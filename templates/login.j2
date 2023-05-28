@@ -1,19 +1,23 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="h-100 d-flex align-items-center justify-content-center">
-    <div class="w-25 border border-primary px-4 py-2 rounded shadow-lg">
+<div class="h-100 d-flex align-items-center justify-content-center bg-scp">
+    <div class="w-25 border border-primary px-4 py-2 rounded shadow-lg bg-light">
         <h2 class="text-center mt-2 mb-3">Přihlášení</h2>
         <form action="{{ url_for('login') }}", method="post">
             <div class="mb-3">
-                <label for="username" class="form-label">Uživatelské jméno</label>
-                <input type="text" name="username" class="form-control" required>
+                {{ form.username.label(class='form-label') }}
+                {{ form.username(class='form-control') }}
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Heslo</label>
-                <input type="password" name="password" class="form-control" required>
+                {{ form.password.label(class='form-label') }}
+                {{ form.password(class='form-control') }}
             </div>
-            <input type="submit" value="Přihlásit" class="btn btn-success w-50 mb-3">
+            <div class="row gx-1">
+                <div class="col">
+                    <input type="submit" value="Přihlásit" class="btn btn-success w-100 mb-3">
+                </div>
+            </div>
         </form>
     </div>
 </div>
