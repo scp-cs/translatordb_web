@@ -1,0 +1,26 @@
+{% extends "base.j2" %}
+
+{% block content %}
+<div class="h-auto container container-md border border-primary my-3 rounded shadow">
+    <table class="table text-center">
+        <tr>
+            <th>Nickname</th>
+            <th>Discord ID</th>
+            <th>Wikidot ID</th>
+            <th>Celkem překladů</th>
+            <th>Celkem bodů</th>
+            <th>Aktuální role</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.nickname }}</td>
+            <td>{{ user.discord }}</td>
+            <td>{{ user.wikidot }}</td>
+            <td>{{ user.articles }}</td>
+            <td>{{ "%.1f" % user.points }}</td>
+            <td>{{ user.role }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock content %}
