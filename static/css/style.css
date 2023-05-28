@@ -5,3 +5,15 @@ html, body {
 .form-label {
   opacity: .7 !important;
 }
+
+.bg-scp {
+  background-image: url(../RAISA2.webp);
+  background-position: top 1em left 1em;
+  background-size: 250PX;
+  background-color: black;
+  background-repeat: no-repeat;
+}
+
+.error-container {
+  background: black;
+}

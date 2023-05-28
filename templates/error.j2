@@ -1,0 +1,12 @@
+{% extends "base.j2" %}
+
+{% block content %}
+
+<div class="container-fluid h-100 w-100 m-0 con-error d-flex flex-column justify-content-center align-items-center error-container">
+    <img width="300" src="{{ url_for('static', filename='scp.png') }}">
+    <h1 class="text-light display-1">{{errno}}</h1>
+    <h1 class="text-light">{{errtext}}</h2>
+    <p class="text-light"><a href="{{errlink}}"><i>"{{errquote}}"</i></a></h3>
+</div>
+
+{% endblock content %}
