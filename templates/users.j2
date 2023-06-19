@@ -26,24 +26,24 @@
             <td>{{ "%.1f" % user.points }}</td>
             <td>{{ user.role or '-'}}</td>
             <td>
-                <a class="bg-blue-500 btn-rounded hover:bg-blue-400" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
-                <a class="bg-red-500 btn-rounded hover:bg-red-400" onclick="delete_confirm(this);">Smazat</a>
+                <a class="bg-blue-600 btn-rounded hover:bg-blue-400" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
+                <a class="bg-red-600 btn-rounded hover:bg-red-400" onclick="delete_confirm(this);">Smazat</a>
             </td>
         </tr>
         {% endfor %}
     </table>
 </div>
 <div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">
-    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 bg-white border rounded-lg">
+    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg border-slate-400 bg-slate-900">
         <h2 class="mb-2 text-xl font-semibold">Potvrzení</h2>
-        <p id='confirm-text' class="mb-4">Opravdu chcete smazat uživatele //USER//?</p>
-        <div id='confirm-buttons' class="flex flex-row justify-center w-full">
-            <a class="mx-auto bg-green-500 w-36 btn-rounded hover:bg-green-400" onclick="delete_send(this);">Ano</a>
-            <a class="mx-auto bg-red-500 w-36 btn-rounded hover:bg-red-400" onclick="hide_overlay();">Ne</a>
+        <p id='confirm-text' class="mb-4"></p>
+        <div id='confirm-buttons' class="flex flex-row justify-center w-auto">
+            <a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a>
+            <a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a>
         </div>
     </div>
 </div>
-<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-70 bg-slate-800">
+<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-80 bg-slate-900">
 </div>
 
 <script src="{{url_for('static', filename='js/confirm.js')}}"></script>

@@ -134,7 +134,6 @@ class Database():
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
-        print(row[3])
         return User(*row)
     
     def get_user_stats(self, uid: int):
@@ -155,5 +154,16 @@ class Database():
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
-        tr = Translation(tid, row[1], row[2], row[3], datetime.strptime(row[4], '%Y:%m:%d %H:%M:%S'), self.get_user(row[5]), row[6])
+        tr = Translation(tid, row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
         return tr
+    
+    def get_translations_by_user(self, uid: int):
+        query = "SELECT * FROM Translation WHERE idauthor=?"
+        data = (uid,)
+        rows = self.__tryexec(query, data).fetchall()
+        if rows is None:
+            return None
+        translations = []
+        for row in rows:
+            translations.append(Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]))
+        return translations

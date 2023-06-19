@@ -163,3 +163,4 @@ translations.json
 translations_new.json
 
 *.db
+config.json

@@ -2,26 +2,26 @@ const overlay_bg = document.getElementById('overlay');
 let overlay_dialog = document.getElementById('overlay-dialog');
 const overlay_flex = document.getElementById('overlay-flex');
 
-let username = "";
-let uid = 0;
+let article = "";
+let aid = 0;
 
 function delete_confirm(btn) {
     overlay_bg.classList.remove('hidden');
     overlay_flex.classList.remove('hidden');
     let row = btn.parentNode.parentNode;
-    username = row.getElementsByTagName('td')[0].innerText;
-    uid = parseInt(row.id.slice(2));
-    document.getElementById('confirm-text').innerText = `Opravdu chcete smazat uživatele ${username}?`;
+    article = row.getElementsByTagName('td')[0].innerText;
+    aid = parseInt(row.id.slice(2));
+    document.getElementById('confirm-text').innerText = `Opravdu chcete smazat článek ${article}?`;
 }
 
 function delete_send(btn) {
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", `/user/${uid}/delete`);
+    xhr.open("POST", `/article/${aid}/delete`);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = () => {
         if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
             console.log('XHR finished');
-            overlay_dialog.innerHTML = `Uživatel ${username} smazán.`;
+            overlay_dialog.innerHTML = `Článek ${article} smazán.`;
             window.setTimeout(() => {
                 hide_overlay();
                 window.location.reload();

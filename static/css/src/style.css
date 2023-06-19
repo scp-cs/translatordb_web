@@ -28,3 +28,7 @@ html, body {
 .btn-rounded {
   @apply px-4 py-2 text-center text-white transition-colors rounded-lg select-none;
 }
+
+.input-field {
+  @apply p-1 text-lg bg-transparent border-2 rounded-lg border-slate-500 focus-visible:outline-none focus-visible:border-slate-300;
+}

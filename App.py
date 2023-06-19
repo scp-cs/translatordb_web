@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, url_for, abort, flash
+from flask import Flask, render_template, redirect, request, url_for, abort, flash, session
 from collections import namedtuple
 import json
 
@@ -6,7 +6,7 @@ import sqlite3
 
 from flask_login import LoginManager, login_required
 from db import Database
-from forms import LoginForm, PasswordChangeForm
+from forms import LoginForm, PasswordChangeForm, NewArticleForm
 
 dbs = Database()
 
@@ -65,7 +65,14 @@ def pw_change():
 
 @app.route('/user/<int:uid>')
 def user(uid: int):
-    return render_template('user.j2', user=dbs.get_user(uid), stats=dbs.get_user_stats(uid))
+    user=dbs.get_user(uid)
+    if not user:
+        abort(404)
+    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid))
+
+@app.route('/user/<int:uid>/new_article', methods=["GET", "POST"])
+def add_article(uid):
+    return render_template('add_article.j2', form=NewArticleForm(), user=dbs.get_user(uid))
 
 if __name__ == '__main__':
     app.config.from_file('config.json', json.load)
