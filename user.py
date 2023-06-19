@@ -6,9 +6,10 @@ class User(UserMixin):
     uid: int
     nickname: str
     wikidot: str
-    discord: str
     password: bytes
+    discord: str
     exempt: bool = False
+    points: float = 0
 
     def get_id(self) -> int:
         return str(self.uid)

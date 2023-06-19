@@ -8,10 +8,12 @@ import os
 import errno
 from os.path import exists
 from translation import Translation
+from collections import namedtuple
 
 from user import User
 from passwords import hashpw, pw_hash
 from secrets import token_urlsafe
+import re
 
 # External
 
@@ -42,15 +44,16 @@ CREATE TABLE Translation (
     FOREIGN KEY (idauthor) REFERENCES User(id)
 );
 
-DROP VIEW IF EXISTS Stats;
-CREATE VIEW Stats AS
-    SELECT User.nickname, COUNT(Translation.id) AS translation_count, SUM(Translation.words) AS total_words, (SUM(Translation.words)/1000.0) AS points, SUM(Translation.bonus) AS bonus
-FROM User
+DROP VIEW IF EXISTS Frontpage;
+CREATE VIEW Frontpage AS
+    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
+FROM USER
 LEFT JOIN Translation ON User.id = Translation.idauthor
 GROUP BY User.nickname;
 
 """
 
+StatRow = namedtuple('StatRow', "id nickname discord wikidot count points")
 
 class Database():
     
@@ -64,7 +67,7 @@ class Database():
         if drop:
             self.__tryexec(db_create_script, script=True)
 
-    def migratejson(self, filepath = "translations.json", pw_for_all = False):
+    def migratejson(self, filepath = "translations.json", pw_for_all = False, no_users=False):
         jsons = {}
         usr_add_query = "INSERT INTO User (nickname, wikidot, password, discord, exempt) VALUES (?, ?, ?, ?, ?)"
         tr_add_query = "INSERT INTO Translation (name, words, bonus, link, idauthor) VALUES (?, ?, ?, ?, ?)"
@@ -72,18 +75,29 @@ class Database():
             jsons = json.load(jfile)
         for nick, user in jsons.items():
             a: bool
-            if not pw_for_all:
-                a = input(f'Adding {nick}. Generate password? [Y/N]: ').lower() == 'y'
-            else:
-                a = True
-            if a:
-                pw = token_urlsafe(8)
-                print(f"PASSWORD FOR {nick}: {pw}")
-                hashed = pw_hash(pw)
+            if not no_users:
+                if not pw_for_all:
+                    a = input(f'Adding {nick}. Generate password? [Y/N]: ').lower() == 'y'
+                else:
+                    a = True
+                if a:
+                    pw = token_urlsafe(8)
+                    print(f"PASSWORD FOR {nick}: {pw}")
+                    hashed = pw_hash(pw)
+                else:
+                    hashed = None
             else:
                 hashed = None
             lastid = self.__tryexec(usr_add_query, (nick, user['wikidot'], hashed, user['discord_id'], int(nick == "Uty"))).lastrowid
             for name, data in user['articles'].items():
+                if data['wd_link'] == "NULL":
+                    m = re.match(r'^(SCP-)?\d{3,4}(-J|-EX)?$', name)
+                    if m:
+                        if not m.string.lower().startswith('scp-'):
+                            data['wd_link'] = f'http://scp-cs.wikidot.com/scp-{m.string.lower()}'
+                        else:
+                            data['wd_link'] = f'http://scp-cs.wikidot.com/{m.string.lower()}'
+
                 self.__tryexec(tr_add_query, (name, data['word_count'], data['bonus_points'], data['wd_link'] if data['wd_link'] != "NULL" else None, lastid))
 
     def __tryexec(self, query: str, data: t.Tuple = (), script=False) -> sqlite3.Cursor:
@@ -98,6 +112,17 @@ class Database():
         except sqlite3.Error as e:
             print(f'Database query {query} aborted with error: {str(e)}')
 
+    def get_stats(self, sort='az'):
+        match sort:
+            case 'az':
+                sorter = 'ORDER BY nickname ASC'
+            case 'points':
+                sorter = 'ORDER BY points DESC'
+            case 'count':
+                sorter = 'ORDER BY translation_count DESC'
+        data = self.__tryexec("SELECT * FROM Frontpage " + sorter).fetchall()
+        return [StatRow(*row) for row in data]
+
     def update_password(self, uid: int, new_pw: bytes):
         query = "UPDATE User SET password=? WHERE id=?"
         data = (new_pw, uid)
@@ -109,7 +134,15 @@ class Database():
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
+        print(row[3])
         return User(*row)
+    
+    def get_user_stats(self, uid: int):
+        return StatRow(*self.__tryexec("SELECT * FROM Frontpage WHERE id=?", (uid,)).fetchone())
+
+    def delete_user(self, uid: int) -> None:
+        query = "DELETE FROM User WHERE id=?"
+        self.__tryexec(query, (uid, ))
 
     def users(self):
         query = "SELECT * FROM User"

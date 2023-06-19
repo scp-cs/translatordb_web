@@ -8,7 +8,7 @@ from flask_login import LoginManager, login_required
 from db import Database
 from forms import LoginForm, PasswordChangeForm
 
-dbs = Database(drop=True)
+dbs = Database()
 
 app = Flask(__name__)
 login_manager = LoginManager(app)
@@ -33,11 +33,17 @@ def user_loader(id: str):
 
 @app.route('/')
 def index():
-    return render_template('users.j2')
+    sort = request.args.get('sort', type=str, default='az')
+    return render_template('users.j2', users=dbs.get_stats(sort))
 
 @app.route('/abort/<int:e>')
 def error(e:int):
     abort(e)
+
+@app.route('/user/<int:uid>/delete', methods=["POST"])
+def delete_user(uid: int):
+    dbs.delete_user(uid)
+    return f"Delete user {uid}"
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -57,7 +63,11 @@ def pw_change():
 
     return render_template('pw_change.j2')
 
+@app.route('/user/<int:uid>')
+def user(uid: int):
+    return render_template('user.j2', user=dbs.get_user(uid), stats=dbs.get_user_stats(uid))
+
 if __name__ == '__main__':
     app.config.from_file('config.json', json.load)
-    dbs.migratejson(pw_for_all=True)
-    app.run()
+    #dbs.migratejson(pw_for_all=False, no_users=True)
+    app.run(debug=True)

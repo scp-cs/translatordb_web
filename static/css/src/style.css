@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.form-label {
+  opacity: .7 !important;
+}
+
+.bg-scp {
+  background-image: url(../RAISA2.webp);
+  background-position: top 1em left 1em;
+  background-size: 250PX;
+  background-color: black;
+  background-repeat: no-repeat;
+}
+
+.error-container {
+  background: black;
+}
+
+.btn-rounded {
+  @apply px-4 py-2 text-center text-white transition-colors rounded-lg select-none;
+}

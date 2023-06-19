@@ -1,26 +1,50 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="h-auto container container-md border border-primary my-3 rounded shadow">
-    <table class="table text-center">
-        <tr>
+<div class="flex flex-col items-center justify-center w-auto p-2">
+    <div class="flex flex-row self-start mr-auto">
+    <a href="{{url_for('index', sort='az')}}" class="mx-1 bg-green-500 btn-rounded">A-Z</a>
+    <a href="{{url_for('index', sort='count')}}" class="mx-1 bg-green-500 btn-rounded">Počet článků</a>
+    <a href="{{url_for('index', sort='points')}}" class="mx-1 bg-green-500 btn-rounded">Počet bodů</a>
+    </div>
+    <table class="text-center border-separate table-auto border-spacing-x-5">
+        <tr class="border-b-2 border-black">
             <th>Nickname</th>
             <th>Discord ID</th>
             <th>Wikidot ID</th>
             <th>Celkem překladů</th>
             <th>Celkem bodů</th>
             <th>Aktuální role</th>
+            <th></th>
         </tr>
         {% for user in users %}
-        <tr>
+        <tr class="h-10 p-4" id="u-{{user.id}}">
             <td>{{ user.nickname }}</td>
             <td>{{ user.discord }}</td>
             <td>{{ user.wikidot }}</td>
-            <td>{{ user.articles }}</td>
+            <td>{{ user.count }}</td>
             <td>{{ "%.1f" % user.points }}</td>
-            <td>{{ user.role }}</td>
+            <td>{{ user.role or '-'}}</td>
+            <td>
+                <a class="bg-blue-500 btn-rounded hover:bg-blue-400" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
+                <a class="bg-red-500 btn-rounded hover:bg-red-400" onclick="delete_confirm(this);">Smazat</a>
+            </td>
         </tr>
         {% endfor %}
     </table>
 </div>
+<div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">
+    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 bg-white border rounded-lg">
+        <h2 class="mb-2 text-xl font-semibold">Potvrzení</h2>
+        <p id='confirm-text' class="mb-4">Opravdu chcete smazat uživatele //USER//?</p>
+        <div id='confirm-buttons' class="flex flex-row justify-center w-full">
+            <a class="mx-auto bg-green-500 w-36 btn-rounded hover:bg-green-400" onclick="delete_send(this);">Ano</a>
+            <a class="mx-auto bg-red-500 w-36 btn-rounded hover:bg-red-400" onclick="hide_overlay();">Ne</a>
+        </div>
+    </div>
+</div>
+<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-70 bg-slate-800">
+</div>
+
+<script src="{{url_for('static', filename='js/confirm.js')}}"></script>
 {% endblock content %}
