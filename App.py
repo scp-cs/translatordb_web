@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for, abort, flash, session
 from collections import namedtuple
+from datetime import datetime
 import json
 
 import sqlite3
@@ -7,6 +8,8 @@ import sqlite3
 from flask_login import LoginManager, login_required
 from db import Database
 from forms import LoginForm, PasswordChangeForm, NewArticleForm
+from user import get_user_role
+from translation import Translation
 
 dbs = Database()
 
@@ -42,8 +45,17 @@ def error(e:int):
 
 @app.route('/user/<int:uid>/delete', methods=["POST"])
 def delete_user(uid: int):
+    name = dbs.get_user(uid).nickname
     dbs.delete_user(uid)
-    return f"Delete user {uid}"
+    flash(f'Uživatel {name} smazán')
+    return redirect(url_for('index'))
+
+@app.route('/article/<int:aid>/delete', methods=["POST"])
+def delete_article(aid: int):
+    name = dbs.get_translation(aid).name
+    dbs.delete_article(aid)
+    flash(f'Článek {name} smazán')
+    return f"Delete article {aid}"
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -72,9 +84,21 @@ def user(uid: int):
 
 @app.route('/user/<int:uid>/new_article', methods=["GET", "POST"])
 def add_article(uid):
-    return render_template('add_article.j2', form=NewArticleForm(), user=dbs.get_user(uid))
+    if request.method == "GET":
+        return render_template('add_article.j2', form=NewArticleForm(), user=dbs.get_user(uid))
+    form = NewArticleForm()
+    if not form.validate_on_submit():
+        return redirect(url_for('add_article', uid=uid))
+    title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
+    if dbs.translation_exists(title):
+        flash('Překlad již existuje!')
+        return redirect(url_for('add_article', uid=uid))
+    t = Translation(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), form.link.data)
+    dbs.add_article(t)
+    return redirect(url_for('user', uid=uid))
 
 if __name__ == '__main__':
     app.config.from_file('config.json', json.load)
     #dbs.migratejson(pw_for_all=False, no_users=True)
+    app.add_template_global(get_user_role)
     app.run(debug=True)

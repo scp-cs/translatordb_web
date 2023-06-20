@@ -14,9 +14,9 @@ class PasswordChangeForm(FlaskForm):
     submit = SubmitField('Změnit heslo')
 
 class NewArticleForm(FlaskForm):
-    title = StringField('Název')
+    title = StringField('Název', validators=[DataRequired()])
     translator = StringField('Překladatel')
-    words = IntegerField('Počet slov')
-    bonus = IntegerField('Bonusové body')
+    words = IntegerField('Počet slov', validators=[DataRequired()])
+    bonus = IntegerField('Bonusové body', validators=[DataRequired()], default=0)
     link = StringField('Odkaz')
     submit = SubmitField('Odeslat')

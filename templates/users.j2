@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="flex flex-col items-center justify-center w-auto p-2">
-    <div class="flex flex-row self-start mr-auto">
+    <div class="flex flex-row items-center my-4">
+    <h2 class="mr-6 text-lg font-bold">Řadit:</h2>
     <a href="{{url_for('index', sort='az')}}" class="mx-1 bg-green-500 btn-rounded">A-Z</a>
     <a href="{{url_for('index', sort='count')}}" class="mx-1 bg-green-500 btn-rounded">Počet článků</a>
     <a href="{{url_for('index', sort='points')}}" class="mx-1 bg-green-500 btn-rounded">Počet bodů</a>
@@ -24,7 +25,7 @@
             <td>{{ user.wikidot }}</td>
             <td>{{ user.count }}</td>
             <td>{{ "%.1f" % user.points }}</td>
-            <td>{{ user.role or '-'}}</td>
+            <td>{{get_user_role(user.points)}}</td>
             <td>
                 <a class="bg-blue-600 btn-rounded hover:bg-blue-400" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
                 <a class="bg-red-600 btn-rounded hover:bg-red-400" onclick="delete_confirm(this);">Smazat</a>

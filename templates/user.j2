@@ -10,14 +10,18 @@
 <a class="mb-2 opacity-50 hover:opacity-80" href="{{url_for('index')}}"><< Zpět na hlavní stranu</a>
 <h1 class="mb-2 text-4xl font-bold">{{user.nickname}}</h1>
 <hr class="mb-4 border-white">
-<p class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
+<p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
 <p class="my-1 text-xl"><b>Wikidot ID:</b> {{user.wikidot}}</p>
 <p class="my-1 text-xl"><b>Discord ID:</b> {{user.discord}}</p>
 <p class="my-1 text-xl"><b>Počet bodů:</b> {{stats.points}}</p>
 <p class="my-1 text-xl"><b>Celkem překladů:</b> {{stats.count}}</p>
+<div class="mt-4">
+    <a href="{{url_for('add_article', uid=user.uid)}}" class="w-48 my-2 bg-green-600 btn-rounded hover:bg-green-500">Přidat překlad</a>
+    <a href="{{url_for('add_article', uid=user.uid)}}" class="w-48 my-2 bg-blue-600 btn-rounded hover:bg-blue-500">Upravit uživatele</a>
+</div>
 </div>
 
-<table class="mx-auto text-lg text-center border-separate table-auto border-spacing-x-12">
+<table class="w-full mt-10 text-center border-separate table-auto border-spacing-x-12">
     <tr>
         <th>Název</th>
         <th>Počet slov</th>

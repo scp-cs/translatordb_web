@@ -21,11 +21,7 @@ function delete_send(btn) {
     xhr.onreadystatechange = () => {
         if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
             console.log('XHR finished');
-            overlay_dialog.innerHTML = `Uživatel ${username} smazán.`;
-            window.setTimeout(() => {
-                hide_overlay();
-                window.location.reload();
-            }, 2000);
+            window.location.reload();
         }
     }
     console.log('sending xhr...');
