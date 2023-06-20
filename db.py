@@ -143,6 +143,10 @@ class Database():
         query = "DELETE FROM User WHERE id=?"
         self.__tryexec(query, (uid, ))
 
+    def delete_article(self, aid: int) -> None:
+        query = "DELETE FROM Translation WHERE id=?"
+        self.__tryexec(query, (aid, ))
+
     def users(self):
         query = "SELECT * FROM User"
         rows = self.__tryexec(query).fetchall()
@@ -157,8 +161,16 @@ class Database():
         tr = Translation(tid, row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
         return tr
     
+    def translation_exists(self, name: str):
+        query = "SELECT * FROM Translation WHERE name=? COLLATE NOCASE"
+        cur = self.__tryexec(query, (name.lower(),))
+        if len(cur.fetchall()) != 0:
+            return True
+        else:
+            return False
+
     def get_translations_by_user(self, uid: int):
-        query = "SELECT * FROM Translation WHERE idauthor=?"
+        query = "SELECT * FROM Translation WHERE idauthor=? ORDER BY added DESC"
         data = (uid,)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
@@ -167,3 +179,8 @@ class Database():
         for row in rows:
             translations.append(Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]))
         return translations
+    
+    def add_article(self, a: Translation) -> int:
+        query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
+        data = (a.name, a.words, a.bonus, a.added.strftime('%Y-%m-%d %H:%M:%S'), a.link, a.author.get_id())
+        return self.__tryexec(query, data).lastrowid
