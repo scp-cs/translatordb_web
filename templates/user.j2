@@ -11,14 +11,16 @@
 <h1 class="mb-2 text-4xl font-bold">{{user.nickname}}</h1>
 <hr class="mb-4 border-white">
 <p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
-<p class="my-1 text-xl"><b>Wikidot ID:</b> {{user.wikidot}}</p>
+<p class="my-1 text-xl"><b>Wikidot ID:</b> <a class="hover:text-blue-500" target="_blank" href="https://www.wikidot.com/user:info/{{user.wikidot}}/">{{user.wikidot}}</a></p>
 <p class="my-1 text-xl"><b>Discord ID:</b> {{user.discord}}</p>
 <p class="my-1 text-xl"><b>Počet bodů:</b> {{stats.points}}</p>
 <p class="my-1 text-xl"><b>Celkem překladů:</b> {{stats.count}}</p>
+{% if current_user.is_authenticated %}
 <div class="mt-4">
     <a href="{{url_for('add_article', uid=user.uid)}}" class="w-48 my-2 bg-green-600 btn-rounded hover:bg-green-500">Přidat překlad</a>
-    <a href="{{url_for('add_article', uid=user.uid)}}" class="w-48 my-2 bg-blue-600 btn-rounded hover:bg-blue-500">Upravit uživatele</a>
+    <a href="{{url_for('edit_user', uid=user.uid)}}" class="w-48 my-2 bg-blue-600 btn-rounded hover:bg-blue-500">Upravit uživatele</a>
 </div>
+{% endif %}
 </div>
 
 <table class="w-full mt-10 text-center border-separate table-auto border-spacing-x-12">
@@ -27,7 +29,9 @@
         <th>Počet slov</th>
         <th>Bonusové body</th>
         <th>Zapsáno</th>
+        {% if current_user.is_authenticated %}
         <th></th>
+        {% endif %}
     </tr>
     {% for tr in translations %}
     <tr id="t-{{tr.id}}" class="h-12">
@@ -35,13 +39,15 @@
         <td>{{tr.words}}</td>
         <td>{{tr.bonus}}</td>
         <td>{{tr.added}}</td>
+        {% if current_user.is_authenticated %}
         <td>
-            {% if tr.link %} <a class="bg-green-600 btn-rounded hover:bg-green-500" href="{{tr.link}}">Otevřít</a>
+            {% if tr.link %} <a class="bg-green-600 btn-rounded hover:bg-green-500" target="_blank" href="{{tr.link}}">Otevřít</a>
             {% else %} <a class="bg-green-800 btn-rounded cursor-normal">Otevřít</a>
             {% endif %}
-            <a class="bg-blue-600 btn-rounded hover:bg-blue-500" href="{{url_for('user', uid=0)}}">Upravit</a>
+            <a class="bg-blue-600 btn-rounded hover:bg-blue-500" href="{{url_for('edit_article', aid=tr.id)}}">Upravit</a>
             <a class="bg-red-600 btn-rounded hover:bg-red-500" onclick="delete_confirm(this);">Smazat</a>
         </td>
+        {% endif %}
     </tr>
     {% endfor %}
 </table>

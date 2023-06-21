@@ -2,12 +2,19 @@
 
 {% block content %}
 <div class="flex flex-col items-center justify-center w-auto p-2">
-    <div class="flex flex-row items-center my-4">
+    <div class="flex flex-row items-center mt-4 mb-8">
     <h2 class="mr-6 text-lg font-bold">Řadit:</h2>
     <a href="{{url_for('index', sort='az')}}" class="mx-1 bg-green-500 btn-rounded">A-Z</a>
     <a href="{{url_for('index', sort='count')}}" class="mx-1 bg-green-500 btn-rounded">Počet článků</a>
     <a href="{{url_for('index', sort='points')}}" class="mx-1 bg-green-500 btn-rounded">Počet bodů</a>
+    {% if current_user.is_authenticated %}
+        <a href="{{url_for('add_user')}}" class="self-end ml-8 bg-blue-500 btn-rounded">Přidat uživatele</a>
+        <a href="{{url_for('logout')}}" class="self-end ml-8 bg-red-500 btn-rounded">Odhlásit se</a>
+    {% else %}
+        <a href="{{url_for('login')}}" class="self-end ml-8 bg-blue-500 btn-rounded">Přihlásit se</a>
+    {% endif %}
     </div>
+    <div class="italic opacity-40">Aktualizováno {{lastupdate}}</div>
     <table class="text-center border-separate table-auto border-spacing-x-5">
         <tr class="border-b-2 border-black">
             <th>Nickname</th>
@@ -16,7 +23,9 @@
             <th>Celkem překladů</th>
             <th>Celkem bodů</th>
             <th>Aktuální role</th>
+            {% if current_user.is_authenticated %}
             <th></th>
+            {% endif %}
         </tr>
         {% for user in users %}
         <tr class="h-10 p-4" id="u-{{user.id}}">
@@ -28,7 +37,9 @@
             <td>{{get_user_role(user.points)}}</td>
             <td>
                 <a class="bg-blue-600 btn-rounded hover:bg-blue-400" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
+                {% if current_user.is_authenticated %}
                 <a class="bg-red-600 btn-rounded hover:bg-red-400" onclick="delete_confirm(this);">Smazat</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

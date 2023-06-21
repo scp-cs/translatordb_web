@@ -1,0 +1,21 @@
+{% extends "base.j2" %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center w-full h-full p-10">
+<h2 class="mb-10 text-3xl font-semibold select-none">Dočasné heslo pro {{user.nickname}}</h2>
+<i class="mb-6 text-lg">{{tpw}}</i>
+<b class="mb-2 text-xl select-none">Heslo nebude zobrazeno znovu. Prosím, zapište si ho.</b>
+<b class="text-xl select-none">Za 20s budete přesměrováni.</b>
+</div>
+
+<a href="{{url_for('user', uid=user.uid)}}" class="hidden" id="ulink"></a>
+
+<script>
+function redirect() {
+    link = document.getElementById('ulink').href;
+    window.location.href = link;
+}
+window.setTimeout(redirect, 20000);
+</script>
+
+{% endblock content %}

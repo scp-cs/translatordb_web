@@ -1,0 +1,8 @@
+.gitignore
+tailwind.config.js
+translations.json
+passwords.log
+.venv
+__pycache__
+data
+static/css/src

@@ -10,12 +10,13 @@ function displayPopup(id) {
 
 const popups_html = document.getElementsByClassName('popup');
 const popups = Array.from(popups_html);
-displayPopup('popup0');
-if (popups.length >= 1) {
-    for(let i = 1; i < popups.length; i++) {
-        let id = "popup" + i.toString();
-        setTimeout(function(){displayPopup(id);}, 6000);
+if (popups.length > 0) {
+    displayPopup('popup0');
+    if (popups.length >= 1) {
+        for(let i = 1; i < popups.length; i++) {
+            let id = "popup" + i.toString();
+            setTimeout(function(){displayPopup(id);}, 6000);
+        }
     }
 }
-
 

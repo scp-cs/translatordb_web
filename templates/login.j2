@@ -1,24 +1,19 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="h-100 d-flex align-items-center justify-content-center bg-scp">
-    <div class="w-25 border border-primary px-4 py-2 rounded shadow-lg bg-light">
-        <h2 class="text-center mt-2 mb-3">Přihlášení</h2>
-        <form action="{{ url_for('login') }}", method="post">
-            <div class="mb-3">
-                {{ form.username.label(class='form-label') }}
-                {{ form.username(class='form-control') }}
-            </div>
-            <div class="mb-3">
-                {{ form.password.label(class='form-label') }}
-                {{ form.password(class='form-control') }}
-            </div>
-            <div class="row gx-1">
-                <div class="col">
-                    <input type="submit" value="Přihlásit" class="btn btn-success w-100 mb-3">
-                </div>
-            </div>
-        </form>
-    </div>
+<div class="flex flex-col items-center justify-center h-full p-10">
+
+<h1 class="pb-6 text-3xl font-semibold">Přihlásit se</h1>
+
+<form action="{{url_for('login')}}" method="post" class="flex flex-col items-center text-lg">
+    {{ form.hidden_tag() }}
+    {{form.username.label(class='self-start font-bold')}}
+    {{form.username(class='mb-4 input-field', id='input-title')}}
+    {{form.password.label(class='self-start font-bold')}}
+    {{form.password(class='mb-4 input-field', id='input-link')}}
+    {{form.submit(class='bg-green-600 w-36 btn-rounded hover:bg-green-500')}}
+</form>
+
 </div>
+
 {% endblock content %}

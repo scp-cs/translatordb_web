@@ -27,6 +27,7 @@ class User(UserMixin):
     password: bytes
     discord: str
     exempt: bool = False
+    temp_pw: bool = False
     points: float = 0
 
     def get_id(self) -> int:
