@@ -24,6 +24,7 @@
 </div>
 
 <table class="w-full mt-10 text-center border-separate table-auto border-spacing-x-12">
+    <thead>
     <tr>
         <th>Název</th>
         <th>Počet slov</th>
@@ -33,14 +34,15 @@
         <th></th>
         {% endif %}
     </tr>
+    </thead>
     {% for tr in translations %}
     <tr id="t-{{tr.id}}" class="h-12">
-        <td>{{tr.name}}</td>
-        <td>{{tr.words}}</td>
-        <td>{{tr.bonus}}</td>
-        <td>{{tr.added}}</td>
+        <td data-label="Název:">{{tr.name}}</td>
+        <td data-label="Počet slov:">{{tr.words}}</td>
+        <td data-label="Bonus:">{{tr.bonus}}</td>
+        <td data-label="Zapsáno:">{{tr.added}}</td>
         {% if current_user.is_authenticated %}
-        <td>
+        <td class="flex flex-col gap-2 md:table-row">
             {% if tr.link %} <a class="bg-green-600 btn-rounded hover:bg-green-500" target="_blank" href="{{tr.link}}">Otevřít</a>
             {% else %} <a class="bg-green-800 btn-rounded cursor-normal">Otevřít</a>
             {% endif %}

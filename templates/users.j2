@@ -2,20 +2,21 @@
 
 {% block content %}
 <div class="flex flex-col items-center justify-center w-auto p-2">
-    <div class="flex flex-row items-center mt-4 mb-8">
-    <h2 class="mr-6 text-lg font-bold">Řadit:</h2>
-    <a href="{{url_for('index', sort='az')}}" class="mx-1 bg-green-500 btn-rounded">A-Z</a>
-    <a href="{{url_for('index', sort='count')}}" class="mx-1 bg-green-500 btn-rounded">Počet článků</a>
-    <a href="{{url_for('index', sort='points')}}" class="mx-1 bg-green-500 btn-rounded">Počet bodů</a>
+    <div class="flex flex-col items-center w-full mt-4 mb-8 md:w-auto md:flex-row">
+    <h2 class="text-lg font-bold md:mr-6">Řadit:</h2>
+    <a href="{{url_for('index', sort='az')}}" class="w-4/5 my-2 bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded">A-Z</a>
+    <a href="{{url_for('index', sort='count')}}" class="w-4/5 my-2 bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet článků</a>
+    <a href="{{url_for('index', sort='points')}}" class="w-4/5 my-2 bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet bodů</a>
     {% if current_user.is_authenticated %}
-        <a href="{{url_for('add_user')}}" class="self-end ml-8 bg-blue-500 btn-rounded">Přidat uživatele</a>
-        <a href="{{url_for('logout')}}" class="self-end ml-8 bg-red-500 btn-rounded">Odhlásit se</a>
+        <a href="{{url_for('add_user')}}" class="w-4/5 my-2 bg-blue-500 md:my-0 md:self-end md:w-auto md:ml-8 btn-rounded">Přidat uživatele</a>
+        <a href="{{url_for('logout')}}" class="w-4/5 my-2 bg-red-500 md:my-0 md:self-end md:w-auto md:ml-8 btn-rounded">Odhlásit se</a>
     {% else %}
-        <a href="{{url_for('login')}}" class="self-end ml-8 bg-blue-500 btn-rounded">Přihlásit se</a>
+        <a href="{{url_for('login')}}" class="w-4/5 my-2 bg-blue-500 md:my-0 md:self-end md:w-auto md:ml-8 btn-rounded">Přihlásit se</a>
     {% endif %}
     </div>
     <div class="italic opacity-40">Aktualizováno {{lastupdate}}</div>
-    <table class="text-center border-separate table-auto border-spacing-x-5">
+    <table class="w-full text-center border-separate table-auto md:w-auto border-spacing-x-5">
+    <thead>
         <tr class="border-b-2 border-black">
             <th>Nickname</th>
             <th>Discord ID</th>
@@ -27,22 +28,25 @@
             <th></th>
             {% endif %}
         </tr>
+    </thead>
+    <tbody>
         {% for user in users %}
         <tr class="h-10 p-4" id="u-{{user.id}}">
-            <td>{{ user.nickname }}</td>
-            <td>{{ user.discord }}</td>
-            <td>{{ user.wikidot }}</td>
-            <td>{{ user.count }}</td>
-            <td>{{ "%.1f" % user.points }}</td>
-            <td>{{get_user_role(user.points)}}</td>
-            <td>
-                <a class="bg-blue-600 btn-rounded hover:bg-blue-400" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
+            <td data-label="Přezdívka">{{ user.nickname }}</td>
+            <td data-label="Discord ID">{{ user.discord }}</td>
+            <td data-label="Wikidot ID">{{ user.wikidot }}</td>
+            <td data-label="Počet překladů">{{ user.count }}</td>
+            <td data-label="Počet bodů">{{ "%.1f" % user.points }}</td>
+            <td data-label="Role">{{get_user_role(user.points)}}</td>
+            <td class="flex flex-col md:table-row">
+                <a class="inline-block w-full mb-2 bg-blue-600 btn-rounded hover:bg-blue-400 md:inline md:w-auto md:mb-0" href="{{url_for('user', uid=user.id)}}">Zobrazit</a>
                 {% if current_user.is_authenticated %}
                 <a class="bg-red-600 btn-rounded hover:bg-red-400" onclick="delete_confirm(this);">Smazat</a>
                 {% endif %}
             </td>
         </tr>
         {% endfor %}
+    </tbody>
     </table>
 </div>
 <div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">

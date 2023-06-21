@@ -32,3 +32,18 @@ html, body {
 .input-field {
   @apply p-1 text-lg bg-transparent border-2 rounded-lg border-slate-500 focus-visible:outline-none focus-visible:border-slate-300;
 }
+
+thead {
+  @apply hidden;
+  @apply md:table-header-group;
+}
+
+tr {
+  @apply flex flex-col h-auto w-auto p-3 my-6 items-end border rounded-lg !important;
+  @apply md:table-row md:h-10 md:p-4 !important;
+}
+
+td {
+  @apply block my-1 before:content-[attr(data-label)] before:font-semibold before:float-left w-full text-right;
+  @apply md:table-cell md:before:content-none md:text-center md:w-auto !important;
+}
