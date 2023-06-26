@@ -21,4 +21,4 @@ jobs:
           rm -rf /tmp/dbuild
           docker stop scp
           docker rm scp
-          docker run -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /mnt/data/scp/config.json:/app/config.json -v /mnt/data/scp/data:/app/data --name scp translatordb
+          docker run -d -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /mnt/data/scp/config.json:/app/config.json -v /mnt/data/scp/data:/app/data --name scp translatordb
