@@ -1,0 +1,24 @@
+name: Deploy over SSH
+on: workflow_dispatch
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Executing remote commands
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          mkdir /tmp/dbuild
+          cd /tmp/dbuild
+          git clone ${{ secrets.GIT_REMOTE }}
+          cd translatordb_web
+          docker build -t --rm scp .
+          rm -rf /tmp/dbuild
+          docker stop scp
+          docker rm scp
+          docker run -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /app/config.json:/mnt/data/scp/config.json -v /app/data:/mnt/data/scp/data --name scp translatordb
