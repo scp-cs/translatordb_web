@@ -17,7 +17,7 @@ jobs:
           cd /tmp/dbuild
           git clone ${{ secrets.GIT_REMOTE }}
           cd translatordb_web
-          docker build -t scp .
+          docker build -t translatordb .
           rm -rf /tmp/dbuild
           docker stop scp
           docker rm scp
