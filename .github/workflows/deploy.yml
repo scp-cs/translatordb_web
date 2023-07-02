@@ -13,12 +13,12 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          mkdir /tmp/dbuild
-          cd /tmp/dbuild
-          git clone ${{ secrets.GIT_REMOTE }}
+          mkdir ${{ vars.TEMP_DIR }}
+          cd ${{ vars.TEMP_DIR }}
+          git clone ${{ vars.GIT_REMOTE }}
           cd translatordb_web
-          docker build -t translatordb .
-          rm -rf /tmp/dbuild
-          docker stop scp
-          docker rm scp
-          docker run -d -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /mnt/data/scp/config.json:/app/config.json -v /mnt/data/scp/data:/app/data --name scp translatordb
+          docker build -t ${{ vars.IMAGE_NAME }} .
+          rm -rf ${{ vars.TEMP_DIR }}
+          docker stop ${{ vars.CONTAINER_NAME }}
+          docker rm ${{ vars.CONTAINER_NAME }}
+          docker run -d -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /mnt/data/scp/config.json:/app/config.json -v /mnt/data/scp/data:/app/data --name ${{ vars.CONTAINER_NAME }} ${{ vars.IMAGE_NAME }}
