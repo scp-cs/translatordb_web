@@ -1,12 +1,8 @@
 # Builtins
 import json
-import queue
 import sqlite3
 from datetime import datetime
 import typing as t
-import os
-import errno
-from os.path import exists
 from translation import Translation
 from collections import namedtuple
 
@@ -115,9 +111,9 @@ class Database():
             print(f'Database query {query} aborted with error: {str(e)}')
 
     @property
-    def lastupdated(self) -> str:
+    def lastupdated(self) -> datetime:
         query = "SELECT MAX(added) FROM Translation"
-        return self.__tryexec(query).fetchone()[0]
+        return datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
 
     def get_stats(self, sort='az'):
         match sort:
@@ -127,6 +123,8 @@ class Database():
                 sorter = 'ORDER BY points DESC'
             case 'count':
                 sorter = 'ORDER BY translation_count DESC'
+            case _:
+                sorter = 'ORDER BY nickname ASC'
         data = self.__tryexec("SELECT * FROM Frontpage " + sorter).fetchall()
         return [StatRow(*row) for row in data]
 
