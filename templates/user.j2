@@ -37,15 +37,16 @@
     </thead>
     {% for tr in translations %}
     <tr id="t-{{tr.id}}" class="h-12">
-        <td data-label="Název:">{{tr.name}}</td>
+        <td data-label="Název:">
+            {% if tr.link %} <a class="hover:underline" target="_blank" href="{{tr.link}}">{{tr.name}}</a>
+            {% else %} <span class="text-gray-500">{{tr.name}}</span>
+            {% endif %}
+        </td>
         <td data-label="Počet slov:">{{tr.words}}</td>
         <td data-label="Bonus:">{{tr.bonus}}</td>
         <td data-label="Zapsáno:">{{tr.added}}</td>
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
-            {% if tr.link %} <a class="bg-green-600 btn-rounded hover:bg-green-500" target="_blank" href="{{tr.link}}">Otevřít</a>
-            {% else %} <a class="bg-green-800 btn-rounded cursor-normal">Otevřít</a>
-            {% endif %}
             <a class="bg-blue-600 btn-rounded hover:bg-blue-500" href="{{url_for('edit_article', aid=tr.id)}}">Upravit</a>
             <a class="bg-red-600 btn-rounded hover:bg-red-500" onclick="delete_confirm(this);">Smazat</a>
         </td>
