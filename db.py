@@ -3,17 +3,16 @@ import json
 import sqlite3
 from datetime import datetime
 import typing as t
-from translation import Translation
-from collections import namedtuple
-
-from user import User
-from passwords import pw_check, pw_hash
-from secrets import token_urlsafe
 import re
+from collections import namedtuple
 
 # External
 
 # Internal
+from user import User
+from passwords import pw_check, pw_hash
+from secrets import token_urlsafe
+from translation import Translation
 
 # Scripts
 db_create_script = """
@@ -64,6 +63,9 @@ class Database():
         if drop:
             self.__tryexec(db_create_script, script=True)
 
+        self.__lastupdate = datetime(2005, 1, 1)
+        self.__mark_updated()
+
     def migratejson(self, filepath = "translations.json", pw_for_all = False, no_users=False):
         jsons = {}
         usr_add_query = "INSERT INTO User (nickname, wikidot, password, discord, exempt) VALUES (?, ?, ?, ?, ?)"
@@ -110,10 +112,14 @@ class Database():
         except sqlite3.Error as e:
             print(f'Database query {query} aborted with error: {str(e)}')
 
+    def __mark_updated(self) -> None:
+        query = "SELECT MAX(added) FROM Translation"
+        self.__lastupdate = datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
+        print(f"Lastupdate: {self.__lastupdate}")
+
     @property
     def lastupdated(self) -> datetime:
-        query = "SELECT MAX(added) FROM Translation"
-        return datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
+        return self.__lastupdate
 
     def get_stats(self, sort='az'):
         match sort:
@@ -208,7 +214,9 @@ class Database():
     def add_article(self, a: Translation) -> int:
         query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
         data = (a.name, a.words, a.bonus, a.added.strftime('%Y-%m-%d %H:%M:%S'), a.link, a.author.get_id())
-        return self.__tryexec(query, data).lastrowid
+        rowid = self.__tryexec(query, data).lastrowid
+        self.__mark_updated()
+        return rowid
 
     def add_user(self, u: User, gen_password=False) -> t.Tuple[int, t.Optional[str]]:
         query = "INSERT INTO User (nickname, wikidot, password, discord, exempt) VALUES (?, ?, ?, ?, ?)"
