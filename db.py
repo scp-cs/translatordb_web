@@ -5,6 +5,7 @@ from datetime import datetime
 import typing as t
 import re
 from collections import namedtuple
+from logging import info, error, warning, critical
 
 # External
 
@@ -17,8 +18,7 @@ from translation import Translation
 # Scripts
 db_create_script = """
 
-DROP TABLE IF EXISTS User;
-CREATE TABLE User (
+CREATE TABLE IF NOT EXISTS User (
     id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
     nickname    TEXT        NOT NULL UNIQUE,
     wikidot     TEXT        NOT NULL UNIQUE,
@@ -28,8 +28,7 @@ CREATE TABLE User (
     temp_pw     BOOLEAN     DEFAULT 1
 );
 
-DROP TABLE IF EXISTS Translation;
-CREATE TABLE Translation (
+CREATE TABLE IF NOT EXISTS Translation (
     id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
     name        TEXT        NOT NULL,
     words       INTEGER     NOT NULL,
@@ -40,8 +39,7 @@ CREATE TABLE Translation (
     FOREIGN KEY (idauthor) REFERENCES User(id)
 );
 
-DROP VIEW IF EXISTS Frontpage;
-CREATE VIEW Frontpage AS
+CREATE VIEW IF NOT EXISTS Frontpage AS
     SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
 FROM USER
 LEFT JOIN Translation ON User.id = Translation.idauthor
@@ -57,48 +55,13 @@ class Database():
 
         try:
             self.connection = sqlite3.connect(filepath, check_same_thread=False)
-        except Exception as e:
-            print(f'Error opening database {filepath} ({str(e)})')
-
-        if drop:
             self.__tryexec(db_create_script, script=True)
+        except Exception as e:
+            critical(f'Error opening database {filepath} ({str(e)})')
+            raise RuntimeError(str(e))
 
         self.__lastupdate = datetime(2005, 1, 1)
         self.__mark_updated()
-
-    def migratejson(self, filepath = "translations.json", pw_for_all = False, no_users=False):
-        jsons = {}
-        usr_add_query = "INSERT INTO User (nickname, wikidot, password, discord, exempt) VALUES (?, ?, ?, ?, ?)"
-        tr_add_query = "INSERT INTO Translation (name, words, bonus, link, idauthor) VALUES (?, ?, ?, ?, ?)"
-        with open(filepath, "r") as jfile:
-            jsons = json.load(jfile)
-        with open('passwords.log', 'w') as pwf:
-            for nick, user in jsons.items():
-                a: bool
-                if not no_users:
-                    if not pw_for_all:
-                        a = input(f'Adding {nick}. Generate password? [Y/N]: ').lower() == 'y'
-                    else:
-                        a = True
-                    if a:
-                        pw = token_urlsafe(8)
-                        pwf.write(f"PASSWORD FOR {nick}: {pw}\n")
-                        hashed = pw_hash(pw)
-                    else:
-                        hashed = None
-                else:
-                    hashed = None
-                lastid = self.__tryexec(usr_add_query, (nick, user['wikidot'], hashed, user['discord_id'], int(nick == "Uty"))).lastrowid
-                for name, data in user['articles'].items():
-                    if data['wd_link'] == "NULL":
-                        m = re.match(r'^(SCP-)?\d{3,4}(-J|-EX)?$', name)
-                        if m:
-                            if not m.string.lower().startswith('scp-'):
-                                data['wd_link'] = f'http://scp-cs.wikidot.com/scp-{m.string.lower()}'
-                            else:
-                                data['wd_link'] = f'http://scp-cs.wikidot.com/{m.string.lower()}'
-
-                    self.__tryexec(tr_add_query, (name, data['word_count'], data['bonus_points'], data['wd_link'] if data['wd_link'] != "NULL" else None, lastid))
 
     def __tryexec(self, query: str, data: t.Tuple = (), script=False) -> sqlite3.Cursor:
         try:
@@ -110,12 +73,15 @@ class Database():
                     result = cur.execute(query, data)
                 return result
         except sqlite3.Error as e:
-            print(f'Database query {query} aborted with error: {str(e)}')
+            error(f'Database query "{query}" aborted with error: {str(e)}')
 
     def __mark_updated(self) -> None:
         query = "SELECT MAX(added) FROM Translation"
-        self.__lastupdate = datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
-        print(f"Lastupdate: {self.__lastupdate}")
+        try:
+            self.__lastupdate = datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
+        except TypeError:
+            warning(f"Unable to get last update timestamp")
+            return datetime(2005, 1, 1)
 
     @property
     def lastupdated(self) -> datetime:
