@@ -1,6 +1,7 @@
 # Builtins
 from logging import info, warning, error, critical, debug
 import logging
+from os import environ as env
 
 # External
 from flask import Flask, render_template, redirect, request, url_for, abort, flash, session
@@ -12,6 +13,7 @@ from waitress import serve
 # Initialize logger before importing internal modules
 logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s')
 logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().addHandler(logging.StreamHandler())
 
 # Internal
 from db import Database
@@ -200,12 +202,30 @@ def pw_change():
     info(f"Permanent password created for {user.nickname} (ID: {user.uid})")
     return redirect(url_for('index'))
 
+def user_init():
+    init_user = env.get("SCP_INIT_USER")
+    if not init_user:
+        return
+    pwd = env.get("SCP_INIT_PASSWORD")
+    if not pwd:
+        error(f"Password not specified for {init_user}")
+        exit(-1)
+    if dbs.user_exists(init_user):
+        warning(f"Initial user {init_user} already exists")
+        return
+    u = User(1, init_user, "", pw_hash(pwd), "")
+    info(f"Adding initial user {init_user}")
+    dbs.add_user(u)
+
 if __name__ == '__main__':
-    # TODO: Create initial user from env var
+    
     ensure_config('config.json')
     app.config.from_file('config.json', json.load)
     app.add_template_global(get_user_role)
     app.add_template_global(current_user, 'current_user')
+
+    user_init()
+
     if app.config['DEBUG']:
         warning('App running in debug mode!')
         app.run('0.0.0.0', 8080)

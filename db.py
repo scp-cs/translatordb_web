@@ -90,13 +90,13 @@ class Database():
     def get_stats(self, sort='az'):
         match sort:
             case 'az':
-                sorter = 'ORDER BY nickname ASC'
+                sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
             case 'points':
                 sorter = 'ORDER BY points DESC'
             case 'count':
                 sorter = 'ORDER BY translation_count DESC'
             case _:
-                sorter = 'ORDER BY nickname ASC'
+                sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
         data = self.__tryexec("SELECT * FROM Frontpage " + sorter).fetchall()
         return [StatRow(*row) for row in data]
 
@@ -112,6 +112,14 @@ class Database():
         if row is None:
             return None
         return User(*row)
+
+    def user_exists(self, username: str) -> bool:
+        query = "SELECT * FROM User WHERE nickname=?"
+        data = (username,)
+        if not self.__tryexec(query, data).fetchone():
+            return False
+        else:
+            return True
     
     def get_user_stats(self, uid: int) -> t.Type[StatRow]:
         return StatRow(*self.__tryexec("SELECT * FROM Frontpage WHERE id=?", (uid,)).fetchone())
@@ -190,5 +198,6 @@ class Database():
             tpw = token_urlsafe(8)
             password = pw_hash(tpw)
         else:
-            tpw = password = None
+            tpw = None
+            password = u.password
         return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord, u.exempt)).lastrowid, tpw)
