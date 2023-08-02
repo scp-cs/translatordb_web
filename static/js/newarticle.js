@@ -10,10 +10,10 @@ function title_update(event) {
         if(reg_scp.test(title)) {
             link.value = 'https://scp-cs.wikidot.com/'+title.toLowerCase();
         } else {
-            console.log('clear');
-            link.value = "";
+            link.value = 'https://scp-cs.wikidot.com/';
         }
 }
+
 
 titlebox.addEventListener("input", title_update);
 link.addEventListener('input', () => {titlebox.removeEventListener('input', title_update);})

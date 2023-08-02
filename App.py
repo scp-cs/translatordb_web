@@ -34,7 +34,7 @@ login_manager.session_protection = "strong"
 def e404(e):
     return render_template('error.j2', errno=404, errtext="Not Found", errquote="Není žádná Antimemetická divize.", errlink="http://scp-cs.wikidot.com/your-last-first-day")
 
-@app.errorhandler(403)
+@app.errorhandler(401)
 def e403(e):
     return render_template('error.j2', errno=403, errtext="Unauthorized", errquote="Okamžitě ukončete své spojení a zůstaňte na místě. Najdeme vás.", errlink="http://scp-cs.wikidot.com/scp-6630")
 
