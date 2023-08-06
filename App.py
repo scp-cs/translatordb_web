@@ -11,7 +11,7 @@ from flask_login import LoginManager, login_required, login_user, logout_user, c
 from waitress import serve
 
 # Initialize logger before importing internal modules
-logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s')
+logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
