@@ -21,4 +21,4 @@ jobs:
           rm -rf ${{ vars.TEMP_DIR }}
           docker stop ${{ vars.CONTAINER_NAME }}
           docker rm ${{ vars.CONTAINER_NAME }}
-          docker run -d -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /mnt/data/scp/config.json:/app/config.json -v /mnt/data/scp/data:/app/data --name ${{ vars.CONTAINER_NAME }} ${{ vars.IMAGE_NAME }}
+          docker run -d -p 8080:8080 -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -v /mnt/data/scp/config.json:/app/config.json -v /mnt/data/scp/scp.log:/app/translatordb.log -v /mnt/data/scp/data:/app/data --name ${{ vars.CONTAINER_NAME }} ${{ vars.IMAGE_NAME }}
