@@ -1,7 +1,7 @@
 # Builtins
 from logging import info, warning, error, critical, debug
 import logging
-from os import environ as env
+from os import environ as env, makedirs
 
 # External
 from flask import Flask, render_template, redirect, request, url_for, abort, flash, session
@@ -22,6 +22,7 @@ from user import get_user_role, User
 from passwords import pw_hash
 from translation import Translation
 from utils import ensure_config
+from discord import DiscordClient
 
 dbs = Database()
 
@@ -185,6 +186,12 @@ def temp_pw():
     del session['tmp_uid']
     return render_template('temp_pw.j2', user=u, tpw=tpw)
 
+@app.route('/debug/avdownload')
+def avdownload():
+    users = [row.discord for row in dbs.get_stats() if len(row.discord) > 5]
+    d = DiscordClient(app.config["DISCORD_TOKEN"])
+    d.download_avatars(users, './temp/avatar')
+
 
 @app.route('/user/pw_change', methods=["GET", "POST"])
 def pw_change():
@@ -221,6 +228,8 @@ if __name__ == '__main__':
     
     ensure_config('config.json')
     app.config.from_file('config.json', json.load)
+
+    makedirs('./temp/avatar', exist_ok=True)
     app.add_template_global(get_user_role)
     app.add_template_global(current_user, 'current_user')
 
