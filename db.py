@@ -6,6 +6,7 @@ import typing as t
 import re
 from collections import namedtuple
 from logging import info, error, warning, critical
+import time
 
 # External
 
@@ -14,6 +15,7 @@ from user import User
 from passwords import pw_check, pw_hash
 from secrets import token_urlsafe
 from translation import Translation
+from discord import DiscordClient
 
 # Scripts
 db_create_script = """
@@ -25,7 +27,8 @@ CREATE TABLE IF NOT EXISTS User (
     password    BLOB        DEFAULT NULL,
     discord     TEXT        ,
     exempt      BOOLEAN     NOT NULL DEFAULT 0,
-    temp_pw     BOOLEAN     DEFAULT 1
+    temp_pw     BOOLEAN     DEFAULT 1,
+    display_name    TEXT    DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Translation (
@@ -40,14 +43,14 @@ CREATE TABLE IF NOT EXISTS Translation (
 );
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
-    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
+    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
 FROM USER
 LEFT JOIN Translation ON User.id = Translation.idauthor
 GROUP BY User.nickname;
 
 """
 
-StatRow = namedtuple('StatRow', "id nickname discord wikidot count points")
+StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
 
 class Database():
     
@@ -165,6 +168,18 @@ class Database():
         query = "UPDATE User SET nickname=?, wikidot=?, discord=?, password=? WHERE id=?"
         data = (u.nickname, u.wikidot, u.discord, u.password, u.uid)
         self.__tryexec(query, data)
+
+    # TODO: Calling an API adapter in a database class is absolutely horrible
+    def update_discord_nicknames(self):
+        query = "SELECT discord FROM User"
+        cur = self.__tryexec(query)
+        ids = cur.fetchall()
+        users = dict()
+        for id_ in ids:
+            users[id_[0]] = DiscordClient.get_global_username(id_[0])
+            time.sleep(0.2) # Wait a bit so the API doesn't 429
+        for uid, nickname in users.items():
+            self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
 
     def translation_exists(self, name: str):
         query = "SELECT * FROM Translation WHERE name=? COLLATE NOCASE"

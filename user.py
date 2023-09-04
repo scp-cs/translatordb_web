@@ -28,7 +28,7 @@ class User(UserMixin):
     discord: str
     exempt: bool = False
     temp_pw: bool = False
-    points: float = 0
+    display_name: str = None
 
     def get_id(self) -> int:
         return str(self.uid)
