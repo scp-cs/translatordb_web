@@ -1,17 +1,20 @@
 # Builtins
 from logging import info, warning, error, critical, debug
 import logging
-from os import environ as env
+from os import environ as env, makedirs
+from os import path
 
 # External
-from flask import Flask, render_template, redirect, request, url_for, abort, flash, session
+from flask import Flask, render_template, redirect, request, url_for, abort, flash, session, send_from_directory, make_response
+from werkzeug.serving import is_running_from_reloader
 from datetime import datetime, timedelta
 import json
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from waitress import serve
+from flask_apscheduler import APScheduler
 
 # Initialize logger before importing internal modules
-logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s')
+logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -22,10 +25,12 @@ from user import get_user_role, User
 from passwords import pw_hash
 from translation import Translation
 from utils import ensure_config
+from discord import DiscordClient
 
 dbs = Database()
 
 app = Flask(__name__)
+sched = APScheduler()
 login_manager = LoginManager(app)
 
 login_manager.session_protection = "strong"
@@ -50,6 +55,15 @@ def user_loader(id: str):
 def index():
     sort = request.args.get('sort', type=str, default='az')
     return render_template('users.j2', users=dbs.get_stats(sort), lastupdate=dbs.lastupdated.strftime("%Y-%m-%d %H:%M:%S"))
+
+@app.route('/content/avatar/<int:uid>')
+def get_avatar(uid: int):
+    if path.exists(path.join('temp', 'avatar', f'{str(uid)}.png')):
+        response = make_response(send_from_directory(path.join('temp', 'avatar'), f'{str(uid)}.png'))
+        return response
+    else:
+        response = make_response(send_from_directory('static', 'discord_default.png'))
+        return response
 
 @app.route('/user/<int:uid>/delete', methods=["POST"])
 @login_required
@@ -185,6 +199,17 @@ def temp_pw():
     del session['tmp_uid']
     return render_template('temp_pw.j2', user=u, tpw=tpw)
 
+@app.route('/debug/nickupdate')
+@login_required
+def nickupdate():
+    dbs.update_discord_nicknames()
+    return redirect(url_for('index'))
+
+@app.route('/debug/avupdate')
+@login_required
+def avdownload():
+    DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar')
+    return redirect(url_for('index'))
 
 @app.route('/user/pw_change', methods=["GET", "POST"])
 def pw_change():
@@ -221,10 +246,21 @@ if __name__ == '__main__':
     
     ensure_config('config.json')
     app.config.from_file('config.json', json.load)
+
+    makedirs('./temp/avatar', exist_ok=True)
     app.add_template_global(get_user_role)
     app.add_template_global(current_user, 'current_user')
-
+    
     user_init()
+    DiscordClient.set_token(app.config["DISCORD_TOKEN"])
+
+    # Check if we are running inside the auto-reloader yet
+    # This doesn't matter normally but messes stuff up in debug mode
+    if is_running_from_reloader() or not app.config['DEBUG']:
+        sched.init_app(app)
+        sched.start()
+        sched.add_job('Download avatars', lambda: DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar'), trigger='interval', days=3)
+        sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
 
     if app.config['DEBUG']:
         warning('App running in debug mode!')
