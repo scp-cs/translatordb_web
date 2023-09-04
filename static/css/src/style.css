@@ -26,7 +26,7 @@ html, body {
 }
 
 .btn-rounded {
-  @apply px-4 py-2 text-center text-white transition-colors rounded-lg select-none;
+  @apply px-4 py-2 text-center text-white transition-colors rounded-lg select-none bg-opacity-80;
 }
 
 .input-field {
@@ -39,8 +39,8 @@ thead {
 }
 
 tr {
-  @apply flex flex-col h-auto w-auto p-3 my-6 items-end border rounded-lg !important;
-  @apply md:table-row md:h-10 md:p-4 !important;
+  @apply flex flex-col h-auto w-auto p-3 my-6 items-end shadow-2xl rounded-xl border border-gray-500 bg-opacity-5 bg-white !important;
+  @apply md:table-row md:h-10 md:p-4 md:border-none md:shadow-none md:bg-transparent !important;
 }
 
 td {
