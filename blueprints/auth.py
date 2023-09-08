@@ -23,7 +23,7 @@ def login():
             return redirect(url_for('pw_change'))
         login_user(dbs.get_user(uid))
         return redirect(url_for('index'))
-    return render_template('login.j2', form=LoginForm())
+    return render_template('auth/login.j2', form=LoginForm())
 
 @UserAuth.route('/user/logout')
 @login_required
@@ -40,7 +40,7 @@ def pw_change():
         return redirect(url_for('index'))
 
     if request.method == "GET":
-        return render_template('pw_change.j2', form=PasswordChangeForm())
+        return render_template('auth/pw_change.j2', form=PasswordChangeForm())
     
     form = PasswordChangeForm()
     dbs.update_password(session['PRE_LOGIN_UID'], pw_hash(form.pw.data))
@@ -60,4 +60,4 @@ def temp_pw():
     tpw = session['tpw']
     del session['tpw']
     del session['tmp_uid']
-    return render_template('temp_pw.j2', user=u, tpw=tpw)
+    return render_template('auth/temp_pw.j2', user=u, tpw=tpw)

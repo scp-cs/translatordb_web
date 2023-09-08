@@ -1,6 +1,16 @@
+from typing import Any
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, BooleanField, ValidationError
 from wtforms.validators import EqualTo, Length, DataRequired, url
+
+class DiscordID():
+    def __call__(self, form, field) -> Any:
+        if len(field.data) != 18:
+            raise ValidationError('Discord ID musí mít 18 znaků')
+        try:
+            a = int(field.data)
+        except ValueError:
+            raise ValidationError('Discord ID může obsahovat pouze číslice')
 
 class LoginForm(FlaskForm):
     username = StringField('Uživatelské Jméno', validators=[DataRequired()])
@@ -26,7 +36,7 @@ class EditArticleForm(NewArticleForm):
 class NewUserForm(FlaskForm):
     nickname = StringField('Přezdívka', validators=[DataRequired()])
     wikidot = StringField('Wikidot ID', validators=[DataRequired()])
-    discord = StringField('Discord ID')
+    discord = StringField('Discord ID', validators=[DiscordID()])
     exempt = BooleanField('Počítat body')
     can_login = BooleanField('Vygenerovat heslo')
     submit = SubmitField('Přidat')
@@ -34,7 +44,7 @@ class NewUserForm(FlaskForm):
 class EditUserForm(NewUserForm):
     nickname = StringField('Přezdívka', validators=[DataRequired()])
     wikidot = StringField('Wikidot ID', validators=[DataRequired()])
-    discord = StringField('Discord ID')
+    discord = StringField('Discord ID', validators=[DiscordID()])
     submit = SubmitField('Uložit')
 
 class PasswordChangeForm(FlaskForm):
