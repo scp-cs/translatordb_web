@@ -4,27 +4,27 @@
 <div class="flex flex-col p-10">
 <h1 class="text-4xl font-bold">Přidat uživatele</h1>
 <hr class="my-4 border-white">
-<form action="{{url_for('add_user')}}" method="post" class="flex flex-col w-1/2 text-lg">
+<form method="post" class="flex flex-col w-1/2 text-lg">
     {{ form.hidden_tag() }}
     {{form.nickname.label(class='font-bold')}}
-    {{form.nickname(class='mb-4 input-field', id='input-title')}}
+    {{form.nickname(class='input-field mb-4', id='input-title')}}
     {{form.wikidot.label(class='font-bold')}}
-    {{form.wikidot(class='mb-4 input-field', id='input-link')}}
+    {{form.wikidot(class='input-field mb-4', id='input-link')}}
     {{form.discord.label(class='font-bold')}}
-    {{form.discord(class='mb-4 input-field')}}
+    {{form.discord(class='input-field mb-4')}}
     
     <span class="mb-6">
     <span class="inline">
-    {{form.exempt(class='hidden peer', checked=True, onchange='updateExempt(this);')}}
-    {{form.exempt.label(class="inline-block w-64 transition-all bg-gray-500 border-2 border-white border-opacity-20 peer-checked:bg-blue-600 btn-rounded", id='check-exempt')}}
+    {{form.exempt(class='peer hidden', checked=True, onchange='updateExempt(this);')}}
+    {{form.exempt.label(class="border-opacity-20 peer-checked:bg-blue-600 btn-rounded inline-block w-64 transition-all bg-gray-500 border-2 border-white", id='check-exempt')}}
     </span>
     
     <span class="inline">
-    {{form.can_login(class='hidden peer', onchange='updateLogin(this);')}}
-    {{form.can_login.label(class='inline-block w-64 transition-all bg-gray-500 border-2 border-white border-opacity-20 peer-checked:bg-blue-600 btn-rounded', id='check-login')}}
+    {{form.can_login(class='peer hidden', onchange='updateLogin(this);')}}
+    {{form.can_login.label(class='border-opacity-20 peer-checked:bg-blue-600 btn-rounded inline-block w-64 transition-all bg-gray-500 border-2 border-white', id='check-login')}}
     </span>
     </span>
-    {{form.submit(class='self-start bg-green-600 w-36 btn-rounded hover:bg-green-500')}}
+    {{form.submit(class='w-36 btn-rounded hover:bg-green-500 self-start bg-green-600')}}
 </form>
 </div>
 

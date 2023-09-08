@@ -3,7 +3,7 @@ from datetime import datetime
 
 import typing as t
 
-from user import User
+from models.user import User
 
 @dataclass
 class Translation():
