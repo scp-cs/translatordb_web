@@ -3,18 +3,17 @@ import json
 import sqlite3
 from datetime import datetime
 import typing as t
-import re
 from collections import namedtuple
-from logging import info, error, warning, critical
+from logging import error, warning, critical
 import time
+from secrets import token_urlsafe
 
 # External
 
 # Internal
-from user import User
+from models.user import User
 from passwords import pw_check, pw_hash
-from secrets import token_urlsafe
-from translation import Translation
+from models.translation import Translation
 from discord import DiscordClient
 
 # Scripts
@@ -54,7 +53,7 @@ StatRow = namedtuple('StatRow', "id nickname discord wikidot display count point
 
 class Database():
     
-    def __init__(self, filepath: str = "data/scp.db", drop: bool = False) -> None:
+    def __init__(self, filepath: str = "data/scp.db") -> None:
 
         try:
             self.connection = sqlite3.connect(filepath, check_same_thread=False)
@@ -63,18 +62,13 @@ class Database():
             critical(f'Error opening database {filepath} ({str(e)})')
             raise RuntimeError(str(e))
 
-        self.__lastupdate = datetime(2005, 1, 1)
         self.__mark_updated()
 
     def __tryexec(self, query: str, data: t.Tuple = (), script=False) -> sqlite3.Cursor:
         try:
             with self.connection as con:
                 cur = con.cursor()
-                if script:
-                    result = cur.executescript(query)
-                else:
-                    result = cur.execute(query, data)
-                return result
+                return cur.executescript(query) if script else cur.execute(query, data)
         except sqlite3.Error as e:
             error(f'Database query "{query}" aborted with error: {str(e)}')
 
@@ -84,7 +78,7 @@ class Database():
             self.__lastupdate = datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
         except TypeError:
             warning(f"Unable to get last update timestamp")
-            return datetime(2005, 1, 1)
+            self.__lastupdate = datetime(2005, 1, 1)
 
     @property
     def lastupdated(self) -> datetime:

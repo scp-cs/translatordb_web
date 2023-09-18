@@ -5,7 +5,7 @@
 
 <h1 class="pb-6 text-3xl font-semibold">Změňte si heslo</h1>
 
-<form action="{{url_for('pw_change')}}" method="post" class="flex flex-col items-center text-lg">
+<form method="post" class="flex flex-col items-center text-lg">
     {{ form.hidden_tag() }}
     {{form.pw.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.pw(class='mb-4 input-field', id='input-title')}}

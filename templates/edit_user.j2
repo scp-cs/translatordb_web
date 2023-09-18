@@ -4,7 +4,7 @@
 <div class="flex flex-col p-10">
 <h1 class="text-4xl font-bold">Upravit uživatele</h1>
 <hr class="my-4 border-white">
-<form action="{{url_for('edit_user', uid=user.uid)}}" method="post" class="flex flex-col w-full md:w-1/2 text-lg">
+<form method="post" class="flex flex-col w-full md:w-1/2 text-lg">
     {{ form.hidden_tag() }}
     {{form.nickname.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.nickname(class='mb-4 input-field', id='input-title')}}
