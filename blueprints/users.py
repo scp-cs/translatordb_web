@@ -16,19 +16,20 @@ def add_user():
         return render_template('add_user.j2', form=NewUserForm())
     
     form = NewUserForm()
-    if form.validate_on_submit():
-        u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
-        uid, tpw = dbs.add_user(u, form.can_login.data)
-        if form.can_login.data:
-            info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
-        else:
-            info(f"User account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
-        session['tpw'] = tpw
-        session['tmp_uid'] = uid
-        return redirect(url_for('UserAuth.temp_pw') if form.can_login.data else url_for('UserController.user', uid=uid))
-    else:
-        # TODO: Flash errors
+    if not form.validate_on_submit():
+        for e in form.errors.values():
+            flash(e[0], category="error")
         return redirect(url_for('UserController.add_user'))
+
+    u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
+    uid, tpw = dbs.add_user(u, form.can_login.data)
+    if form.can_login.data:
+        info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
+    else:
+        info(f"User account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
+    session['tpw'] = tpw
+    session['tmp_uid'] = uid
+    return redirect(url_for('UserAuth.temp_pw') if form.can_login.data else url_for('UserController.user', uid=uid))
 
 @UserController.route('/user/<int:uid>/edit', methods=["GET", "POST"])
 @login_required
@@ -42,14 +43,15 @@ def edit_user(uid: int):
         return render_template('edit_user.j2', form=EditUserForm(data=fdata), user=u)
     
     form = EditUserForm()
-    if form.validate_on_submit():
-        un = User(uid, form.nickname.data, form.wikidot.data, u.password, form.discord.data, u.exempt, u.temp_pw)
-        dbs.update_user(un)
-        info(f"User {un.nickname} (ID: {uid}) edited by {current_user.nickname} (ID: {current_user.uid})")
-        return redirect(url_for('UserController.user', uid=uid))
-    else:
-        # TODO: flash errors
+    if not form.validate_on_submit():
+        for e in form.errors.values():
+            flash(e[0], category="error")
         return redirect(url_for('UserController.edit_user', uid=uid))
+
+    un = User(uid, form.nickname.data, form.wikidot.data, u.password, form.discord.data, u.exempt, u.temp_pw)
+    dbs.update_user(un)
+    info(f"User {un.nickname} (ID: {uid}) edited by {current_user.nickname} (ID: {current_user.uid})")
+    return redirect(url_for('UserController.user', uid=uid))
 
 @UserController.route('/user/<int:uid>')
 def user(uid: int):

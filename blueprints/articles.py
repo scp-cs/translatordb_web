@@ -61,5 +61,5 @@ def edit_article(aid: int):
         info(f"Article {t.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
     else:
         for e in form.errors.values():
-            flash(e, category="error")
+            flash(e[0], category="error")
     return redirect(url_for('UserController.user', uid=a.author.get_id()))
