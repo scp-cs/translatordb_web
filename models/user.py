@@ -11,6 +11,7 @@ ROLE_LIMITS = {
     100: 'Překladatel V'
 }
 
+# TODO: Move this to utils
 def get_user_role(points: int) -> str:
     r = ROLE_NONE
     for limit, role in ROLE_LIMITS.items():

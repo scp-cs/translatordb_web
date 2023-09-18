@@ -8,12 +8,12 @@
 
 
     
-<div class="flex flex-col px-10 py-4 shadow-2xl py-8 bg-white bg-opacity-5">
+<div class="flex flex-col px-10 py-4 py-8 bg-white shadow-2xl bg-opacity-5">
     <a class="mb-2 opacity-50 hover:opacity-80" href="{{url_for('index')}}"><< Zpět na hlavní stranu</a>
     <h1 class="mb-2 text-4xl font-bold">{{user.nickname}}</h1>
     <hr class="mb-4 border-white">
-    <div class="w-full flex flex-row items-center">
-        <img class="max-h-48 mr-6 rounded-xl border-white border-2 hidden md:block" src="{{ url_for('get_avatar', uid=(user.discord or 0)) }}">
+    <div class="flex flex-row items-center w-full">
+        <img class="hidden mr-6 border-2 border-white max-h-48 rounded-xl md:block" src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0)) }}">
         <div>
             <p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
             <p class="my-1 text-xl"><b>Wikidot ID:</b> <a class="hover:text-blue-500" target="_blank" href="https://www.wikidot.com/user:info/{{user.wikidot | replace(' ', '-')}}/">{{user.wikidot}}</a></p>
@@ -22,8 +22,8 @@
             <p class="my-1 text-xl"><b>Celkem překladů:</b> {{stats.count}}</p>
             {% if current_user.is_authenticated %}
             <div class="mt-4">
-                <a href="{{url_for('add_article', uid=user.uid)}}" class="w-48 my-2 bg-green-600 btn-rounded hover:bg-green-500">Přidat překlad</a>
-                <a href="{{url_for('edit_user', uid=user.uid)}}" class="w-48 my-2 bg-blue-600 btn-rounded hover:bg-blue-500">Upravit uživatele</a>
+                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="w-48 my-2 bg-green-600 btn-rounded hover:bg-green-500">Přidat překlad</a>
+                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="w-48 my-2 bg-blue-600 btn-rounded hover:bg-blue-500">Upravit uživatele</a>
             </div>
             {% endif %}
         </div>
@@ -31,7 +31,7 @@
 </div>
 
 
-<table class="w-full mt-10 text-center border-separate table-auto border-spacing-x-12">
+<table class="w-full mt-10 text-center table-auto border-spacing-x-12 md:border-separate">
     <thead>
     <tr>
         <th>Název</th>
@@ -55,7 +55,7 @@
         <td data-label="Zapsáno:">{{tr.added}}</td>
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
-            <a class="bg-blue-600 btn-rounded hover:bg-blue-500" href="{{url_for('edit_article', aid=tr.id)}}">Upravit</a>
+            <a class="bg-blue-600 btn-rounded hover:bg-blue-500" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}">Upravit</a>
             <a class="bg-red-600 btn-rounded hover:bg-red-500" onclick="delete_confirm(this);">Smazat</a>
         </td>
         {% endif %}

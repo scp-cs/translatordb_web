@@ -2,12 +2,14 @@
 
 {% block content %}
 
-<div class="flex flex-col items-center justify-center w-full h-full m-0 con-error error-container">
-    <img width="300" src="{{ url_for('static', filename='scp.png') }}">
+<div class="flex flex-col items-center justify-center w-full h-full m-0">
+    <div class="rounded-xl bg-opacity-5 flex flex-col items-center px-16 py-10 md:mt-4 md:mb-8 md:h-auto h-full bg-white shadow-2xl">
+    <img width="300" src="{{ url_for('static', filename='scp.png') }}" class="animate-pulse">
     <h1 class="text-5xl text-white">{{errno}}</h1>
     <h1 class="text-3xl text-white">{{errtext}}</h2>
     <p class="text-xl text-white"><a href="{{errlink}}"><i>"{{errquote}}"</i></a></h3>
     <p class="mt-16 text-slate-300 hover:text-slate-50"><a href="{{url_for('index')}}"><i>Odvolat se k etické komisi?</i></a></p>
+    </div>
 </div>
 
 {% endblock content %}
