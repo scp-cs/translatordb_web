@@ -26,9 +26,10 @@ from passwords import pw_hash
 from translation import Translation
 from utils import ensure_config
 from discord import DiscordClient
+from rss import RSSMonitor
 
 dbs = Database()
-
+#rss = RSSMonitor()
 app = Flask(__name__)
 sched = APScheduler()
 login_manager = LoginManager(app)
@@ -162,15 +163,17 @@ def add_user():
     if request.method == "GET":
         return render_template('add_user.j2', form=NewUserForm())
     form = NewUserForm()
-    u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
-    uid, tpw = dbs.add_user(u, form.can_login.data)
-    if form.can_login.data:
-        info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
-    else:
-        info(f"User account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
-    session['tpw'] = tpw
-    session['tmp_uid'] = uid
-    return redirect(url_for('temp_pw') if form.can_login.data else url_for('user', uid=uid))
+    if form.validate_on_submit():
+        u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
+        uid, tpw = dbs.add_user(u, form.can_login.data)
+        if form.can_login.data:
+            info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
+        else:
+            info(f"User account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
+        session['tpw'] = tpw
+        session['tmp_uid'] = uid
+        return redirect(url_for('temp_pw') if form.can_login.data else url_for('user', uid=uid))
+    return redirect(url_for('add_user'))
 
 @app.route('/user/<int:uid>/edit', methods=["GET", "POST"])
 @login_required
@@ -199,12 +202,14 @@ def temp_pw():
     del session['tmp_uid']
     return render_template('temp_pw.j2', user=u, tpw=tpw)
 
+# TODO: Force these both to update on startup if there are no cached avatars (Docker)
 @app.route('/debug/nickupdate')
 @login_required
 def nickupdate():
     dbs.update_discord_nicknames()
     return redirect(url_for('index'))
 
+# TODO: .||.
 @app.route('/debug/avupdate')
 @login_required
 def avdownload():
@@ -255,7 +260,7 @@ if __name__ == '__main__':
     DiscordClient.set_token(app.config["DISCORD_TOKEN"])
 
     # Check if we are running inside the auto-reloader yet
-    # This doesn't matter normally but messes stuff up in debug mode
+    # This doesn't matter normally but messes stuff up when debugging
     if is_running_from_reloader() or not app.config['DEBUG']:
         sched.init_app(app)
         sched.start()
@@ -267,4 +272,5 @@ if __name__ == '__main__':
         app.run('0.0.0.0', 8080)
     else:
         info("TranslatorDB Starting")
+        # TODO: Check out the task queue warnings
         serve(app)
