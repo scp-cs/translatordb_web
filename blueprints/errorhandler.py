@@ -12,4 +12,4 @@ def e403(e):
 
 @ErrorHandler.app_errorhandler(500)
 def e500(e):
-    return render_template('errors/error.j2', errno=500, errtext="Internal Server Error", errquote="VJEM: CHYBA. HYPERREALITA.", errlink="http://scp-cs.wikidot.com/scp-5500")
+    return render_template('errors/error.j2', errno=500, errtext="Internal Server Error", errquote="[DATA VYMAZÁNA]", errlink="http://scp-cs.wikidot.com/sandrewswann-s-proposal")

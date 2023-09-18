@@ -30,7 +30,7 @@ html, body {
 }
 
 .input-field {
-  @apply p-1 text-lg bg-transparent border-b border-slate-500 focus-visible:outline-none focus-visible:border-b-slate-300 transition-colors;
+  @apply p-1 text-lg transition-colors bg-transparent border-b border-slate-500 focus-visible:outline-none focus-visible:border-b-slate-300;
 }
 
 thead {
@@ -39,7 +39,7 @@ thead {
 }
 
 tr {
-  @apply flex flex-col h-auto w-auto p-3 my-6 items-end shadow-2xl rounded-xl border border-gray-500 bg-opacity-5 bg-white !important;
+  @apply flex flex-col h-auto w-full px-3 py-2 my-4 items-end shadow-2xl border-gray-500 bg-opacity-5 bg-white !important;
   @apply md:table-row md:h-10 md:p-4 md:border-none md:shadow-none md:bg-transparent !important;
 }
 
