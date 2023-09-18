@@ -1,16 +1,21 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center h-full p-10">
+<div class="flex flex-col items-center justify-center h-full w-full md:p-10">
 
-<h1 class="pb-6 text-3xl font-semibold">Přihlásit se</h1>
 
-<form action="{{url_for('login')}}" method="post" class="flex flex-col items-center text-lg">
+
+<form action="{{url_for('login')}}" method="post" class="flex flex-col items-center text-lg py-8 px-24 bg-white bg-opacity-5 md:rounded-xl md:w-auto w-full shadow-2xl">
+    <h1 class="pb-6 text-3xl font-semibold">Přihlásit se</h1>
     {{ form.hidden_tag() }}
-    {{form.username.label(class='self-start font-bold')}}
+    <div>
+    {{form.username.label(class='self-start font-thin opacity-90 text-sm')}}<br>
     {{form.username(class='mb-4 input-field', id='input-title')}}
-    {{form.password.label(class='self-start font-bold')}}
+    </div>
+    <div>
+    {{form.password.label(class='self-start font-thin opacity-90 text-sm')}}<br>
     {{form.password(class='mb-4 input-field', id='input-link')}}
+    </div>
     {{form.submit(class='bg-green-600 w-36 btn-rounded hover:bg-green-500')}}
 </form>
 

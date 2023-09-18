@@ -4,19 +4,19 @@
 <div class="flex flex-col p-10">
 <h1 class="text-4xl font-bold">Přidat článek</h1>
 <hr class="my-4 border-white">
-<form action="{{url_for('add_article', uid=user.uid)}}" method="post" class="flex flex-col w-1/2 text-lg">
+<form action="{{url_for('add_article', uid=user.uid)}}" method="post" class="flex flex-col w-full md:w-1/2 text-lg">
     {{ form.hidden_tag() }}
-    {{form.title.label(class='font-bold')}}
+    {{form.title.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.title(class='mb-4 input-field', id='input-title')}}
-    {{form.link.label(class='font-bold')}}
+    {{form.link.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.link(class='mb-4 input-field', id='input-link', value='https://scp-cs.wikidot.com/')}}
-    {{form.translator.label(class='font-bold')}}
+    {{form.translator.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.translator(class='mb-4 select-none opacity-60 input-field', disabled='', value=user.nickname)}}
-    {{form.words.label(class='font-bold')}}
+    {{form.words.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.words(class='mb-4 input-field')}}
-    {{form.bonus.label(class='font-bold')}}
+    {{form.bonus.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.bonus(class='mb-4 input-field')}}
-    {{form.submit(class='self-start bg-green-600 w-36 btn-rounded hover:bg-green-500')}}
+    {{form.submit(class='self-start bg-green-600 md:w-36 w-full btn-rounded hover:bg-green-500')}}
 </form>
 </div>
 

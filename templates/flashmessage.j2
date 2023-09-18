@@ -1,11 +1,12 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for cat, msg in messages %}
-            <div class="fixed flex-col items-center justify-between hidden w-auto h-auto overflow-hidden bg-black border-2 border-white min-w-56 bottom-5 left-5 popup" id="popup0">
+            <div class="fixed flex-col items-center justify-between hidden w-auto h-auto overflow-hidden bg-opacity-20 backdrop-blur-lg bg-white/10 shadow-2xl rounded-xl min-w-56 bottom-5 left-5 border-black/25 border popup" id="popup0">
                 <b class="my-2 px-3 text-{{cat}}">{{msg}}</b>
-                <div class="bottom-0 left-0 self-start h-2 bg-green-600 animate-timeout"></div>
+                <div class="bottom-0 left-0 self-start h-2 bg-red-500/75 animate-timeout"></div>
             </div>
         {% endfor %}
     {% endif %}
 {% endwith %}
 <script src="{{url_for('static', filename='js/popup.js')}}"></script>
+

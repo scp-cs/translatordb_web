@@ -7,9 +7,9 @@
 
 <form action="{{url_for('pw_change')}}" method="post" class="flex flex-col items-center text-lg">
     {{ form.hidden_tag() }}
-    {{form.pw.label(class='self-start font-bold')}}
+    {{form.pw.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.pw(class='mb-4 input-field', id='input-title')}}
-    {{form.pw_confirm.label(class='self-start font-bold')}}
+    {{form.pw_confirm.label(class='self-start font-thin opacity-90 text-sm')}}
     {{form.pw_confirm(class='mb-4 input-field', id='input-link')}}
     {{form.submit(class='bg-green-600 w-36 btn-rounded hover:bg-green-500')}}
 </form>
