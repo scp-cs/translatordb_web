@@ -16,11 +16,11 @@ def login():
         uid = dbs.verify_login(form.username.data, form.password.data)
         if not uid:
             flash('Nesprávné uživatelské jméno nebo heslo')
-            return redirect(url_for('login'))
+            return redirect(url_for('UserAuth.login'))
         u = dbs.get_user(uid)
         if u.temp_pw:
             session['PRE_LOGIN_UID'] = uid
-            return redirect(url_for('pw_change'))
+            return redirect(url_for('UserAuth.pw_change'))
         login_user(dbs.get_user(uid))
         return redirect(url_for('index'))
     return render_template('auth/login.j2', form=LoginForm())
@@ -55,7 +55,7 @@ def temp_pw():
     dbs = c.config['database']
 
     if 'tpw' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('UserAuth.login'))
     u = dbs.get_user(session['tmp_uid'])
     tpw = session['tpw']
     del session['tpw']
