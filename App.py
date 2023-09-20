@@ -13,7 +13,7 @@ from flask_apscheduler import APScheduler
 
 # Initialize logger before importing internal modules
 logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 # Internal
@@ -81,6 +81,7 @@ if __name__ == '__main__':
     makedirs('./temp/avatar', exist_ok=True)
 
     app.config['database'] = dbs
+    app.config['scheduler'] = sched
 
     app.add_template_global(get_user_role)
     app.add_template_global(current_user, 'current_user')
@@ -110,9 +111,10 @@ if __name__ == '__main__':
         error('Discord API token not set. Profiles won\'t be updated!')
 
     if app.config['DEBUG']:
+        logging.getLogger().setLevel(logging.DEBUG)
         warning('App running in debug mode!')
         app.run('0.0.0.0', 8080)
     else:
         info("TranslatorDB Starting")
         # TODO: Check out the task queue warnings
-        serve(app)
+        serve(app, threads=8)

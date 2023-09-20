@@ -8,12 +8,11 @@
 
 
     
-<div class="flex flex-col px-10 py-4 py-8 bg-white shadow-2xl bg-opacity-5">
-    <a class="mb-2 opacity-50 hover:opacity-80" href="{{url_for('index')}}"><< Zpět na hlavní stranu</a>
+<div class="bg-opacity-5 flex flex-col px-10 py-4 py-8 bg-white shadow-2xl">
     <h1 class="mb-2 text-4xl font-bold">{{user.nickname}}</h1>
     <hr class="mb-4 border-white">
     <div class="flex flex-row items-center w-full">
-        <img class="hidden mr-6 border-2 border-white max-h-48 rounded-xl md:block" src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0)) }}">
+        <img class="max-h-48 rounded-xl md:block hidden mr-6 border-2 border-white" src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0)) }}">
         <div>
             <p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
             <p class="my-1 text-xl"><b>Wikidot ID:</b> <a class="hover:text-blue-500" target="_blank" href="https://www.wikidot.com/user:info/{{user.wikidot | replace(' ', '-')}}/">{{user.wikidot}}</a></p>
@@ -22,8 +21,8 @@
             <p class="my-1 text-xl"><b>Celkem překladů:</b> {{stats.count}}</p>
             {% if current_user.is_authenticated %}
             <div class="mt-4">
-                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="w-48 my-2 bg-green-600 btn-rounded hover:bg-green-500">Přidat překlad</a>
-                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="w-48 my-2 bg-blue-600 btn-rounded hover:bg-blue-500">Upravit uživatele</a>
+                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="btn-rounded hover:bg-green-500 w-48 my-2 bg-green-600">Přidat překlad</a>
+                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="btn-rounded hover:bg-blue-500 w-48 my-2 bg-blue-600">Upravit uživatele</a>
             </div>
             {% endif %}
         </div>
@@ -31,7 +30,7 @@
 </div>
 
 
-<table class="w-full mt-10 text-center table-auto border-spacing-x-12 md:border-separate">
+<table class="border-spacing-x-12 md:border-separate w-full mt-10 text-center table-auto">
     <thead>
     <tr>
         <th>Název</th>
@@ -54,25 +53,25 @@
         <td data-label="Bonus:">{{tr.bonus}}</td>
         <td data-label="Zapsáno:">{{tr.added}}</td>
         {% if current_user.is_authenticated %}
-        <td class="flex flex-col gap-2 md:table-row">
-            <a class="bg-blue-600 btn-rounded hover:bg-blue-500" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}">Upravit</a>
-            <a class="bg-red-600 btn-rounded hover:bg-red-500" onclick="delete_confirm(this);">Smazat</a>
+        <td class="md:table-row flex flex-col gap-2">
+            <a class="btn-rounded hover:bg-blue-500 bg-blue-600" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}">Upravit</a>
+            <a class="btn-rounded hover:bg-red-500 bg-red-600" onclick="delete_confirm(this);">Smazat</a>
         </td>
         {% endif %}
     </tr>
     {% endfor %}
 </table>
 <div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">
-    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg border-slate-400 bg-slate-900">
+    <div id="overlay-dialog" class="border-slate-400 bg-slate-900 z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg">
         <h2 class="mb-2 text-xl font-semibold">Potvrzení</h2>
         <p id='confirm-text' class="mb-4"></p>
         <div id='confirm-buttons' class="flex flex-row justify-center w-full">
-            <a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a>
-            <a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a>
+            <a class="w-36 btn-rounded hover:bg-green-500 mx-1 bg-green-600" onclick="delete_send(this);">Ano</a>
+            <a class="w-36 btn-rounded hover:bg-red-500 mx-1 bg-red-600" onclick="hide_overlay();">Ne</a>
         </div>
     </div>
 </div>
-<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-80 bg-slate-900">
+<div id="overlay" class="opacity-80 bg-slate-900 fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all">
 </div>
 
 <script src="{{url_for('static', filename='js/user.js')}}"></script>

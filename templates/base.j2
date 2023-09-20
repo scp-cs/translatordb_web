@@ -7,12 +7,14 @@
     <title>SCUTTLE v1.3.2</title>
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
     <link rel="shortcut icon" href="{{url_for('static', filename='favicon.gif')}}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     {% block head %}
     {% endblock head %}
 </head>
-<body class="text-slate-100 bg-gradient-to-b from-slate-900 to-violet-900 bg-no-repeat bg-fixed">
+<body class="text-slate-100 bg-gradient-to-b from-slate-900 to-violet-900 bg-fixed bg-no-repeat">
     {% block content %}
     {% endblock content %}
     {% include 'flashmessage.j2' %}
+    {% include 'sidebar.j2'%}
 </body>
 </html>

@@ -6,3 +6,4 @@ passwords.log
 __pycache__
 data
 static/css/src
+temp

@@ -175,6 +175,10 @@ class Database():
         for uid, nickname in users.items():
             self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
 
+    def update_nickname(self, uid):
+        nick = DiscordClient.get_global_username(uid)
+        self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nick, uid))
+
     def translation_exists(self, name: str):
         query = "SELECT * FROM Translation WHERE name=? COLLATE NOCASE"
         cur = self.__tryexec(query, (name.lower(),))
