@@ -2,6 +2,7 @@
 import json
 import time
 import typing as t
+from logging import warning, error, info
 
 # External
 import requests
@@ -18,6 +19,16 @@ class DiscordClient():
     def __new__(*args, **kwargs):
         # Pretend python has static classes and this is one
         raise TypeError("Static class cannot be instantiated")
+
+    @staticmethod
+    def _validate_user_id(uid: str):
+        if len(uid) != 18:
+            return False
+        try:
+            _ = int(uid)
+        except Exception:
+            return False
+        return True
 
     @staticmethod
     def set_token(auth_token: str):
@@ -37,8 +48,10 @@ class DiscordClient():
         if response.status_code == 200:
             return user
         elif response.status_code == 404:
+            warning(f'Discord user API returned 404 for {uid}')
             return None
         else:
+            error(f'Discord API request failed for {uid}')
             raise DiscordException("API Request failed")
 
     @staticmethod
@@ -82,12 +95,14 @@ class DiscordClient():
         if response.status_code == 200:
             return response.content
         elif response.status_code == 404:
+            warning(f"Discord CDN request returned 404 for {uid}")
             return None
         else:
+            error(f"Discord CDN request failed for {uid}")
             raise DiscordException("CDN Request failed")
 
     @staticmethod
-    def download_avatars(users, path: str) -> None:
+    def download_avatars(users, path: str = './temp/avatar') -> None:
         """Downloads the avatars for multiple users
 
         Args:
@@ -95,11 +110,11 @@ class DiscordClient():
             path (str): The Download directory
         """
         for u in users:
-            if u is None:
+            if u is None or not DiscordClient._validate_user_id(u):
+                warning(f"Skipping profile update for {u}")
                 continue
             avatar = DiscordClient.get_avatar(u)
             if avatar is not None:
                 with open(path+f'/{u}.png', 'wb') as file:
                     file.write(avatar)
                 time.sleep(0.1) # Wait for a bit so we don't hit the rate limit
-

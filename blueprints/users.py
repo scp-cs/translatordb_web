@@ -3,6 +3,7 @@ from forms import NewUserForm, EditUserForm
 from flask_login import current_user, login_required
 from models.user import User
 from logging import info
+from discord import DiscordClient
 
 UserController = Blueprint('UserController', __name__)
 
@@ -11,6 +12,7 @@ UserController = Blueprint('UserController', __name__)
 def add_user():
 
     dbs = c.config['database']
+    scheduler = c.config['scheduler']
 
     if request.method == "GET":
         return render_template('add_user.j2', form=NewUserForm())
@@ -23,6 +25,11 @@ def add_user():
 
     u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
     uid, tpw = dbs.add_user(u, form.can_login.data)
+
+    # Fetch nickname and profile in background
+    scheduler.add_job('Immediate nickname update', lambda: dbs.update_nickname(form.discord.data))
+    scheduler.add_job('Immediate profile update', func=lambda: DiscordClient.download_avatars([form.discord.data]))
+    
     if form.can_login.data:
         info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
     else:
