@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["templates/**/*.j2"],
-  safelist: ['animate-fadeout', 'animate-fadein', 'border-green-500', 'border-purple-600', 'border-yellow-400', 'border-red-600', 'border-rose-500'],
+  safelist: ['animate-fadeout', 'animate-fadein', 'border-green-500', 'border-purple-600', 'border-yellow-400', 'border-red-600', 'border-rose-500', 'opacity-0'],
   theme: {
     extend: {
       animation: {
