@@ -1,9 +1,9 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for cat, msg in messages %}
-            <div class="fixed bottom-0 left-0 flex-col items-center justify-between hidden w-full h-auto overflow-hidden border shadow-2xl md:w-auto bg-opacity-20 backdrop-blur-lg bg-white/10 md:rounded-xl min-w-56 md:bottom-5 md:left-5 border-black/25 popup" id="popup0">
+            <div class="md:w-auto bg-opacity-20 backdrop-blur-lg bg-white/10 md:rounded-xl min-w-56 md:bottom-5 md:left-5 border-black/25 popup fixed bottom-0 left-0 z-40 flex-col items-center justify-between hidden w-full h-auto overflow-hidden border shadow-2xl" id="popup0">
                 <p class="my-2 px-3 text-{{cat}}">{{msg}}</p>
-                <div class="bottom-0 left-0 self-start h-2 bg-white/75 animate-timeout"></div>
+                <div class="bg-white/75 animate-timeout bottom-0 left-0 self-start h-2"></div>
             </div>
         {% endfor %}
     {% endif %}
