@@ -41,6 +41,14 @@ CREATE TABLE IF NOT EXISTS Translation (
     FOREIGN KEY (idauthor) REFERENCES User(id)
 );
 
+CREATE TABLE IF NOT EXISTS Note (
+    id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title       TEXT        NOT NULL,
+    content     TEXT        NOT NULL,
+    idauthor    INTEGER     NOT NULL,
+    FOREIGN KEY (idauthor) REFERENCES User(id)
+);
+
 CREATE VIEW IF NOT EXISTS Frontpage AS
     SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
 FROM USER
