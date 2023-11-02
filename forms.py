@@ -5,7 +5,7 @@ from wtforms.validators import EqualTo, Length, DataRequired, url
 
 class DiscordID():
     def __call__(self, form, field) -> Any:
-        if len(field.data) != 18:
+        if len(field.data) not in [18, 19]:
             raise ValidationError('Discord ID musí mít 18 znaků')
         try:
             a = int(field.data)
