@@ -22,7 +22,7 @@ class DiscordClient():
 
     @staticmethod
     def _validate_user_id(uid: str):
-        if len(uid) != 18:
+        if len(uid) not in [18, 19]:
             return False
         try:
             _ = int(uid)
