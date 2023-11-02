@@ -10,8 +10,10 @@ UserAuth = Blueprint('UserAuth', __name__)
 @UserAuth.route('/login', methods=["GET", "POST"])
 def login():
     dbs = c.config['database']
+    
 
     if request.method == "GET":
+        session['login_next'] = request.referrer
         return render_template('auth/login.j2', form=LoginForm())
 
     form = LoginForm()
@@ -29,7 +31,9 @@ def login():
         session['PRE_LOGIN_UID'] = uid
         return redirect(url_for('UserAuth.pw_change'))
     login_user(dbs.get_user(uid))
-    return redirect(url_for('index'))
+    referrer = session['login_next']
+    del session['login_next']
+    return redirect(referrer or url_for('index'))
 
 
 @UserAuth.route('/user/logout')
@@ -37,7 +41,7 @@ def login():
 def logout():
     logout_user()
     flash('Uživatel odhlášen')
-    return redirect(url_for('index'))
+    return redirect(request.referrer or url_for('index'))
 
 @UserAuth.route('/user/pw_change', methods=["GET", "POST"])
 def pw_change():
