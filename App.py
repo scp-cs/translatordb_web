@@ -15,7 +15,9 @@ from flask_discord import DiscordOAuth2Session
 # Initialize logger before importing internal modules
 logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
 logging.getLogger().setLevel(logging.INFO)
-logging.getLogger().addHandler(logging.StreamHandler())
+handler_st = logging.StreamHandler()
+handler_st.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
+logging.getLogger().addHandler(handler_st)
 
 # Internal
 from db import Database
