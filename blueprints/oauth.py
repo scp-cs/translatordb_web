@@ -37,4 +37,5 @@ def oauth_callback():
         flash('Přihlášení je povolené pouze moderátorům')
 
     login_user(usr)
+    info(f'User {usr.nickname} (ID: {usr.uid}) logged in using Oauth (Authorized as {uid})')
     return redirect(url_for('index'))   # TODO: Pamatovat si posledni URL i tady
