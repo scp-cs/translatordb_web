@@ -47,7 +47,7 @@ app = Flask(__name__)
 sched = APScheduler()
 login_manager = LoginManager(app)
 
-login_manager.session_protection = "strong"
+login_manager.session_protection = "basic"
 login_manager.login_view = "UserAuth.login"
 
 @login_manager.user_loader
