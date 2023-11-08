@@ -10,6 +10,7 @@ from werkzeug.serving import is_running_from_reloader
 from flask_login import LoginManager, current_user
 from waitress import serve
 from flask_apscheduler import APScheduler
+from flask_discord import DiscordOAuth2Session
 
 # Initialize logger before importing internal modules
 logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
@@ -41,11 +42,15 @@ from blueprints.errorhandler import ErrorHandler
 from blueprints.users import UserController
 from blueprints.articles import ArticleController
 
+from blueprints.oauth import OauthController
+
 dbs = Database()
 #rss = RSSMonitor()
 app = Flask(__name__)
 sched = APScheduler()
-login_manager = LoginManager(app)
+login_manager = LoginManager()
+oauth = DiscordOAuth2Session()
+
 
 login_manager.session_protection = "basic"
 login_manager.login_view = "UserAuth.login"
@@ -82,6 +87,7 @@ if __name__ == '__main__':
 
     app.config['database'] = dbs
     app.config['scheduler'] = sched
+    app.config['oauth'] = oauth
 
     app.add_template_global(get_user_role)
     app.add_template_global(current_user, 'current_user')
@@ -92,13 +98,16 @@ if __name__ == '__main__':
     app.register_blueprint(DebugTools)
     app.register_blueprint(UserController)
     app.register_blueprint(ArticleController)
+    app.register_blueprint(OauthController)
 
     user_init()
+    login_manager.init_app(app)
+    oauth.init_app(app)
 
-    token = app.config.get('DISCORD_TOKEN', None)
+    token = app.config.get('DISCORD_CLIENT_SECRET', None)
 
     if token:
-        DiscordClient.set_token(app.config["DISCORD_TOKEN"])
+        DiscordClient.set_token(token)
 
         # Check if we are running inside the auto-reloader yet
         # This doesn't matter normally but messes stuff up in debug mode
@@ -108,13 +117,15 @@ if __name__ == '__main__':
             sched.add_job('Download avatars', lambda: DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar'), trigger='interval', days=3)
             sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
     else:
-        error('Discord API token not set. Profiles won\'t be updated!')
+        warning('Discord API token not set. Profiles won\'t be updated!')
 
     if app.config['DEBUG']:
         logging.getLogger().setLevel(logging.DEBUG)
         warning('App running in debug mode!')
+        env['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
+        warning('OAUTHLIB Insecure transport is enabled!')
         app.run('0.0.0.0', 8080)
     else:
-        info("TranslatorDB Starting")
+        info("TranslatorDB init complete. Starting WSGI server now.")
         # TODO: Check out the task queue warnings
         serve(app, threads=8)

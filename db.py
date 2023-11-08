@@ -110,9 +110,19 @@ class Database():
         data = (new_pw, uid)
         self.__tryexec(query, data)
 
+    # TODO: Merge into one
     def get_user(self, uid: int) -> t.Optional[User]:
         query = "SELECT * FROM User WHERE id=?"
         data = (uid,)
+        row = self.__tryexec(query, data).fetchone()
+        if row is None:
+            return None
+        return User(*row)
+    
+    # TODO: Merge into one
+    def get_user_by_discord(self, dscid: int) -> t.Optional[User]:
+        query = "SELECT * FROM User WHERE discord=?"
+        data = (dscid,)
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
