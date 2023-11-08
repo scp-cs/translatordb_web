@@ -11,7 +11,7 @@ OauthController = Blueprint('OauthController', __name__)
 def oauth_session():
     oauth: DiscordOAuth2Session = c.config['oauth']
 
-    return oauth.create_session()
+    return oauth.create_session(prompt=False)
 
 @OauthController.route('/oauth/callback')
 def oauth_callback():
