@@ -53,13 +53,9 @@ sched = APScheduler()
 login_manager = LoginManager()
 oauth = DiscordOAuth2Session()
 
-
 login_manager.session_protection = "basic"
 login_manager.login_view = "UserAuth.login"
-
-@login_manager.user_loader
-def user_loader(id: str):
-    return dbs.get_user(int(id))
+login_manager.user_loader(lambda uid: dbs.get_user(uid))
 
 @app.route('/')
 def index():
