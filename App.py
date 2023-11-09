@@ -104,8 +104,20 @@ if __name__ == '__main__':
 
     user_init()
     login_manager.init_app(app)
-    oauth.init_app(app)
+    
+    # Checking if we can enable Discord Login
+    appid, appsecret = app.config.get('DISCORD_CLIENT_ID', None), app.config.get('DISCORD_CLIENT_SECRET', None)
 
+    app.config['OAUTH_ENABLE'] = app.config.get('DISCORD_LOGIN_ENABLE', True)
+
+    if not appid or not appsecret:
+        warning('OAuth App ID or secret not set, Discord login disabled')
+        app.config['OAUTH_ENABLE'] = False
+
+    if app.config['OAUTH_ENABLE']:
+        oauth.init_app(app)
+
+    # Checking if we can enable the API connection and initializing APScheduler
     token = app.config.get('DISCORD_TOKEN', None)
 
     if token:
