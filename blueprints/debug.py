@@ -15,7 +15,6 @@ def nickupdate():
 @DebugTools.route('/debug/avupdate')
 @login_required
 def avdownload():
-    dbs = c.config['database']
-
-    DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar')
+    sched = c.config['scheduler']
+    sched.run_job('Download avatars')
     return redirect(url_for('index'))

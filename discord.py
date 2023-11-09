@@ -3,9 +3,12 @@ import json
 import time
 import typing as t
 from logging import warning, error, info
+from os.path import join
+from io import BytesIO
 
 # External
 import requests
+from PIL import Image
 
 API_UA = "SCUTTLE Discord service (https://scp-wiki.cz, v1)"
 API_URL = "https://discord.com/api"
@@ -115,6 +118,7 @@ class DiscordClient():
                 continue
             avatar = DiscordClient.get_avatar(u)
             if avatar is not None:
-                with open(path+f'/{u}.png', 'wb') as file:
+                with open(join(path,f'{u}.png'), 'wb') as file:
                     file.write(avatar)
+                    Image.open(BytesIO(avatar)).resize((64, 64), Image.Resampling.NEAREST).save(join(path,f'{u}_thumb.png'))
                 time.sleep(0.1) # Wait for a bit so we don't hit the rate limit

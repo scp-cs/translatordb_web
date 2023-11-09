@@ -28,7 +28,7 @@
             <td data-label="Přezdívka">{{ user.nickname }}</td>
             <td data-label="Discord ID">
             {% if user.discord %}
-            <img class="w-8 h-8 rounded-[50%] inline md:mr-4" src={{ url_for('UserContent.get_avatar', uid=(user.discord or 0)) }}>
+            <img class="w-8 h-8 rounded-[50%] inline md:mr-4" src={{ url_for('UserContent.get_avatar', uid=(user.discord or 0), s='thumb') }}>
             {{ user.display or user.discord }}
             {% endif %}</td>
             <td data-label="Počet překladů">{{ user.count }}</td>
