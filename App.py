@@ -106,7 +106,7 @@ if __name__ == '__main__':
     login_manager.init_app(app)
     oauth.init_app(app)
 
-    token = app.config.get('DISCORD_CLIENT_SECRET', None)
+    token = app.config.get('DISCORD_TOKEN', None)
 
     if token:
         DiscordClient.set_token(token)
