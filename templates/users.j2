@@ -9,7 +9,7 @@
     <a href="{{url_for('index', sort='points')}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Počet bodů</a>
     </div>
     <div class="opacity-40 italic">Aktualizováno {{lastupdate}}</div>
-    <table class="md:bg-white md:border-separate md:table-auto md:py-5 md:w-auto border-spacing-x-10 md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl w-full mt-2 text-center shadow-2xl">
+    <table class="md:bg-white md:border-separate md:table-auto md:py-5 md:w-auto border-spacing-x-12 border-spacing-y-0 md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl w-full mt-2 text-center shadow-2xl">
     <thead>
         <tr class="border-b-2 border-black">
             <th>Nickname</th>
@@ -35,9 +35,9 @@
             <td data-label="Počet bodů">{{ "%.1f" % user.points }}</td>
             <td data-label="Role">{{get_user_role(user.points)}}</td>
             <td class="md:table-row flex flex-col">
-                <a class="btn-rounded hover:bg-blue-500 md:inline md:w-auto md:mb-0 inline-block w-full mb-2 bg-blue-600" href="{{url_for('UserController.user', uid=user.id)}}">Zobrazit</a>
+                <a class="md:inline md:w-auto md:mb-0 inline-block w-full mb-2" href="{{url_for('UserController.user', uid=user.id)}}"><i class="bi bi-eye opacity-40 hover:opacity-100 text-3xl transition-opacity"></i></a>
                 {% if current_user.is_authenticated %}
-                <a class="btn-rounded hover:bg-red-400 bg-red-600" onclick="delete_confirm(this);">Smazat</a>
+                <a class="opacity-40 hover:opacity-100" onclick="delete_confirm(this);"><i class="bi bi-x-circle mx-3 text-3xl transition-opacity"></i></a>
                 {% endif %}
             </td>
         </tr>
