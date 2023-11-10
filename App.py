@@ -115,7 +115,6 @@ if __name__ == '__main__':
 
     # Checking if we can enable the API connection and initializing APScheduler
     token = app.config.get('DISCORD_TOKEN', None)
-
     if token:
         DiscordClient.set_token(token)
 
@@ -129,6 +128,7 @@ if __name__ == '__main__':
     else:
         warning('Discord API token not set. Profiles won\'t be updated!')
 
+    # Force oauthlib to allow insecure HTTP when debugging
     if app.config['DEBUG']:
         logging.getLogger().setLevel(logging.DEBUG)
         warning('App running in debug mode!')
