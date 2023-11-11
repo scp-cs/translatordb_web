@@ -33,3 +33,7 @@ class User(UserMixin):
 
     def get_id(self) -> int:
         return str(self.uid)
+    
+    @property
+    def can_login(self) -> bool:
+        return self.password != None
