@@ -142,8 +142,12 @@ class Database():
         return row[0]
 
     def delete_user(self, uid: int) -> None:
-        query = "DELETE FROM User WHERE id=?"
-        self.__tryexec(query, (uid, ))
+        queries = [
+            "DELETE FROM User WHERE id=?",
+            "DELETE FROM Translation WHERE idauthor=?",
+            "DELETE FROM Note WHERE idauthor=?"]
+        for query in queries:   # No cascade delete because I'm dumb
+            self.__tryexec(query, (uid, ))
 
     def delete_article(self, aid: int) -> None:
         query = "DELETE FROM Translation WHERE id=?"
@@ -203,10 +207,7 @@ class Database():
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
             return None
-        translations = []
-        for row in rows:
-            translations.append(Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]))
-        return translations
+        return [Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]) for row in rows]
     
     def add_article(self, a: Translation) -> int:
         query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
@@ -224,3 +225,41 @@ class Database():
             tpw = None
             password = u.password
         return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord, u.exempt)).lastrowid, tpw)
+
+    def search_user(self, param: str) -> t.List[dict]:
+        query = "SELECT * FROM Frontpage WHERE nickname LIKE :param OR wikidot LIKE :param OR display LIKE :param OR discord=:param"
+        results = self.__tryexec(query, {'param': f'%{param}%'}).fetchall()
+        if not results:
+            return list()
+        return [{
+            'id': result[0],
+            'nickname': result[1],
+            'discord': result[2],
+            'wikidot': result[3],
+            'tr_count': result[4],
+            'points': result[5]
+        } for result in results]
+
+    def search_article(self, param: str) -> t.List[Translation]:
+        query = "SELECT * FROM Translation WHERE name LIKE :param OR link LIKE :link"
+        results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%"}).fetchall()
+        search_result = list()
+        ucache = dict()
+        for result in results:
+            if result[6] not in ucache: # Ugly but saves us a lot of useless queries
+                author = ucache[result[6]] = self.get_user(result[6])
+            else:
+                author = ucache[result[6]]
+            if not author: # Ideally, this shouldn't happen. In practice I forgot to enable foreign keys initially so it's possible
+                continue
+            search_result.append({
+                'id': result[0],
+                'name': result[1],
+                'link': result[5],
+                'words': result[2],
+                'author': {
+                    'id': author.uid,
+                    'name': author.display_name or author.nickname
+                }
+            })
+        return search_result
