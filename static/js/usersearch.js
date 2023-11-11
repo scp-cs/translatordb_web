@@ -66,7 +66,7 @@ function search(target) {
 function handleSearch(e) {
     clearTimeout(timeoutID)
     if(e.target.value.length > 1) {
-        timeoutID = setTimeout(search, 700, e.target)
+        timeoutID = setTimeout(search, 300, e.target)
     } else {
         search(e.target)
     }
