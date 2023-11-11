@@ -1,15 +1,22 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="md:p-2 flex flex-col items-center justify-center w-auto">
-    <div class="md:mt-4 md:w-auto md:flex-row md:rounded-xl bg-opacity-5 flex flex-col items-center w-full px-10 py-5 mb-8 bg-white shadow-2xl">
-    <h2 class="md:mr-6 text-lg font-bold">Řadit:</h2>
-    <a href="{{url_for('index', sort='az')}}" class="hover:bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">A-Z</a>
-    <a href="{{url_for('index', sort='count')}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Počet článků</a>
-    <a href="{{url_for('index', sort='points')}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Počet bodů</a>
+<div class="flex flex-col items-center justify-center w-auto md:p-2">
+    <div>
+        <div class="inline-flex flex-col items-center w-full px-10 py-5 mb-8 bg-white shadow-2xl md:mt-4 md:w-auto md:flex-row md:rounded-xl bg-opacity-5">
+        <h2 class="text-lg font-bold md:mr-6">Řadit:</h2>
+        <a href="{{url_for('index', sort='az')}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded">A-Z</a>
+        <a href="{{url_for('index', sort='count')}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet článků</a>
+        <a href="{{url_for('index', sort='points')}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet bodů</a>
+        </div>
+        
+        <div class="inline-block w-full px-4 mb-6 ml-3 text-center text-black shadow-2xl md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl md:w-auto md:bg-white md:py-5">
+            <i class="mr-4 text-xl text-white bi bi-search"></i>
+            <input type="text" id="search-field" class="p-2 text-white rounded-md shadow-inner outline-none bg-white/20">
+        </div>
     </div>
-    <div class="opacity-40 italic">Aktualizováno {{lastupdate}}</div>
-    <table class="md:bg-white md:border-separate md:table-auto md:py-5 md:w-auto border-spacing-x-12 border-spacing-y-0 md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl w-full mt-2 text-center shadow-2xl">
+    <div class="italic opacity-40">Aktualizováno {{lastupdate}}</div>
+    <table class="w-full mt-2 text-center transition-all shadow-2xl md:bg-white md:border-separate md:table-auto md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl">
     <thead>
         <tr class="border-b-2 border-black">
             <th>Nickname</th>
@@ -22,9 +29,9 @@
             {% endif %}
         </tr>
     </thead>
-    <tbody>
+    <tbody id="ut-body" class="transition-all">
         {% for user in users %}
-        <tr class="md:p-4 h-10" id="u-{{user.id}}">
+        <tr class="h-10 md:p-4 usr-row" id="u-{{user.id}}">
             <td data-label="Přezdívka">{{ user.nickname }}</td>
             <td data-label="Discord ID">
             {% if user.discord %}
@@ -34,10 +41,10 @@
             <td data-label="Počet překladů">{{ user.count }}</td>
             <td data-label="Počet bodů">{{ "%.1f" % user.points }}</td>
             <td data-label="Role">{{get_user_role(user.points)}}</td>
-            <td class="md:table-row flex flex-col">
-                <a class="md:inline md:w-auto md:mb-0 inline-block w-full mb-2" href="{{url_for('UserController.user', uid=user.id)}}"><i class="bi bi-eye opacity-40 hover:opacity-100 text-3xl transition-opacity"></i></a>
+            <td class="flex flex-col md:table-row">
+                <a class="inline-block w-full mb-2 md:inline md:w-auto md:mb-0" href="{{url_for('UserController.user', uid=user.id)}}"><i class="text-3xl transition-opacity bi bi-eye opacity-40 hover:opacity-100"></i></a>
                 {% if current_user.is_authenticated %}
-                <a class="opacity-40 hover:opacity-100" onclick="delete_confirm(this);"><i class="bi bi-x-circle mx-3 text-3xl transition-opacity"></i></a>
+                <a class="opacity-40 hover:opacity-100" onclick="delete_confirm(this);"><i class="mx-3 text-3xl transition-opacity bi bi-x-circle"></i></a>
                 {% endif %}
             </td>
         </tr>
@@ -46,17 +53,18 @@
     </table>
 </div>
 <div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">
-    <div id="overlay-dialog" class="border-slate-400 bg-slate-900 z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg">
+    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg border-slate-400 bg-slate-900">
         <h2 class="mb-2 text-xl font-semibold">Potvrzení</h2>
         <p id='confirm-text' class="mb-4"></p>
         <div id='confirm-buttons' class="flex flex-row justify-center w-auto">
-            <a class="w-36 btn-rounded hover:bg-green-500 mx-1 bg-green-600" onclick="delete_send(this);">Ano</a>
-            <a class="w-36 btn-rounded hover:bg-red-500 mx-1 bg-red-600" onclick="hide_overlay();">Ne</a>
+            <a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a>
+            <a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a>
         </div>
     </div>
 </div>
-<div id="overlay" class="opacity-80 bg-slate-900 fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all">
+<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-80 bg-slate-900">
 </div>
 
 <script src="{{url_for('static', filename='js/confirm.js')}}"></script>
+<script src="{{url_for('static', filename='js/usersearch.js')}}"></script>
 {% endblock content %}
