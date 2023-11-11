@@ -4,7 +4,7 @@ import json
 
 SearchController = Blueprint('SearchController', __name__)
 
-@SearchController.route('/api/search/article')
+@SearchController.route('/api/search/article_any')
 def search_article():
     dbs = c.config['database']
 
@@ -16,6 +16,24 @@ def search_article():
         }), 400
     
     results = dbs.search_article(query)
+    return jsonify({
+        'status': 'OK',
+        'result': results
+    })
+
+@SearchController.route('/api/search/article')
+def search_user_article():
+    dbs = c.config['database']
+
+    query = request.args.get('q', None, str)
+    author = request.args.get('u', None, str)
+    if not query or not author:
+        return jsonify({
+            'status': 'error',
+            'result': []
+        }), 400
+    
+    results = dbs.search_article_by_user(query)
     return jsonify({
         'status': 'OK',
         'result': results

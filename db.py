@@ -274,3 +274,6 @@ class Database():
                 }
             })
         return search_result
+
+    def search_article_by_user(self, param: str, uid: str):
+        raise NotImplementedError()
