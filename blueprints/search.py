@@ -1,0 +1,38 @@
+from flask import jsonify, request, current_app as c, Blueprint, abort
+import json
+
+SearchController = Blueprint('SearchController', __name__)
+
+@SearchController.route('/api/search/article')
+def search_article():
+    dbs = c.config['database']
+
+    query = request.args.get('q', None, str)
+    if not query:
+        return jsonify({
+            'status': 'error',
+            'result': []
+        }), 400
+    
+    results = dbs.search_article(query)
+    return jsonify({
+        'status': 'OK',
+        'result': results
+    })
+
+@SearchController.route('/api/search/user')
+def search_user():
+    dbs = c.config['database']
+
+    query = request.args.get('q', None, str)
+    if not query:
+        return jsonify({
+            'status': 'error',
+            'result': []
+        }), 400
+    
+    results = dbs.search_user(query)
+    return jsonify({
+        'status': 'OK',
+        'result': results
+    })

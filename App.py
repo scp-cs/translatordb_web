@@ -32,14 +32,7 @@ from blueprints.content import UserContent
 from blueprints.errorhandler import ErrorHandler
 from blueprints.users import UserController
 from blueprints.articles import ArticleController
-
-# Blueprints
-from blueprints.auth import UserAuth
-from blueprints.debug import DebugTools
-from blueprints.content import UserContent
-from blueprints.errorhandler import ErrorHandler
-from blueprints.users import UserController
-from blueprints.articles import ArticleController
+from blueprints.search import SearchController
 
 dbs = Database()
 #rss = RSSMonitor()
@@ -92,6 +85,7 @@ if __name__ == '__main__':
     app.register_blueprint(DebugTools)
     app.register_blueprint(UserController)
     app.register_blueprint(ArticleController)
+    app.register_blueprint(SearchController)
 
     user_init()
 
