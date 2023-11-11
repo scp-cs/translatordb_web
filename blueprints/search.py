@@ -1,4 +1,5 @@
 from flask import jsonify, request, current_app as c, Blueprint, abort
+from flask_login import current_user
 import json
 
 SearchController = Blueprint('SearchController', __name__)
@@ -34,5 +35,6 @@ def search_user():
     results = dbs.search_user(query)
     return jsonify({
         'status': 'OK',
-        'result': results
+        'result': results,
+        'has_auth': current_user.is_authenticated
     })

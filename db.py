@@ -236,8 +236,9 @@ class Database():
             'nickname': result[1],
             'discord': result[2],
             'wikidot': result[3],
-            'tr_count': result[4],
-            'points': result[5]
+            'displayname': result[4],
+            'tr_count': result[5],
+            'points': result[6]
         } for result in results]
 
     def search_article(self, param: str) -> t.List[Translation]:
