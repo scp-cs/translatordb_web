@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS Translation (
     added       DATETIME    NOT NULL DEFAULT (datetime('now','localtime')),
     link        TEXT                 DEFAULT NULL,
     idauthor    INTEGER     NOT NULL,
-    FOREIGN KEY (idauthor) REFERENCES User(id)
+    FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Note (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS Note (
     title       TEXT        NOT NULL,
     content     TEXT        NOT NULL,
     idauthor    INTEGER     NOT NULL,
-    FOREIGN KEY (idauthor) REFERENCES User(id)
+    FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE
 );
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
@@ -66,6 +66,8 @@ class Database():
         try:
             self.connection = sqlite3.connect(filepath, check_same_thread=False)
             self.__tryexec(db_create_script, script=True)
+            self.connection.execute('PRAGMA journal_mode=wal')  # Enable write-ahead logging
+            self.connection.execute('PRAGMA foreign_keys=1')    # Enable SQLite foreign keys
         except Exception as e:
             critical(f'Error opening database {filepath} ({str(e)})')
             raise RuntimeError(str(e))
