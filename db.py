@@ -92,7 +92,7 @@ class Database():
     def lastupdated(self) -> datetime:
         return self.__lastupdate
 
-    def get_stats(self, sort='az'):
+    def get_stats(self, sort='points'):
         match sort:
             case 'az':
                 sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
