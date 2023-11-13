@@ -35,14 +35,9 @@ from blueprints.content import UserContent
 from blueprints.errorhandler import ErrorHandler
 from blueprints.users import UserController
 from blueprints.articles import ArticleController
+from blueprints.search import SearchController
 
-# Blueprints
-from blueprints.auth import UserAuth
-from blueprints.debug import DebugTools
-from blueprints.content import UserContent
-from blueprints.errorhandler import ErrorHandler
-from blueprints.users import UserController
-from blueprints.articles import ArticleController
+from blueprints.oauth import OauthController
 
 from blueprints.oauth import OauthController
 
@@ -53,13 +48,9 @@ sched = APScheduler()
 login_manager = LoginManager()
 oauth = DiscordOAuth2Session()
 
-
 login_manager.session_protection = "basic"
 login_manager.login_view = "UserAuth.login"
-
-@login_manager.user_loader
-def user_loader(id: str):
-    return dbs.get_user(int(id))
+login_manager.user_loader(lambda uid: dbs.get_user(uid))
 
 @app.route('/')
 def index():
@@ -100,14 +91,26 @@ if __name__ == '__main__':
     app.register_blueprint(DebugTools)
     app.register_blueprint(UserController)
     app.register_blueprint(ArticleController)
+    app.register_blueprint(SearchController)
     app.register_blueprint(OauthController)
 
     user_init()
     login_manager.init_app(app)
-    oauth.init_app(app)
+    
+    # Checking if we can enable Discord Login
+    appid, appsecret = app.config.get('DISCORD_CLIENT_ID', None), app.config.get('DISCORD_CLIENT_SECRET', None)
 
+    app.config['OAUTH_ENABLE'] = app.config.get('DISCORD_LOGIN_ENABLE', True)
+
+    if not appid or not appsecret:
+        warning('OAuth App ID or secret not set, Discord login disabled')
+        app.config['OAUTH_ENABLE'] = False
+
+    if app.config['OAUTH_ENABLE']:
+        oauth.init_app(app)
+
+    # Checking if we can enable the API connection and initializing APScheduler
     token = app.config.get('DISCORD_TOKEN', None)
-
     if token:
         DiscordClient.set_token(token)
 
@@ -121,6 +124,7 @@ if __name__ == '__main__':
     else:
         warning('Discord API token not set. Profiles won\'t be updated!')
 
+    # Force oauthlib to allow insecure HTTP when debugging
     if app.config['DEBUG']:
         logging.getLogger().setLevel(logging.DEBUG)
         warning('App running in debug mode!')

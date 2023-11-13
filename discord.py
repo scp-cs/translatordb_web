@@ -69,7 +69,6 @@ class DiscordClient():
             return user['username']
         return user['global_name']
 
-    # TODO: Download size 512 pics, scale down to like 64 for front page to save bandwidth and user's CPU
     @staticmethod
     def get_avatar(uid: int, size = 256) -> bytes:
         """Fetches the avatar of a user from Discord's CDN. Results are cached for 6 hours.

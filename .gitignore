@@ -163,5 +163,7 @@ translations.json
 translations_new.json
 
 *.db
+*.db-wal
+*.db-shm
 config.json
 temp

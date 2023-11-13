@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS Translation (
     added       DATETIME    NOT NULL DEFAULT (datetime('now','localtime')),
     link        TEXT                 DEFAULT NULL,
     idauthor    INTEGER     NOT NULL,
-    FOREIGN KEY (idauthor) REFERENCES User(id)
+    FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Note (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS Note (
     title       TEXT        NOT NULL,
     content     TEXT        NOT NULL,
     idauthor    INTEGER     NOT NULL,
-    FOREIGN KEY (idauthor) REFERENCES User(id)
+    FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE
 );
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
@@ -66,6 +66,8 @@ class Database():
         try:
             self.connection = sqlite3.connect(filepath, check_same_thread=False)
             self.__tryexec(db_create_script, script=True)
+            self.connection.execute('PRAGMA journal_mode=wal')  # Enable write-ahead logging
+            self.connection.execute('PRAGMA foreign_keys=1')    # Enable SQLite foreign keys
         except Exception as e:
             critical(f'Error opening database {filepath} ({str(e)})')
             raise RuntimeError(str(e))
@@ -92,7 +94,7 @@ class Database():
     def lastupdated(self) -> datetime:
         return self.__lastupdate
 
-    def get_stats(self, sort='az'):
+    def get_stats(self, sort='points'):
         match sort:
             case 'az':
                 sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
@@ -150,8 +152,12 @@ class Database():
         return row[0]
 
     def delete_user(self, uid: int) -> None:
-        query = "DELETE FROM User WHERE id=?"
-        self.__tryexec(query, (uid, ))
+        queries = [
+            "DELETE FROM User WHERE id=?",
+            "DELETE FROM Translation WHERE idauthor=?",
+            "DELETE FROM Note WHERE idauthor=?"]
+        for query in queries:   # No cascade delete because I'm dumb
+            self.__tryexec(query, (uid, ))
 
     def delete_article(self, aid: int) -> None:
         query = "DELETE FROM Translation WHERE id=?"
@@ -205,16 +211,22 @@ class Database():
         else:
             return False
 
-    def get_translations_by_user(self, uid: int):
-        query = "SELECT * FROM Translation WHERE idauthor=? ORDER BY added DESC, id DESC"
+    def get_translations_by_user(self, uid: int, sort='latest'):
+        match sort:
+            case 'az':
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+            case 'latest':
+                sorter = 'ORDER BY added DESC, id DESC'
+            case 'words':
+                sorter = 'ORDER BY words DESC'
+            case _:
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter
         data = (uid,)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
             return None
-        translations = []
-        for row in rows:
-            translations.append(Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]))
-        return translations
+        return [Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]) for row in rows]
     
     def add_article(self, a: Translation) -> int:
         query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
@@ -232,3 +244,54 @@ class Database():
             tpw = None
             password = u.password
         return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord, u.exempt)).lastrowid, tpw)
+
+    def search_user(self, param: str) -> t.List[dict]:
+        query = "SELECT * FROM Frontpage WHERE nickname LIKE :param OR wikidot LIKE :param OR display LIKE :param OR discord=:param"
+        results = self.__tryexec(query, {'param': f'%{param}%'}).fetchall()
+        if not results:
+            return list()
+        return [{
+            'id': result[0],
+            'nickname': result[1],
+            'discord': result[2],
+            'wikidot': result[3],
+            'displayname': result[4],
+            'tr_count': result[5],
+            'points': result[6]
+        } for result in results]
+
+    def search_article(self, param: str) -> t.List[Translation]:
+        query = "SELECT * FROM Translation WHERE name LIKE :param OR link LIKE :link"
+        results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%"}).fetchall()
+        search_result = list()
+        ucache = dict()
+        for result in results:
+            if result[6] not in ucache: # Ugly but saves us a lot of useless queries
+                author = ucache[result[6]] = self.get_user(result[6])
+            else:
+                author = ucache[result[6]]
+            if not author: # Ideally, this shouldn't happen. In practice I forgot to enable foreign keys initially so it's possible
+                continue
+            search_result.append({
+                'id': result[0],
+                'name': result[1],
+                'link': result[5],
+                'words': result[2],
+                'author': {
+                    'id': author.uid,
+                    'name': author.display_name or author.nickname
+                }
+            })
+        return search_result
+
+    def search_article_by_user(self, param: str, uid: int):
+        query = "SELECT * FROM Translation WHERE (name LIKE :param OR link LIKE :link) AND idauthor=:uid"
+        results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%", 'uid': uid}).fetchall()
+        return [{
+            'id': result[0],
+            'name': result[1],
+            'link': result[5],
+            'words': result[2],
+            'bonus': result[3],
+            'added': result[4]
+        } for result in results]

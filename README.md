@@ -47,7 +47,12 @@ cd translatordb_web
 import secrets
 print(secrets.token_urlsafe(24))
 ```
-### 3. Run the app
+### 3. Define the initial admin user
+```bash
+export SCP_INIT_USER=administrator
+export SCP_INIT_PASSWORD=password
+```
+### 4. Run the app
 ```bash
 python App.py
 ```

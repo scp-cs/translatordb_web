@@ -64,8 +64,9 @@ def edit_user(uid: int):
 def user(uid: int):
     dbs = c.config['database']
 
+    sort = request.args.get('sort', 'latest', str)
     user=dbs.get_user(uid) or abort(404)
-    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid))
+    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid, sort))
 
 @UserController.route('/user/<int:uid>/delete', methods=["POST"])
 @login_required
