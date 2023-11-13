@@ -275,5 +275,14 @@ class Database():
             })
         return search_result
 
-    def search_article_by_user(self, param: str, uid: str):
-        raise NotImplementedError()
+    def search_article_by_user(self, param: str, uid: int):
+        query = "SELECT * FROM Translation WHERE (name LIKE :param OR link LIKE :link) AND idauthor=:uid"
+        results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%", 'uid': uid}).fetchall()
+        return [{
+            'id': result[0],
+            'name': result[1],
+            'link': result[5],
+            'words': result[2],
+            'bonus': result[3],
+            'added': result[4]
+        } for result in results]

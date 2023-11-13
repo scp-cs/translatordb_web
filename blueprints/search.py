@@ -26,14 +26,14 @@ def search_user_article():
     dbs = c.config['database']
 
     query = request.args.get('q', None, str)
-    author = request.args.get('u', None, str)
+    author = request.args.get('u', None, int)
     if not query or not author:
         return jsonify({
             'status': 'error',
             'result': []
         }), 400
     
-    results = dbs.search_article_by_user(query)
+    results = dbs.search_article_by_user(query, author)
     return jsonify({
         'status': 'OK',
         'result': results
