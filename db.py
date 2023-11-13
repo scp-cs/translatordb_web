@@ -211,8 +211,17 @@ class Database():
         else:
             return False
 
-    def get_translations_by_user(self, uid: int):
-        query = "SELECT * FROM Translation WHERE idauthor=? ORDER BY added DESC, id DESC"
+    def get_translations_by_user(self, uid: int, sort='latest'):
+        match sort:
+            case 'az':
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+            case 'latest':
+                sorter = 'ORDER BY added DESC, id DESC'
+            case 'words':
+                sorter = 'ORDER BY words DESC'
+            case _:
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter
         data = (uid,)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
