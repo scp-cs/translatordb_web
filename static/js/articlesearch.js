@@ -1,5 +1,6 @@
 const table = document.getElementById('tb-articles')
 const originalHtml = table.innerHTML
+const uid = window.location.pathname.split('/').at(-1)
 
 let is_original = true
 let timeoutID = 0
@@ -14,27 +15,16 @@ function get_role(point_count) {
     return role
 }
 
-function make_row(u, has_auth) {
-    const btns = has_auth ? `` : ``
-    let btnblock = `<a class="inline-block w-full mb-2 md:inline md:w-auto md:mb-0" href="/user/${u.id}"><i class="text-3xl transition-opacity bi bi-eye opacity-40 hover:opacity-100"></i></a>`
-    if(has_auth) 
-        btnblock += `<a class="opacity-40 hover:opacity-100" onclick="delete_confirm(this);"><i class="mx-3 text-3xl transition-opacity bi bi-x-circle"></i></a>`
+function make_row(t, has_auth) {
+    let titlelink = t.link ? `<a class="hover:underline" target="_blank" href="${t.link}">${t.name}</a>` : `<span class="text-gray-500">${t.name}</span>`
+    btns = `<td class="flex flex-col gap-2 md:table-row"><a class="" href="/article/${t.id}/edit"><i class="bi bi-pencil-square opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a><a class="" onclick="delete_confirm(this);"><i class="bi bi-x-circle opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a></td>`
 
-    return `<tr id="t-{{tr.id}}" class="h-12">
-    <td data-label="Název:">
-        {% if tr.link %} <a class="hover:underline" target="_blank" href="{{tr.link}}">{{tr.name}}</a>
-        {% else %} <span class="text-gray-500">{{tr.name}}</span>
-        {% endif %}
-    </td>
-    <td data-label="Počet slov:">{{tr.words}}</td>
-    <td data-label="Bonus:">{{tr.bonus}}</td>
-    <td data-label="Zapsáno:">{{tr.added}}</td>
-    {% if current_user.is_authenticated %}
-    <td class="flex flex-col gap-2 md:table-row">
-        <a class="" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}"><i class="text-2xl transition-opacity bi bi-pencil-square opacity-40 hover:opacity-100"></i></a>
-        <a class="" onclick="delete_confirm(this);"><i class="text-2xl transition-opacity bi bi-x-circle opacity-40 hover:opacity-100"></i></a>
-    </td>
-    {% endif %}
+    return `<tr id="t-${t.id}" class="h-12">
+    <td data-label="Název:">${titlelink}</td>
+    <td data-label="Počet slov:">${t.words}</td>
+    <td data-label="Bonus:">${t.bonus}</td>
+    <td data-label="Zapsáno:">${t.added}</td>
+    ${has_auth ? btns : ""}
 </tr>`
 }
 
@@ -55,7 +45,8 @@ function search(target) {
     setTimeout(() => {
         
         fetch('/api/search/article?' + new URLSearchParams({
-            'q': target.value
+            'q': target.value,
+            'u': uid
         })).then(response => response.json()).then(r => r.result.forEach(a => {newHtml += make_row(a, r.has_auth)})).then(() => table.innerHTML = newHtml)
     }, 300);
 
