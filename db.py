@@ -51,13 +51,31 @@ CREATE TABLE IF NOT EXISTS Note (
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
     SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
-FROM USER
-LEFT JOIN Translation ON User.id = Translation.idauthor
-GROUP BY User.nickname;
+        FROM user
+            LEFT JOIN Translation 
+                ON User.id = Translation.idauthor
+        GROUP BY User.nickname;
 
+CREATE VIEW IF NOT EXISTS Series AS 
+    SELECT (SUBSTR(name, 5)/1000)+1 AS series, COUNT(id) AS articles, SUM(words) AS words 
+        FROM translation 
+        WHERE name 
+            LIKE 'SCP-___' OR name LIKE 'SCP-____' 
+        GROUP BY SERIES
+    UNION
+    SELECT 999 AS series, COUNT(id) AS articles, SUM(words) AS words
+        FROM TRANSLATION
+        WHERE name
+            NOT LIKE 'SCP-___' AND name NOT LIKE 'SCP-____';
+
+CREATE VIEW IF NOT EXISTS Statistics AS
+    SELECT SUM(t.words) AS total_words, COUNT(t.id) AS total_articles, (SELECT COUNT(id) FROM user) AS total_users
+        FROM translation AS t;
 """
 
 StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
+SeriesRow = namedtuple('SeriesRow', "series articles words")
+StatisticsRow = namedtuple('StatisticsRow', "total_words total_articles total_users")
 
 class Database():
     
@@ -163,12 +181,12 @@ class Database():
         query = "DELETE FROM Translation WHERE id=?"
         self.__tryexec(query, (aid, ))
 
-    def users(self):
+    def users(self) -> t.List:
         query = "SELECT * FROM User"
         rows = self.__tryexec(query).fetchall()
         return [User(*row) for row in rows]
 
-    def get_translation(self, tid: int):
+    def get_translation(self, tid: int) -> t.Optional[Translation]:
         query = "SELECT * FROM Translation WHERE id=?"
         data = (tid,)
         row = self.__tryexec(query, data).fetchone()
@@ -177,18 +195,18 @@ class Database():
         tr = Translation(tid, row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
         return tr
     
-    def update_translation(self, t: Translation):
+    def update_translation(self, t: Translation) -> None:
         query = "UPDATE Translation SET name=?, words=?, bonus=?, link=? WHERE id=?"
         data = (t.name, t.words, t.bonus, t.link, t.id)
         self.__tryexec(query, data)
 
-    def update_user(self, u: User):
+    def update_user(self, u: User) -> None:
         query = "UPDATE User SET nickname=?, wikidot=?, discord=?, password=? WHERE id=?"
         data = (u.nickname, u.wikidot, u.discord, u.password, u.uid)
         self.__tryexec(query, data)
 
     # TODO: Calling an API adapter in a database class is absolutely horrible
-    def update_discord_nicknames(self):
+    def update_discord_nicknames(self) -> None:
         query = "SELECT discord FROM User"
         cur = self.__tryexec(query)
         ids = cur.fetchall()
@@ -199,11 +217,11 @@ class Database():
         for uid, nickname in users.items():
             self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
 
-    def update_nickname(self, uid):
+    def update_nickname(self, uid) -> None:
         nick = DiscordClient.get_global_username(uid)
         self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nick, uid))
 
-    def translation_exists(self, name: str):
+    def translation_exists(self, name: str) -> bool:
         query = "SELECT * FROM Translation WHERE name=? COLLATE NOCASE"
         cur = self.__tryexec(query, (name.lower(),))
         if len(cur.fetchall()) != 0:
@@ -211,7 +229,7 @@ class Database():
         else:
             return False
 
-    def get_translations_by_user(self, uid: int, sort='latest'):
+    def get_translations_by_user(self, uid: int, sort='latest') -> t.Optional[list[Translation]]:
         match sort:
             case 'az':
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
@@ -227,6 +245,16 @@ class Database():
         if rows is None:
             return None
         return [Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]) for row in rows]
+
+    def get_series_info(self, sid: int = 0) -> list[SeriesRow] | SeriesRow:
+        query = "SELECT * FROM Series" if not sid else "SELECT * FROM SERIES WHERE series=?"
+        data = self.__tryexec(query, () if not sid else (sid,)).fetchall()
+        return [SeriesRow(*d) for d in data] if not sid else SeriesRow(*data[0])
+
+    def get_global_stats(self) -> StatisticsRow:
+        query = "SELECT * FROM Statistics"
+        data = self.__tryexec(query).fetchone()
+        return StatisticsRow(*data)
     
     def add_article(self, a: Translation) -> int:
         query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
@@ -235,6 +263,7 @@ class Database():
         self.__mark_updated()
         return rowid
 
+    # TODO: Generate tpw in controller
     def add_user(self, u: User, gen_password=False) -> t.Tuple[int, t.Optional[str]]:
         query = "INSERT INTO User (nickname, wikidot, password, discord, exempt) VALUES (?, ?, ?, ?, ?)"
         if gen_password:
