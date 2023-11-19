@@ -84,7 +84,7 @@ class Database():
         try:
             self.connection = sqlite3.connect(filepath, check_same_thread=False)
             self.__tryexec(db_create_script, script=True)
-            self.connection.execute('PRAGMA journal_mode=wal')  # Enable write-ahead logging
+            # self.connection.execute('PRAGMA journal_mode=wal')  # Enable write-ahead logging
             self.connection.execute('PRAGMA foreign_keys=1')    # Enable SQLite foreign keys
         except Exception as e:
             critical(f'Error opening database {filepath} ({str(e)})')
