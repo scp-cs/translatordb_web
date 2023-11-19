@@ -1,0 +1,83 @@
+{% extends "base.j2" %}
+
+{% block content %}
+
+
+<div class="grid w-full grid-cols-1 gap-4 md:grid-cols-3 md:p-12">
+<div class="flex flex-col items-center justify-around col-span-1 px-4 py-4 border shadow-xl bg-black/30 rounded-2xl">
+    <h1 class="mb-6 text-2xl font-bold">Globální statistiky</h1>
+    <div class="mb-4 text-center">
+        <h2 class="inline text-6xl font-bold bignumber" data-val="{{global_stats.total_users}}"></h2><p class="inline"> uživatelů</p>
+    </div>
+    <div class="mb-4 text-center">
+        <h2 class="inline text-6xl font-bold bignumber" data-val="{{global_stats.total_articles}}"></h2><p class="inline"> článků</p>
+    </div>
+    <div class="mb-4 text-center">
+        <h2 class="inline text-6xl font-bold bignumber" data-val="{{global_stats.total_words}}"></h2><p class="inline">slov</p>
+    </div>
+</div>
+<div class="flex flex-col items-start justify-center col-span-1 px-4 py-4 border shadow-xl bg-black/30 rounded-2xl">
+    {% for series in series_info if series.series < 6 %}
+        {# 
+           <div class="flex flex-col items-center justify-center col-span-1 px-4 py-2 rounded-xl bg-white/5"></div> 
+        #}
+        {% if series.series != 999 %}
+            <h1 class="text-2xl font-bold">Série {{series.series}}</h1>
+            <i>{{series.articles}} článků z 1000</i>
+            <i>celkem {{series.words}} slov</i>
+            <div class="w-1/2 h-6 px-1 py-1 mb-6 border-2 border-white rounded-lg progressbar opacity-80">
+                <div class="w-0 h-full transition-all duration-700 rounded-lg progressbar-inner bg-gradient-to-r from-slate-300 to-red-400" data-val="{{series.articles}}"></div>
+            </div>
+        {% else %}
+            <h1 class="text-2xl font-bold">Příběhy a další</h1>
+            <i>{{series.articles}} článků z ∞</i>
+            <i>celkem {{series.words}} slov</i>
+            <div class="w-1/2 h-6 px-1 py-1 border-2 border-white rounded-lg progressbar opacity-80">
+                <div class="w-0 h-full transition-all duration-700 rounded-lg progressbar-inner bg-gradient-to-r from-slate-300 to-red-400" data-val="500"></div>
+            </div>
+        {% endif %}
+            
+    {% endfor %}
+</div>
+<div class="flex flex-col col-span-1 px-4 py-4 border shadow-xl bg-black/30 rounded-2xl">
+    {% for series in series_info if series.series > 5 %}
+        {# 
+           <div class="flex flex-col items-center justify-center col-span-1 px-4 py-2 rounded-xl bg-white/5"></div> 
+        #}
+        {% if series.series != 999 %}
+            <h1 class="text-2xl font-bold">Série {{series.series}}</h1>
+            <i>{{series.articles}} článků z 1000</i>
+            <i>celkem {{series.words}} slov</i>
+            <div class="w-1/2 h-6 px-1 py-1 mb-6 border-2 border-white rounded-lg progressbar opacity-80">
+                <div class="w-0 h-full transition-all duration-700 rounded-lg progressbar-inner bg-gradient-to-r from-slate-300 to-red-400" data-val="{{series.articles}}"></div>
+            </div>
+        {% else %}
+            <h1 class="text-2xl font-bold">Příběhy a další</h1>
+            <i>{{series.articles}} článků z ∞</i>
+            <i>celkem {{series.words}} slov</i>
+            <div class="w-1/2 h-6 px-1 py-1 border-2 border-white rounded-lg progressbar opacity-80">
+                <div class="w-0 h-full transition-all duration-700 rounded-lg progressbar-inner bg-gradient-to-r from-slate-300 to-red-400" data-val="500"></div>
+            </div>
+        {% endif %}
+            
+    {% endfor %}
+</div>
+
+</div> 
+<script>
+let counters = {}
+
+function countup(e, final) {
+    counters[e] = 0
+    intid = setInterval((e, final) => {
+        counters[e]++
+        e.innerHTML = Math.floor((final/90)*counters[e])
+    }, 20, e)
+}
+
+$('.progressbar-inner').each((_, e) => {$(e).css('width', ($(e).attr('data-val')/1000)*100 + '%')})
+$('.bignumber').each((_, e) => {countup(e, $(e).attr('data-val'))})
+$('.bignumber').each((_, e) => {$(e).change((e) => {}))
+</script>
+
+{% endblock content %}
