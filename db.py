@@ -51,13 +51,31 @@ CREATE TABLE IF NOT EXISTS Note (
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
     SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
-FROM USER
-LEFT JOIN Translation ON User.id = Translation.idauthor
-GROUP BY User.nickname;
+        FROM user
+            LEFT JOIN Translation 
+                ON User.id = Translation.idauthor
+        GROUP BY User.nickname;
 
+CREATE VIEW IF NOT EXISTS Series AS 
+    SELECT (SUBSTR(name, 5)/1000)+1 AS series, COUNT(id) AS articles, SUM(words) AS words 
+        FROM translation 
+        WHERE name 
+            LIKE 'SCP-___' OR name LIKE 'SCP-____' 
+        GROUP BY SERIES
+    UNION
+    SELECT 999 AS series, COUNT(id) AS articles, SUM(words) AS words
+        FROM TRANSLATION
+        WHERE name
+            NOT LIKE 'SCP-___' AND name NOT LIKE 'SCP-____';
+
+CREATE VIEW IF NOT EXISTS Statistics AS
+    SELECT SUM(t.words) AS total_words, COUNT(t.id) AS total_articles, (SELECT COUNT(id) FROM user) AS total_users
+        FROM translation AS t;
 """
 
 StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
+SeriesRow = namedtuple('SeriesRow', "series articles words")
+StatisticsRow = namedtuple('StatisticsRow', "total_words total_articles total_users")
 
 class Database():
     
@@ -195,7 +213,7 @@ class Database():
         else:
             return False
 
-    def get_translations_by_user(self, uid: int) -> t.Optional[t.List[Translation]]:
+    def get_translations_by_user(self, uid: int) -> t.Optional[list[Translation]]:
         query = "SELECT * FROM Translation WHERE idauthor=? ORDER BY added DESC, id DESC"
         data = (uid,)
         rows = self.__tryexec(query, data).fetchall()
@@ -206,11 +224,15 @@ class Database():
             translations.append(Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]))
         return translations
 
-    def get_translation_count_by_series(self, s: int) -> int:
-        seriesnum = str(s - 1) if s > 1 else ''
-        query = "SELECT COUNT(id) FROM Translation WHERE name LIKE ? COLLATE NOCASE"
-        data = (f"SCP-{seriesnum}___",)
-        return int(self.__tryexec(query, data).fetchone())
+    def get_series_info(self, sid: int = 0) -> list[SeriesRow] | SeriesRow:
+        query = "SELECT * FROM Series" if not sid else "SELECT * FROM SERIES WHERE series=?"
+        data = self.__tryexec(query, () if not sid else (sid,)).fetchall()
+        return [SeriesRow(*d) for d in data] if not sid else SeriesRow(*data[0])
+
+    def get_global_stats(self) -> StatisticsRow:
+        query = "SELECT * FROM Statistics"
+        data = self.__tryexec(query).fetchone()
+        return StatisticsRow(*data)
     
     def add_article(self, a: Translation) -> int:
         query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
