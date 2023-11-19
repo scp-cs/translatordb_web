@@ -35,6 +35,7 @@ from blueprints.content import UserContent
 from blueprints.errorhandler import ErrorHandler
 from blueprints.users import UserController
 from blueprints.articles import ArticleController
+from blueprints.stats import StatisticsController
 from blueprints.search import SearchController
 
 from blueprints.oauth import OauthController
@@ -91,6 +92,7 @@ if __name__ == '__main__':
     app.register_blueprint(DebugTools)
     app.register_blueprint(UserController)
     app.register_blueprint(ArticleController)
+    app.register_blueprint(StatisticsController)
     app.register_blueprint(SearchController)
     app.register_blueprint(OauthController)
 
