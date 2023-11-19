@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
     <link rel="shortcut icon" href="{{url_for('static', filename='favicon.gif')}}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
     {% block head %}
     {% endblock head %}
 </head>
-<body class="text-slate-100 bg-gradient-to-b from-slate-900 to-violet-900 h-screen bg-fixed bg-no-repeat">
+<body class="h-screen bg-fixed bg-no-repeat text-slate-100 bg-gradient-to-b from-slate-900 to-violet-900">
     {% block content %}
     {% endblock content %}
     {% include 'flashmessage.j2' %}
