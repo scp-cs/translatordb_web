@@ -68,7 +68,7 @@ def user(uid: int):
     user=dbs.get_user(uid) or abort(404)
     return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid, sort))
 
-@UserController.route('/user/<int:uid>/delete', methods=["POST"])
+@UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required
 def delete_user(uid: int):
     dbs = c.config['database']

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap');
+
 /*
 ! tailwindcss v3.2.4 | MIT License | https://tailwindcss.com
 */
@@ -587,6 +589,11 @@ video {
   margin-bottom: 0.75rem;
 }
 
+.mx-10{
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+}
+
 .my-1{
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
@@ -634,10 +641,6 @@ video {
 
 .mt-1{
   margin-top: 0.25rem;
-}
-
-.mr-1{
-  margin-right: 0.25rem;
 }
 
 .mr-2{
@@ -914,6 +917,14 @@ video {
   gap: 1.5rem;
 }
 
+.gap-1{
+  gap: 0.25rem;
+}
+
+.gap-3{
+  gap: 0.75rem;
+}
+
 .self-start{
   align-self: flex-start;
 }
@@ -1088,8 +1099,8 @@ video {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.to-violet-900{
-  --tw-gradient-to: #4c1d95;
+.to-blue-900{
+  --tw-gradient-to: #1e3a8a;
 }
 
 .to-green-400{
@@ -1156,9 +1167,9 @@ video {
   padding-bottom: 0.25rem;
 }
 
-.py-16{
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+.py-10{
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
 }
 
 .py-5{
@@ -1189,11 +1200,6 @@ video {
 .px-16{
   padding-left: 4rem;
   padding-right: 4rem;
-}
-
-.py-10{
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
 }
 
 .pb-6{
@@ -1383,6 +1389,7 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'IBM Plex Sans';
 }
 
 .form-label {
@@ -1584,6 +1591,11 @@ td::before{
   .md\:mx-1{
     margin-left: 0.25rem;
     margin-right: 0.25rem;
+  }
+
+  .md\:my-2{
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 
   .md\:mb-0{
