@@ -6,11 +6,11 @@
 
 {% block content %}
   
-<div class="bg-opacity-5 rounded-xl flex flex-col px-10 py-10 mx-10 my-4 bg-white shadow-2xl">
+<div class="flex flex-col px-10 py-10 mx-10 my-4 bg-white shadow-2xl bg-opacity-5 rounded-xl">
     <h1 class="mb-2 text-4xl font-bold">{{user.nickname}}</h1>
     <hr class="mb-4 border-white">
     <div class="flex flex-row items-center w-full">
-        <img class="max-h-48 rounded-xl md:block hidden mr-6 border-2 border-white" src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0), s='full')}}">
+        <img class="hidden mr-6 border-2 border-white max-h-48 rounded-xl md:block" src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0), s='full')}}">
         <div>
             <p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
             <p class="my-1 text-xl"><b>Wikidot ID:</b> <a class="hover:text-blue-500" target="_blank" href="https://www.wikidot.com/user:info/{{user.wikidot | replace(' ', '-')}}/">{{user.wikidot}}</a></p>
@@ -18,12 +18,12 @@
             <p class="my-1 text-xl"><b>Počet bodů:</b> {{stats.points}}</p>
             <p class="mt-1 text-xl"><b>Celkem překladů:</b> {{stats.count}}</p>
             {% if current_user.is_authenticated %}
-            <div class=" align-center flex flex-row"></div>
-                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 my-3 transition-all border rounded-md"><i class="bi bi-file-earmark-plus mr-2 text-2xl"></i>Přidat překlad</a>
-                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 my-3 transition-all border rounded-md"><i class="bi bi-person-gear mr-2 text-2xl"></i>Upravit uživatele</a>
-                <a id="del-btn" href="javascript:void(0)" onclick="confirm_remove()" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 my-3 transition-all border rounded-md"><i class="bi bi-person-x mr-2 text-2xl"></i>Smazat uživatele</a>
-                <a href="javascript:void(0)" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 my-3 transition-all border rounded-md">
-                    <i class="bi bi-check-lg mr-2 text-2xl"></i> Potvrdit smazání?
+            <div class="flex flex-col gap-1 my-3 md:flex-row md:my-2 align-center">
+                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md bg-white/5 hover:bg-white/20 border-white/20"><i class="mr-2 text-2xl bi bi-file-earmark-plus"></i>Přidat překlad</a>
+                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md bg-white/5 hover:bg-white/20 border-white/20"><i class="mr-2 text-2xl bi bi-person-gear"></i>Upravit uživatele</a>
+                <a id="del-btn" href="javascript:void(0)" class="inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md bg-white/5 hover:bg-white/20 border-white/20"><i class="mr-2 text-2xl bi bi-person-x"></i>Smazat uživatele</a>
+                <a id="del-confirm" href="{{url_for('UserController.delete_user', uid=user.uid)}}" class="inline-flex items-center justify-center hidden h-12 px-3 py-2 transition-all border rounded-md bg-white/5 hover:bg-white/20 border-white/20">
+                    <i class="mr-2 text-2xl bi bi-check-lg"></i> Potvrdit smazání?
                 </a>
             </div>
             {% endif %}
@@ -32,17 +32,17 @@
 </div>
 
 <div>
-<div class="md:flex-row md:gap-0 flex flex-col justify-center w-full gap-6 mt-4">
-    <div class="md:w-auto md:flex-row md:rounded-xl bg-opacity-5 inline-flex flex-col items-center px-10 py-5 mr-4 bg-white shadow-2xl">
-        <h2 class="md:mr-6 text-lg font-bold">Řadit:</h2>
-        <a href="{{url_for('UserController.user', sort='az', uid=user.uid)}}" class="hover:bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">A-Z</a>
-        <a href="{{url_for('UserController.user', sort='latest', uid=user.uid)}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Nejnovější</a>
-        <a href="{{url_for('UserController.user', sort='words', uid=user.uid)}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Počet slov</a>
+<div class="flex flex-col justify-center w-full gap-6 mt-4 md:flex-row md:gap-0">
+    <div class="inline-flex flex-col items-center px-10 py-5 mr-4 bg-white shadow-2xl md:w-auto md:flex-row md:rounded-xl bg-opacity-5">
+        <h2 class="text-lg font-bold md:mr-6">Řadit:</h2>
+        <a href="{{url_for('UserController.user', sort='az', uid=user.uid)}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded">A-Z</a>
+        <a href="{{url_for('UserController.user', sort='latest', uid=user.uid)}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Nejnovější</a>
+        <a href="{{url_for('UserController.user', sort='words', uid=user.uid)}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet slov</a>
     </div>
     
-    <div class="md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl md:w-auto md:bg-white md:py-5 inline-block w-full px-4 text-center text-black shadow-2xl">
-        <i class="bi bi-search mr-4 text-xl text-white"></i>
-        <input type="text" id="search-field" class="bg-white/20 p-2 text-white rounded-md shadow-inner outline-none">
+    <div class="inline-block w-full px-4 text-center text-black shadow-2xl md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl md:w-auto md:bg-white md:py-5">
+        <i class="mr-4 text-xl text-white bi bi-search"></i>
+        <input type="text" id="search-field" class="p-2 text-white rounded-md shadow-inner outline-none bg-white/20">
     </div>
 </div>
 
@@ -70,9 +70,9 @@
         <td data-label="Bonus:">{{tr.bonus}}</td>
         <td data-label="Zapsáno:">{{tr.added}}</td>
         {% if current_user.is_authenticated %}
-        <td class="md:table-row flex flex-col gap-2">
-            <a class="" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}"><i class="bi bi-pencil-square opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a>
-            <a class="" onclick="delete_confirm(this);"><i class="bi bi-x-circle opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a>
+        <td class="flex flex-col gap-2 md:table-row">
+            <a class="" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}"><i class="text-2xl transition-opacity bi bi-pencil-square opacity-40 hover:opacity-100"></i></a>
+            <a class="" onclick="delete_confirm(this);"><i class="text-2xl transition-opacity bi bi-x-circle opacity-40 hover:opacity-100"></i></a>
         </td>
         {% endif %}
     </tr>
@@ -81,18 +81,22 @@
 </table>
 </div>
 <div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">
-    <div id="overlay-dialog" class="border-slate-400 bg-slate-900 z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg">
+    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg border-slate-400 bg-slate-900">
         <h2 class="mb-2 text-xl font-semibold">Potvrzení</h2>
         <p id='confirm-text' class="mb-4"></p>
         <div id='confirm-buttons' class="flex flex-row justify-center w-full">
-            <a class="w-36 btn-rounded hover:bg-green-500 mx-1 bg-green-600" onclick="delete_send(this);">Ano</a>
-            <a class="w-36 btn-rounded hover:bg-red-500 mx-1 bg-red-600" onclick="hide_overlay();">Ne</a>
+            <a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a>
+            <a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a>
         </div>
     </div>
 </div>
-<div id="overlay" class="opacity-80 bg-slate-900 fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all">
+<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-80 bg-slate-900">
 </div>
 
+
+<script defer>
+$('#del-btn').click(() => {$('#del-btn').addClass('hidden'); $('#del-confirm').removeClass('hidden')})
+</script>
 <script src="{{url_for('static', filename='js/user.js')}}"></script>
 <script src="{{url_for('static', filename='js/articlesearch.js')}}"></script>
 {% endblock content %}
