@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,6 +9,7 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'IBM Plex Sans';
 }
 
 .form-label {
@@ -27,11 +29,11 @@ html, body {
 }
 
 .btn-rounded {
-  @apply px-4 py-2 text-center text-white transition-colors rounded-lg select-none bg-opacity-80;
+  @apply bg-opacity-80 px-4 py-2 text-center text-white transition-colors rounded-lg select-none;
 }
 
 .input-field {
-  @apply p-1 text-lg transition-colors bg-transparent border-b border-slate-500 focus-visible:outline-none focus-visible:border-b-slate-300;
+  @apply border-slate-500 focus-visible:outline-none focus-visible:border-b-slate-300 p-1 text-lg transition-colors bg-transparent border-b;
 }
 
 thead {
