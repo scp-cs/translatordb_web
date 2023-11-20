@@ -171,9 +171,9 @@ class Database():
 
     def delete_user(self, uid: int) -> None:
         queries = [
-            "DELETE FROM User WHERE id=?",
             "DELETE FROM Translation WHERE idauthor=?",
-            "DELETE FROM Note WHERE idauthor=?"]
+            "DELETE FROM Note WHERE idauthor=?",
+            "DELETE FROM User WHERE id=?"]
         for query in queries:   # No cascade delete because I'm dumb
             self.__tryexec(query, (uid, ))
 
