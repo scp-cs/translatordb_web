@@ -8,7 +8,9 @@ ROLE_LIMITS = {
     10: 'Překladatel II',
     25: 'Překladatel III',
     50: 'Překladatel IV',
-    100: 'Překladatel V'
+    100: 'Překladatel V',
+    200: 'Překladatel VI',
+    500: 'Překladatel VII'
 }
 
 # TODO: Move this to utils

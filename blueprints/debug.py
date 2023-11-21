@@ -1,6 +1,5 @@
 from flask import Blueprint, redirect, url_for, current_app as c
 from flask_login import login_required
-from discord import DiscordClient
 
 DebugTools = Blueprint('DebugTools', __name__)
 
