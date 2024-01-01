@@ -1,13 +1,12 @@
-from flask import jsonify, request, current_app as c, Blueprint, abort
+from flask import jsonify, request, Blueprint
 from flask_login import current_user
-import json
+
+from extensions import dbs
 
 SearchController = Blueprint('SearchController', __name__)
 
 @SearchController.route('/api/search/article_any')
 def search_article():
-    dbs = c.config['database']
-
     query = request.args.get('q', None, str)
     if not query:
         return jsonify({
@@ -23,8 +22,6 @@ def search_article():
 
 @SearchController.route('/api/search/article')
 def search_user_article():
-    dbs = c.config['database']
-
     query = request.args.get('q', None, str)
     author = request.args.get('u', None, int)
     if not query or not author:
@@ -41,8 +38,6 @@ def search_user_article():
 
 @SearchController.route('/api/search/user')
 def search_user():
-    dbs = c.config['database']
-
     query = request.args.get('q', None, str)
     if not query:
         return jsonify({

@@ -4,13 +4,13 @@ from flask_login import login_user, login_required, logout_user
 from passwords import pw_hash
 from logging import info
 
+from extensions import dbs
+
 # TODO: Move templates
 UserAuth = Blueprint('UserAuth', __name__)
 
 @UserAuth.route('/login', methods=["GET", "POST"])
 def login():
-    dbs = c.config['database']
-    
 
     if request.method == "GET":
         session['login_next'] = request.referrer
@@ -45,7 +45,6 @@ def logout():
 
 @UserAuth.route('/user/pw_change', methods=["GET", "POST"])
 def pw_change():
-    dbs = c.config['database']
 
     if 'PRE_LOGIN_UID' not in session:
         return redirect(url_for('index'))
@@ -69,7 +68,6 @@ def pw_change():
 
 @UserAuth.route('/user/new/pw')
 def temp_pw():
-    dbs = c.config['database']
 
     if 'tpw' not in session:
         return redirect(url_for('UserAuth.login'))

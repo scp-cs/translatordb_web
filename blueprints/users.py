@@ -5,15 +5,13 @@ from models.user import User
 from logging import info
 from discord import DiscordClient
 
+from extensions import dbs, sched
+
 UserController = Blueprint('UserController', __name__)
 
 @UserController.route('/user/new', methods=["GET", "POST"])
 @login_required
 def add_user():
-
-    dbs = c.config['database']
-    scheduler = c.config['scheduler']
-
     if request.method == "GET":
         return render_template('add_user.j2', form=NewUserForm())
     
@@ -27,8 +25,8 @@ def add_user():
     uid, tpw = dbs.add_user(u, form.can_login.data)
 
     # Fetch nickname and profile in background
-    scheduler.add_job('Immediate nickname update', lambda: dbs.update_nickname(form.discord.data))
-    scheduler.add_job('Immediate profile update', func=lambda: DiscordClient.download_avatars([form.discord.data]))
+    sched.add_job('Immediate nickname update', lambda: dbs.update_nickname(form.discord.data))
+    sched.add_job('Immediate profile update', func=lambda: DiscordClient.download_avatars([form.discord.data]))
     
     if form.can_login.data:
         info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
@@ -41,8 +39,6 @@ def add_user():
 @UserController.route('/user/<int:uid>/edit', methods=["GET", "POST"])
 @login_required
 def edit_user(uid: int):
-    dbs = c.config['database']
-
     u = dbs.get_user(uid) or abort(404)
 
     if request.method == "GET":
@@ -62,8 +58,6 @@ def edit_user(uid: int):
 
 @UserController.route('/user/<int:uid>')
 def user(uid: int):
-    dbs = c.config['database']
-
     sort = request.args.get('sort', 'latest', str)
     user=dbs.get_user(uid) or abort(404)
     return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid, sort))
@@ -71,8 +65,6 @@ def user(uid: int):
 @UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required
 def delete_user(uid: int):
-    dbs = c.config['database']
-
     name = dbs.get_user(uid).nickname
     dbs.delete_user(uid)
     info(f"User {name} deleted by {current_user.nickname} (ID: {current_user.uid})")

@@ -1,27 +1,26 @@
-from flask import Blueprint, flash, redirect, request, render_template, abort, url_for, current_app as c
+from flask import Blueprint, flash, redirect, request, render_template, abort, url_for
 from flask_login import current_user, login_required
 from forms import NewArticleForm, EditArticleForm
 from logging import info
 from models.translation import Translation
 from datetime import datetime
 
+from extensions import dbs
+
 ArticleController = Blueprint('ArticleController', __name__)
 
 @ArticleController.route('/article/<int:aid>/delete', methods=["POST"])
 @login_required
 def delete_article(aid: int):
-    dbs = c.config['database']
-
     name = dbs.get_translation(aid).name
     dbs.delete_article(aid)
     info(f"Article {name} deleted by {current_user.nickname} (ID: {current_user.uid})")
     flash(f'Článek {name} smazán')
-    return f"Delete article {aid}"
+    return "OK"
 
 @ArticleController.route('/user/<int:uid>/new_article', methods=["GET", "POST"])
 @login_required
 def add_article(uid):
-    dbs = c.config['database']
 
     if request.method == "GET":
         return render_template('add_article.j2', form=NewArticleForm(), user=dbs.get_user(uid))
@@ -43,7 +42,6 @@ def add_article(uid):
 @ArticleController.route('/article/<int:aid>/edit', methods=["GET", "POST"])
 @login_required
 def edit_article(aid: int):
-    dbs = c.config['database']
 
     a = dbs.get_translation(aid)
     if not a:
