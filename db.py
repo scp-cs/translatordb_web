@@ -130,7 +130,6 @@ class Database():
         data = (new_pw, uid)
         self.__tryexec(query, data)
 
-    # TODO: Merge into one
     def get_user(self, uid: int) -> t.Optional[User]:
         query = "SELECT * FROM User WHERE id=?"
         data = (uid,)
@@ -139,10 +138,17 @@ class Database():
             return None
         return User(*row)
     
-    # TODO: Merge into one
     def get_user_by_discord(self, dscid: int) -> t.Optional[User]:
         query = "SELECT * FROM User WHERE discord=?"
         data = (dscid,)
+        row = self.__tryexec(query, data).fetchone()
+        if row is None:
+            return None
+        return User(*row)
+    
+    def get_user_by_wikidot(self, wdid: str) -> t.Optional[User]:
+        query = "SELECT * FROM User WHERE wikidot=? COLLATE NOCASE"
+        data = (wdid,)
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
@@ -204,6 +210,9 @@ class Database():
         query = "UPDATE User SET nickname=?, wikidot=?, discord=?, password=? WHERE id=?"
         data = (u.nickname, u.wikidot, u.discord, u.password, u.uid)
         self.__tryexec(query, data)
+
+    def rename_translation(self, name: str, new_name: str):
+        ... # We need to update the link too
 
     # TODO: Calling an API adapter in a database class is absolutely horrible
     def update_discord_nicknames(self) -> None:

@@ -35,7 +35,8 @@ from blueprints.search import SearchController
 from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
 
-from extensions import login_manager, dbs, rss, sched, oauth
+from extensions import login_manager, dbs, sched, oauth, rss
+from rss import RSSMonitor
 
 app = Flask(__name__)
 

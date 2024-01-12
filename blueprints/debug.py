@@ -16,3 +16,9 @@ def nickupdate():
 def avdownload():
     sched.run_job('Download avatars')
     return redirect(url_for('index'))
+
+@DebugTools.route('/debug/rssupdate')
+@login_required
+def updaterss():
+    sched.run_job('Fetch RSS updates')
+    return redirect(url_for('index'))
