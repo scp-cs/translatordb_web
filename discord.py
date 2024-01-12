@@ -24,6 +24,16 @@ class DiscordClient():
         raise TypeError("Static class cannot be instantiated")
 
     @staticmethod
+    def init_app(app):
+        auth_token = app.config.get('DISCORD_TOKEN', "")
+        DiscordClient.__auth_token = auth_token
+        DiscordClient.__request_headers = {
+            "User-Agent": API_UA,
+            "Authorization": f"Bot {DiscordClient.__auth_token}",
+            "Content-Type": "application/json"
+        }
+
+    @staticmethod
     def _validate_user_id(uid: str):
         if len(uid) not in [18, 19]:
             return False
@@ -32,15 +42,6 @@ class DiscordClient():
         except Exception:
             return False
         return True
-
-    @staticmethod
-    def set_token(auth_token: str):
-        DiscordClient.__auth_token = auth_token
-        DiscordClient.__request_headers = {
-            "User-Agent": API_UA,
-            "Authorization": f"Bot {DiscordClient.__auth_token}",
-            "Content-Type": "application/json"
-        }
     
     @staticmethod
     def _get_user(uid: int) -> t.Optional[dict]:

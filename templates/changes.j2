@@ -1,13 +1,14 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="flex flex-col px-10 py-4 justify-center items-center">
-    <h1 class="text-3xl font-semibold my-5">Nové články</h1>
-    <table class="w-full text-center border-separate table-auto md:w-auto border-spacing-x-5">
+<div class="flex flex-col items-center justify-center px-10 py-4">
+    <h1 class="my-5 text-3xl font-semibold">Nové stránky</h1>
+    <table class="w-full text-center mx-auto my-4 transition-all shadow-2xl md:bg-white md:border-separate md:table-auto md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl">
     <thead>
         <tr class="border-b-2 border-black">
             <th>Název</th>
             <th>Přidáno</th>
+            <th>Autor</th>
             <th>Odkaz</th>
             <th></th>
         </tr>
@@ -17,10 +18,11 @@
         <tr class="h-10 p-4" id="ch-{{ch.uuid}}">
             <td data-label="Název">{{ ch.title }}</td>
             <td data-label="Přidáno">{{ ch.timestamp }}</td>
-            <td data-label="Odkaz">{{ ch.link }}</td>
-            <td class="flex flex-col gap-2 md:table-row">
-            <a class="inline-block w-full mb-2 bg-blue-600 btn-rounded hover:bg-blue-400 md:inline md:w-auto md:mb-0" href="#">Započítat</a>
-            <a class="inline-block w-full mb-2 bg-red-600 btn-rounded hover:bg-red-400 md:inline md:w-auto md:mb-0" href="#">Ignorovat</a>
+            <td data-label="Autor"><a href="{{ url_for('UserController.user', uid=ch.author.uid) }}" class=" decoration-white/50 hover:text-blue-400 underline transition-all">{{ ch.author.nickname }}</a></td>
+            <td data-label="Odkaz"><a href="{{ ch.link }}" class=" decoration-white/50 hover:text-blue-400 underline transition-all">{{ ch.title }}</a></td>
+            <td class="md:table-row flex flex-col gap-2">
+            <a href="{{ url_for('ArticleController.add_article', uid=ch.author.uid, rss=1, l=ch.link, t=ch.title, u=ch.uuid) }}"><i class="bi bi-file-earmark-plus opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a>
+            <a href="{{ url_for('RssPageController.ignore_update', u=ch.uuid)}}" onclick="delete_confirm(this);"><i class="bi bi-file-earmark-x opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a>
             </td>
         </tr>
         {% endfor %}
@@ -28,7 +30,6 @@
     </table>
 </div>
 <div class="absolute top-0 left-0 opacity-50">
-<a href="{{url_for('index')}}">Zpět na hlavní stranu</a>
 </div>
 
 {% endblock content %}
