@@ -81,13 +81,15 @@ class RSSMonitor:
     def get_rss_update_timestamp(update: dict) -> datetime:
         return datetime.strptime(update['published'], "%a, %d %b %Y %H:%M:%S +%f")
 
-    def _process_new_page(self, update) -> None:
+    def _process_new_page(self, update) -> bool:
         timestamp = RSSMonitor.get_rss_update_timestamp(update)
         title = RSSMonitor.get_rss_update_title(update)
         author = self.get_rss_update_author(update)
         debug(f'Check {title} with ts {timestamp}, last update was {self.__lastupdate}')
         if timestamp+TIMEZONE_UTC_OFFSET > self.__lastupdate:
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
+            return True
+        return False
         
     def check(self):
         info(f'Fetching {len(self.__links)} RSS feeds')
@@ -105,8 +107,8 @@ class RSSMonitor:
                 update_type = RSSMonitor.get_rss_update_type(update)
                 match update_type:
                     case RSSUpdateType.RSS_NEWPAGE:
-                        count += 1
-                        self._process_new_page(update)
+                        if self._process_new_page(update):
+                            count +=1
                     case _:
                         continue
 
@@ -115,7 +117,7 @@ class RSSMonitor:
         else:
             self.__lastupdate = datetime.now()
 
-        info(f'Got {count} new pages from RSS feeds')
+        info(f'Got {count or "no"} new pages from RSS feeds') #TODO
 
     @property
     def updates(self) -> List[RSSUpdate]:
