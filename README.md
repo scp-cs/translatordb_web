@@ -14,9 +14,9 @@ Details on the scoring system can be found on our [Discord](https://discord.gg/A
 
 ## Planned features
 
-- [ ] Fetching new pages from RSS feeds
+- [X] Fetching new pages from RSS feeds
 - [ ] Note system for moderators
-- [ ] A statistics page
+- [X] A statistics page
 - [ ] Automatic word counting (hard >w<)
 - [ ] Improve responsivity on mobile and smaller windows
 
