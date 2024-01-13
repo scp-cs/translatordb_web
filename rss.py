@@ -87,7 +87,7 @@ class RSSMonitor:
         author = self.get_rss_update_author(update)
         debug(f'Check {title} with ts {timestamp}, last update was {self.__lastupdate}')
         if timestamp+TIMEZONE_UTC_OFFSET > self.__lastupdate:
-            self.__updates.append(RSSUpdate(timestamp, update['link'], title, author, uuid4()))
+            self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
         
     def check(self):
         info(f'Fetching {len(self.__links)} RSS feeds')
