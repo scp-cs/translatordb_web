@@ -142,4 +142,4 @@ if __name__ == '__main__':
     else:
         info("Init complete. Starting WSGI server now.")
         # TODO: Check out the task queue warnings
-        serve(app, threads=8)
+        serve(app, threads=64)
