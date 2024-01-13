@@ -141,5 +141,4 @@ if __name__ == '__main__':
         app.run('0.0.0.0', 8080)
     else:
         info("Init complete. Starting WSGI server now.")
-        # TODO: Check out the task queue warnings
         serve(app, threads=64)
