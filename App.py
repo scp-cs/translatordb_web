@@ -10,7 +10,7 @@ from werkzeug.serving import is_running_from_reloader
 from flask_login import current_user
 from waitress import serve
 
-# Initialize logger before importing internal modules
+# Initialize logger before importing modules
 logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
 logging.getLogger().setLevel(logging.INFO)
 handler_st = logging.StreamHandler()
@@ -36,7 +36,6 @@ from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
 
 from extensions import login_manager, dbs, sched, oauth, rss
-from rss import RSSMonitor
 
 app = Flask(__name__)
 
