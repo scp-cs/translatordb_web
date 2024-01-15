@@ -1,8 +1,9 @@
 from flask import Blueprint, send_from_directory, request
-from os import path
-from constants import *
+from os import path, getcwd
 
 UserContent = Blueprint('UserContent', __name__)
+
+PROFILE_DIR = path.join(getcwd(), 'temp', 'avatar')
 
 @UserContent.route('/content/avatar/<int:uid>')
 def get_avatar(uid: int):

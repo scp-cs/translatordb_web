@@ -10,7 +10,7 @@ from werkzeug.serving import is_running_from_reloader
 from flask_login import current_user
 from waitress import serve
 
-# Initialize logger before importing internal modules
+# Initialize logger before importing modules
 logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
 logging.getLogger().setLevel(logging.INFO)
 handler_st = logging.StreamHandler()
@@ -35,8 +35,7 @@ from blueprints.search import SearchController
 from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
 
-from extensions import login_manager, dbs, sched, oauth, rss
-from rss import RSSMonitor
+from extensions import login_manager, dbs, sched, oauth, rss, webhook
 
 app = Flask(__name__)
 
@@ -91,6 +90,14 @@ def extensions_init():
     else:
         warning('Discord API token not set. Profiles won\'t be updated!')
 
+    # Checking if we have a webhook URL
+    webhook_url = app.config.get('DISCORD_WEBHOOK_URL', None)
+    if webhook_url:
+        webhook.init_app(app)
+        app.config['WEBHOOK_ENABLE'] = True
+    else:
+        app.config['WEBHOOK_ENABLE'] = False
+
     # Checking if we have any RSS feeds configured
     if rss.has_links:
         sched.add_job('Fetch RSS updates', rss.check, trigger='interval', hours=1)
@@ -142,5 +149,4 @@ if __name__ == '__main__':
         app.run('0.0.0.0', 8080)
     else:
         info("Init complete. Starting WSGI server now.")
-        # TODO: Check out the task queue warnings
-        serve(app, threads=8)
+        serve(app, threads=64)

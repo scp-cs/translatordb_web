@@ -121,4 +121,32 @@ class DiscordClient():
                 with open(join(path,f'{u}.png'), 'wb') as file:
                     file.write(avatar)
                     Image.open(BytesIO(avatar)).resize((64, 64), Image.Resampling.NEAREST).save(join(path,f'{u}_thumb.png'))
+
                 time.sleep(0.1) # Wait for a bit so we don't hit the rate limit
+
+class DiscordWebhook():
+
+    def __init__(self, url: str = None, notify = 0) -> None:
+        self.url = url
+        self.notify = notify
+
+    def init_app(self, app):
+        self.url = app.config['DISCORD_WEBHOOK_URL']
+        self.notify = app.config['DISCORD_ROLEMASTER_ID']
+
+    def send_text(self, message: str, ping_user: int = 0) -> None:
+        if not self.url:
+            raise RuntimeError('Cannot send an uninitialized webhook (no URL specified)')
+        if len(message) > 2000:
+            raise ValueError(f'Message is too long ({len(message)} characters)')
+        if ping_user:
+            data = {"content": f'<@{ping_user}> {message}'}
+        elif self.notify:
+            data = {"content": f'<@{self.notify}> {message}'}
+        else:
+            data = {"content": message}
+        info('Sending webhook')
+        try:
+            webhook_response = requests.post(self.url, json=data)
+        except Exception as e:
+            error(f'Webhook failed to send ({str(e)})')
