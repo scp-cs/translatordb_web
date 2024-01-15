@@ -35,7 +35,7 @@ from blueprints.search import SearchController
 from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
 
-from extensions import login_manager, dbs, sched, oauth, rss
+from extensions import login_manager, dbs, sched, oauth, rss, webhook
 
 app = Flask(__name__)
 
@@ -89,6 +89,14 @@ def extensions_init():
         sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
     else:
         warning('Discord API token not set. Profiles won\'t be updated!')
+
+    # Checking if we have a webhook URL
+    webhook_url = app.config.get('DISCORD_WEBHOOK_URL', None)
+    if webhook_url:
+        webhook.init_app(app)
+        app.config['WEBHOOK_ENABLE'] = True
+    else:
+        app.config['WEBHOOK_ENABLE'] = False
 
     # Checking if we have any RSS feeds configured
     if rss.has_links:

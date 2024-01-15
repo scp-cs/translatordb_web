@@ -254,6 +254,10 @@ class Database():
         if rows is None:
             return None
         return [Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]) for row in rows]
+    
+    def get_user_point_count(self, uid: int) -> int:
+        row = self.__tryexec("SELECT points FROM Frontpage WHERE id=?", (uid,)).fetchone()
+        return row[0] if row else 0
 
     def get_series_info(self, sid: int = 0) -> list[SeriesRow] | SeriesRow:
         query = "SELECT * FROM Series" if not sid else "SELECT * FROM SERIES WHERE series=?"
