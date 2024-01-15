@@ -35,7 +35,14 @@ cd translatordb_web
     "DISCORD_TOKEN": "[YOUR DISCORD APP TOKEN]"
     "DISCORD_CLIENT_SECRET": "[YOUR DISCORD OAUTH SECRET]",
     "DISCORD_CLIENT_ID": [YOUR DISCORD APP ID],
-    "DISCORD_REDIRECT_URI": "https://your-app-url.xyz/oauth/callback"
+    "DISCORD_REDIRECT_URI": "https://your-app-url.xyz/oauth/callback",
+    "DISCORD_WEBHOOK_URL": [A WEBHOOK TO YOUR ADMIN/LOG CHANNEL],
+    "DISCORD_ROLEMASTER_ID": [DISCORD ID OF THE PERSON RESPONSIBLE FOR TRANSLATOR ROLES],
+    "RSS_MONITOR_CHANNELS": [
+        "http://your-wiki.wikidot.com/feed/site-changes.xml",
+        "http://your-wanderers-library.wikidot.com/feed/site-changes.xml",
+        "http://your-backrooms-or-whatever.wikidot.com/feed/site-changes.xml",
+    ]
 }
 ```
 `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` can be found on your [Discord Developer Portal](https://discord.com/developers/applications).
