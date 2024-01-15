@@ -90,6 +90,9 @@ class RSSMonitor:
         if title.lower().endswith(IGNORE_BRANCH_TAG):
             info(f'Ignoring {title} in RSS feed (not a translation)')
             return False
+        if self.__dbs.get_article_by_link(update['link']):
+            info(f'Ignoring {title} in RSS feed (added manually)')
+            return False
         if timestamp+TIMEZONE_UTC_OFFSET > self.__lastupdate:
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
             return True
