@@ -254,6 +254,12 @@ class Database():
         if rows is None:
             return None
         return [Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]) for row in rows]
+
+    def get_translation_by_link(self, link: str):
+        query = "SELECT * FROM Translation WHERE link=?"
+        data = (link,)
+        row = self.__tryexec(query, data).fetchone()
+        return None if not row else Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
     
     def get_user_point_count(self, uid: int) -> int:
         row = self.__tryexec("SELECT points FROM Frontpage WHERE id=?", (uid,)).fetchone()

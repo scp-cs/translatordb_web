@@ -23,6 +23,7 @@ r_user = re.compile(r'href="http:\/\/www\.wikidot\.com\/user:info\/(.+?)"', re.U
 
 # TODO: Move this to config, possibly create separate config for RSS feeds
 NEW_PAGE = 'nová stránka'   # This text in the title indicates a new page
+IGNORE_BRANCH_TAG = '-cs' # Ignore new pages that start with this tag, doesn't work for tales but I don't really care
 TIMEZONE_UTC_OFFSET = timedelta(hours=2)
 
 class RSSUpdateType(IntEnum):
@@ -86,6 +87,12 @@ class RSSMonitor:
         title = RSSMonitor.get_rss_update_title(update)
         author = self.get_rss_update_author(update)
         debug(f'Check {title} with ts {timestamp}, last update was {self.__lastupdate}')
+        if title.lower().endswith(IGNORE_BRANCH_TAG):
+            info(f'Ignoring {title} in RSS feed (not a translation)')
+            return False
+        if self.__dbs.get_article_by_link(update['link']):
+            info(f'Ignoring {title} in RSS feed (added manually)')
+            return False
         if timestamp+TIMEZONE_UTC_OFFSET > self.__lastupdate:
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
             return True
