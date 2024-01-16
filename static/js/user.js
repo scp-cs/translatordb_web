@@ -33,8 +33,3 @@ function hide_overlay() {
     overlay_flex.classList.add('hidden');
     overlay_dialog.innerHTML = '<h2 class="mb-2 text-xl font-semibold">Potvrzení</h2><p id="confirm-text" class="mb-4"></p><div id="confirm-buttons" class="flex flex-row justify-center w-full"><a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a><a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a> </div>'
 }
-
-function confirm_remove() {
-    $('#del-btn').innerHTML = 
-}
-
