@@ -33,7 +33,8 @@ def search_user_article():
     results = dbs.search_article_by_user(query, author)
     return jsonify({
         'status': 'OK',
-        'result': results
+        'result': results,
+        'has_auth': current_user.is_authenticated
     })
 
 @SearchController.route('/api/search/user')
