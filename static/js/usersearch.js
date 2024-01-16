@@ -29,8 +29,6 @@ function get_role(point_count) {
 function make_row(u, has_auth) {
     const dscblock = u.discord ? `<img class="w-8 h-8 rounded-[50%] inline md:mr-4" src="/content/avatar/${u.discord}?s=thumb"> ${u.displayname ?? u.discord}` : u.displayname ?? u.discord
     let btnblock = `<a class="inline-block w-full mb-2 md:inline md:w-auto md:mb-0" href="/user/${u.id}"><i class="text-3xl transition-opacity bi bi-eye opacity-40 hover:opacity-100"></i></a>`
-    if(has_auth) 
-        btnblock += `<a class="opacity-40 hover:opacity-100" onclick="delete_confirm(this);"><i class="mx-3 text-3xl transition-opacity bi bi-x-circle"></i></a>`
 
     return `<tr class="h-10 md:p-4 usr-row" id="u-${u.id}">
             <td data-label="Přezdívka">${u.nickname}</td>
