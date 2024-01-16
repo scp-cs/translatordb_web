@@ -10,13 +10,6 @@ from werkzeug.serving import is_running_from_reloader
 from flask_login import current_user
 from waitress import serve
 
-# Initialize logger before importing modules
-logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
-logging.getLogger().setLevel(logging.INFO)
-handler_st = logging.StreamHandler()
-handler_st.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
-logging.getLogger().addHandler(handler_st)
-
 # Internal
 from models.user import get_user_role, User
 from passwords import pw_hash
@@ -44,7 +37,31 @@ def index():
     sort = request.args.get('sort', type=str, default='az')
     return render_template('users.j2', users=dbs.get_stats(sort), lastupdate=dbs.lastupdated.strftime("%Y-%m-%d %H:%M:%S"))
 
-def user_init():
+def init_logger() -> None:
+    """
+    Sets up logging
+    """
+    
+    logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
+    logging.getLogger().setLevel(logging.INFO)
+    handler_st = logging.StreamHandler()
+    handler_st.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
+    logging.getLogger().addHandler(handler_st)
+
+def fix_proxy() -> None:
+    """
+    Registers the ProxyFix middleware as described in https://flask.palletsprojects.com/en/3.0.x/deploying/proxy_fix/
+    """
+    
+    if app.config['FIX_PROXY']:
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+def user_init() -> None:
+    """
+    Registers an administrator from environment variables
+    """
+
     init_user, pwd = env.get("SCP_INIT_USER"), env.get("SCP_INIT_PASSWORD")
     if not init_user:
         return
@@ -57,7 +74,11 @@ def user_init():
     info(f"Adding initial user {init_user}")
     dbs.add_user(User(1, init_user, "", pw_hash(pwd), ""))
 
-def extensions_init():
+def extensions_init() -> None:
+    """
+    Checks which integrations can be enabled, initializes all flask extensions and schedules background tasks
+    """
+
     login_manager.session_protection = "basic"
     login_manager.login_view = "UserAuth.login"
     login_manager.user_loader(lambda uid: dbs.get_user(uid))
@@ -105,7 +126,8 @@ def extensions_init():
 
 # TODO: App factory??
 if __name__ == '__main__':
-    
+    init_logger()
+
     # Load config file or create it if there isn't one
     ensure_config('config.json')
     app.config.from_file('config.json', json.load)
@@ -137,10 +159,9 @@ if __name__ == '__main__':
 
     # Create the admin user
     user_init()
-    
     extensions_init()
 
-    # Force oauthlib to allow insecure HTTP when debugging
+    # Force oauthlib to allow insecure transport when debugging
     if app.config['DEBUG']:
         logging.getLogger().setLevel(logging.DEBUG)
         warning('App running in debug mode!')
@@ -148,5 +169,6 @@ if __name__ == '__main__':
         warning('OAUTHLIB insecure transport is enabled!')
         app.run('0.0.0.0', 8080)
     else:
+        fix_proxy()
         info("Init complete. Starting WSGI server now.")
         serve(app, threads=64)
