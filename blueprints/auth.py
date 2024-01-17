@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app as c
-from forms import LoginForm, PasswordChangeForm
-from flask_login import login_user, login_required, logout_user
-from passwords import pw_hash
+# Builtins
 from logging import info
 
+# External
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from forms import LoginForm, PasswordChangeForm
+from flask_login import login_user, login_required, logout_user
+
+# Internal
+from passwords import pw_hash
 from extensions import dbs
 
 # TODO: Move templates
@@ -17,9 +21,7 @@ def login():
         return render_template('auth/login.j2', form=LoginForm())
 
     form = LoginForm()
-    if not form.validate_on_submit():
-        for e in form.errors.values():
-            flash(e[0], category="error")
+    if not form.validate_and_flash():
         return redirect(url_for('UserAuth.login'))
 
     uid = dbs.verify_login(form.username.data, form.password.data)
@@ -54,9 +56,7 @@ def pw_change():
     
     form = PasswordChangeForm()
 
-    if not form.validate_on_submit():
-        for e in form.errors.values():
-            flash(e[0], category="error")
+    if not form.validate_and_flash():
         return redirect(url_for('UserAuth.pw_change'))
 
     dbs.update_password(session['PRE_LOGIN_UID'], pw_hash(form.pw.data))

@@ -37,10 +37,9 @@ def add_article(uid):
         return render_template('add_article.j2', form=form, user=dbs.get_user(uid))
     
     form = NewArticleForm()
-    if not form.validate_on_submit():
-        for e in form.errors.values():
-            flash(e[0], category="error")
+    if not form.validate_and_flash():
         return redirect(url_for('ArticleController.add_article', uid=uid))
+
     title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
     if dbs.translation_exists(title):
         flash('Překlad již existuje!')
@@ -81,12 +80,12 @@ def edit_article(aid: int):
         return render_template('edit_article.j2', form=EditArticleForm(data=fdata))
     
     form = EditArticleForm()
-    if form.validate_on_submit():
-        title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
-        t = Translation(a.id, title, form.words.data, form.bonus.data, a.added, a.author, form.link.data)
-        dbs.update_translation(t)
-        info(f"Article {t.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
-    else:
-        for e in form.errors.values():
-            flash(e[0], category="error")
+    if not form.validate_and_flash():
+        return redirect(url_for('UserController.user', uid=a.author.get_id()))
+
+    title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
+    t = Translation(a.id, title, form.words.data, form.bonus.data, a.added, a.author, form.link.data)
+    dbs.update_translation(t)
+    info(f"Article {t.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
+
     return redirect(url_for('UserController.user', uid=a.author.get_id()))

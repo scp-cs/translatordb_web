@@ -16,9 +16,7 @@ def add_user():
         return render_template('add_user.j2', form=NewUserForm())
     
     form = NewUserForm()
-    if not form.validate_on_submit():
-        for e in form.errors.values():
-            flash(e[0], category="error")
+    if not form.validate_and_flash():
         return redirect(url_for('UserController.add_user'))
 
     u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
@@ -46,9 +44,7 @@ def edit_user(uid: int):
         return render_template('edit_user.j2', form=EditUserForm(data=fdata), user=u)
     
     form = EditUserForm()
-    if not form.validate_on_submit():
-        for e in form.errors.values():
-            flash(e[0], category="error")
+    if not form.validate_and_flash():
         return redirect(url_for('UserController.edit_user', uid=uid))
 
     un = User(uid, form.nickname.data, form.wikidot.data, u.password, form.discord.data, u.exempt, u.temp_pw)
