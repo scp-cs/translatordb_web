@@ -1,5 +1,4 @@
-from flask import flash, Blueprint, redirect, url_for, request, abort
-from flask_discord import DiscordOAuth2Session
+from flask import flash, Blueprint, redirect, url_for, request
 from flask_login import login_user
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from logging import error, warning, info
