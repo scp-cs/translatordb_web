@@ -44,7 +44,6 @@ class RSSMonitor:
     
     def __init__(self, links: List[str] = []):
         self.__links = links
-        self.__lastupdate = datetime.now()
         self.__updates = list()
 
     def init_app(self, app: Flask) -> None:
@@ -65,6 +64,7 @@ class RSSMonitor:
     def get_rss_update_author(self, update: dict) -> Optional[User]:
         update_description = update['description']
         username = r_user.search(update_description).group(1)
+        debug(f"Extracted username \"{username}\"")
         user = self.__dbs.get_user_by_wikidot(username) # Spaces and underscores get replaced with dashes in the URL, there's no way around this unfortunately
         if not user: #! This is going to break if a user has two of these symbols in their name
             username = username.replace('-', ' ')
@@ -86,14 +86,16 @@ class RSSMonitor:
         timestamp = RSSMonitor.get_rss_update_timestamp(update)
         title = RSSMonitor.get_rss_update_title(update)
         author = self.get_rss_update_author(update)
-        debug(f'Check {title} with ts {timestamp}, last update was {self.__lastupdate}')
+        if not author:
+            info('Ignoring {title} in RSS feed (couldn\'t match wikidot username {author} to a user)')
+        debug(f'Check {title} with ts {timestamp}, last db update was {self.__dbs.lastupdated}')
         if title.lower().endswith(IGNORE_BRANCH_TAG):
             info(f'Ignoring {title} in RSS feed (not a translation)')
             return False
-        if self.__dbs.get_article_by_link(update['link']):
+        if self.__dbs.get_translation_by_link(update['link']):
             info(f'Ignoring {title} in RSS feed (added manually)')
             return False
-        if timestamp+TIMEZONE_UTC_OFFSET > self.__lastupdate:
+        if timestamp+TIMEZONE_UTC_OFFSET > self.__dbs.lastupdated:
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
             return True
         return False
@@ -118,11 +120,6 @@ class RSSMonitor:
                             count +=1
                     case _:
                         continue
-
-        if len(self.__updates) > 0:
-            self.__lastupdate = max(sorted(self.__updates, key=lambda a: a.timestamp, reverse=True)[0].timestamp, datetime.now())
-        else:
-            self.__lastupdate = datetime.now()
 
         info(f'Got {count or "no"} new pages from RSS feeds') #TODO
 
