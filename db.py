@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS User (
     wikidot     TEXT        NOT NULL UNIQUE,
     password    BLOB        DEFAULT NULL,
     discord     TEXT        ,
-    exempt      BOOLEAN     NOT NULL DEFAULT 0,
     temp_pw     BOOLEAN     DEFAULT 1,
     display_name    TEXT    DEFAULT NULL
 );
@@ -284,14 +283,14 @@ class Database():
 
     # TODO: Generate tpw in controller
     def add_user(self, u: User, gen_password=False) -> t.Tuple[int, t.Optional[str]]:
-        query = "INSERT INTO User (nickname, wikidot, password, discord, exempt) VALUES (?, ?, ?, ?, ?)"
+        query = "INSERT INTO User (nickname, wikidot, password, discord) VALUES (?, ?, ?, ?)"
         if gen_password:
             tpw = token_urlsafe(8)
             password = pw_hash(tpw)
         else:
             tpw = None
             password = u.password
-        return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord, u.exempt)).lastrowid, tpw)
+        return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord)).lastrowid, tpw)
 
     def search_user(self, param: str) -> t.List[dict]:
         query = "SELECT * FROM Frontpage WHERE nickname LIKE :param OR wikidot LIKE :param OR display LIKE :param OR discord=:param"

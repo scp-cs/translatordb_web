@@ -17,11 +17,6 @@
     
     <span class="mb-6">
     <span class="inline">
-    {{form.exempt(class='peer hidden', checked=True, onchange='updateExempt(this);')}}
-    {{form.exempt.label(class="border-opacity-20 peer-checked:bg-blue-600 btn-rounded inline-block w-64 transition-all bg-gray-500 border-2 border-white", id='check-exempt')}}
-    </span>
-    
-    <span class="inline">
     {{form.can_login(class='peer hidden', onchange='updateLogin(this);')}}
     {{form.can_login.label(class='border-opacity-20 peer-checked:bg-blue-600 btn-rounded inline-block w-64 transition-all bg-gray-500 border-2 border-white', id='check-login')}}
     </span>

@@ -50,7 +50,6 @@ class NewUserForm(FlaskFormEx):
     nickname = StringField('Přezdívka', validators=[DataRequired()])
     wikidot = StringField('Wikidot ID', validators=[DataRequired()])
     discord = StringField('Discord ID', validators=[DiscordID()])
-    exempt = BooleanField('Počítat body')
     can_login = BooleanField('Vygenerovat heslo')
     submit = SubmitField('Přidat')
 

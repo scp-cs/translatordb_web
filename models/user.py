@@ -28,7 +28,6 @@ class User(UserMixin):
     wikidot: str
     password: bytes
     discord: str
-    exempt: bool = False
     temp_pw: bool = False
     display_name: str = None
 
