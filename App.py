@@ -53,7 +53,7 @@ def fix_proxy() -> None:
     Registers the ProxyFix middleware as described in https://flask.palletsprojects.com/en/3.0.x/deploying/proxy_fix/
     """
     
-    if app.config['FIX_PROXY']:
+    if "FIX_PROXY" in app.config and app.config['FIX_PROXY']:
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
