@@ -8,11 +8,11 @@
 <hr class="my-4 border-white">
 <form method="post" class="md:w-1/2 flex flex-col w-full text-lg">
     {{ form.hidden_tag() }}
-    {{form.nickname.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.nickname.label(class='form-label')}}
     {{form.nickname(class='input-field mb-4', id='input-title')}}
-    {{form.wikidot.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.wikidot.label(class='form-label')}}
     {{form.wikidot(class='input-field mb-4', id='input-link')}}
-    {{form.discord.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.discord.label(class='form-label')}}
     {{form.discord(class='input-field mb-4')}}
     
     <span class="mb-6">

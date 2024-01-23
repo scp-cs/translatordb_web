@@ -58,7 +58,10 @@ function search(target) {
         
         fetch('/api/search/user?' + new URLSearchParams({
             'q': target.value
-        })).then(response => response.json()).then(r => r.result.forEach(a => {newHtml += make_row(a, r.has_auth)})).then(() => table.innerHTML = newHtml)
+        }))
+        .then(response => response.json())
+        .then(r => r.result.forEach(a => {newHtml += make_row(a, r.has_auth)}))
+        .then(() => table.innerHTML = newHtml)
     }, 300);
 
 }

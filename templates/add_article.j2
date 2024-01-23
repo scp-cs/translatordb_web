@@ -8,15 +8,15 @@
 <hr class="my-4 border-white">
 <form method="post" class="md:w-1/2 flex flex-col w-full text-lg">
     {{ form.hidden_tag() }}
-    {{form.title.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.title.label(class='form-label')}}
     {{form.title(class='input-field mb-4', id='input-title')}}
-    {{form.link.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.link.label(class='form-label')}}
     {{form.link(class='input-field mb-4', id='input-link')}}
-    {{form.translator.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.translator.label(class='form-label')}}
     {{form.translator(class='opacity-60 input-field mb-4 select-none', disabled='', value=user.nickname)}}
-    {{form.words.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.words.label(class='form-label')}}
     {{form.words(class='input-field mb-4')}}
-    {{form.bonus.label(class='opacity-90 self-start text-sm font-thin')}}
+    {{form.bonus.label(class='form-label')}}
     {{form.bonus(class='input-field mb-4')}}
     {{form.submit(class='md:w-36 btn-rounded hover:bg-green-500 self-start w-full bg-green-600')}}
 </form>

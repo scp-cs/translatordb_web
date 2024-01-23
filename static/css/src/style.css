@@ -11,10 +11,6 @@ html, body {
   font-family: 'IBM Plex Sans';
 }
 
-.form-label {
-  opacity: .7 !important;
-}
-
 .bg-scp {
   background-image: url(../RAISA2.webp);
   background-position: top 1em left 1em;
@@ -25,14 +21,6 @@ html, body {
 
 .error-container {
   background: black;
-}
-
-.btn-rounded {
-  @apply bg-opacity-80 px-4 py-2 text-center text-white transition-colors rounded-lg select-none;
-}
-
-.input-field {
-  @apply border-slate-500 focus-visible:outline-none focus-visible:border-b-slate-300 p-1 text-lg transition-colors bg-transparent border-b;
 }
 
 thead {
@@ -50,6 +38,56 @@ td {
   @apply md:table-cell md:before:content-none md:text-center md:w-auto !important;
 }
 
-.shadow-inner {
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+
+
+@layer components {
+
+  .form-label {
+    @apply opacity-90 self-start text-sm font-thin;
+  }
+
+  .glass-btn {
+    @apply bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md;
+  }
+
+  .glass-btn-sidebar {
+    @apply bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md;
+  }
+
+  .btn-rounded {
+    @apply bg-opacity-80 px-4 py-2 text-center text-white transition-colors rounded-lg select-none;
+  }
+  
+  .input-field {
+    @apply border-slate-500 focus-visible:outline-none focus-visible:border-b-slate-300 p-1 text-lg transition-colors bg-transparent border-b; /* Used in text input forms*/
+  }
+
+  .progressbar {
+    @apply opacity-80 w-1/2 h-6 px-1 py-1 border-2 border-white rounded-lg; /* Used on the statistics page */
+  }
+
+  .progressbar-inner {
+    @apply bg-gradient-to-r from-slate-300 to-green-400 w-0 h-full transition-all duration-700 rounded-lg; /* Used on the statistics page */
+  }
+
+  .bignumber {
+    @apply inline text-6xl font-bold; /* Used on the statistics page */
+  }
+
+  .sorter-container {
+    
+  }
+
+  .sorter-button {
+    @apply hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600;
+  }
+
+}
+
+@layer utilities {
+  
+  .shadow-inner {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+  }
+  
 }
