@@ -8,6 +8,7 @@ from uuid import uuid4, UUID
 from flask import Flask
 from enum import IntEnum
 from typing import Optional
+from collections import deque
 
 # Internal
 from models.user import User
@@ -49,6 +50,7 @@ class RSSMonitor:
     def __init__(self, links: List[str] = []):
         self.__links = links
         self.__updates = list()
+        self.__finished_links = deque(maxlen=60)
 
     def init_app(self, app: Flask) -> None:
         if 'RSS_MONITOR_CHANNELS' not in app.config:
@@ -113,6 +115,9 @@ class RSSMonitor:
         return datetime.strptime(update['published'], "%a, %d %b %Y %H:%M:%S +%f")
 
     def _process_new_page(self, update) -> bool:
+        if update['link'] in self.__finished_links:
+            debug(f"Drop {update['link']}")
+            return False
         timestamp = RSSMonitor.get_rss_update_timestamp(update)
         title = RSSMonitor.get_rss_update_title(update)
         author = self.get_rss_update_author(update)
@@ -152,6 +157,9 @@ class RSSMonitor:
                     case RSSUpdateType.RSS_NEWPAGE:
                         if self._process_new_page(update):
                             count +=1
+                        if update['link'] not in self.__finished_links:
+                            debug(f"{update['link']} mark finished")
+                            self.__finished_links.append(update['link'])
                     case _:
                         continue
 
@@ -172,6 +180,8 @@ class RSSMonitor:
     def remove_update(self, uuid: str) -> Optional[str]:
         for u in self.__updates:
             if str(u.uuid).lower() == uuid.lower():
+                self.__finished_links.append(u.link)
+                debug(f'{u.link} mark finished (remove)')
                 self.__updates.remove(u)
                 return u.title
         return None
