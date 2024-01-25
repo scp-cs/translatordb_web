@@ -26,6 +26,7 @@ r_user = re.compile(r'href="http:\/\/www\.wikidot\.com\/user:info\/(.+?)"', re.U
 
 # TODO: Move this to config, possibly create separate config for RSS feeds
 NEW_PAGE = 'nová stránka'   # This text in the title indicates a new page
+PAGE_RENAME = 'přesunout/přejmenovat stránku' # This text in the title indicates a page move
 IGNORE_BRANCH_TAG = '-cs' # Ignore new pages that start with this tag, doesn't work for tales but I don't really care
 TIMEZONE_UTC_OFFSET = timedelta(hours=2)
 
@@ -35,7 +36,8 @@ class RSSUpdateType(IntEnum):
     RSS_NEWPAGE = 0,
     RSS_RENAME = 1
     RSS_SOURCECHANGE = 2,
-    RSS_DELETE = 3
+    RSS_DELETE = 3,
+    RSS_UNKNOWN = 4
 
 @dataclass
 class RSSUpdate:
@@ -50,7 +52,7 @@ class RSSMonitor:
     def __init__(self, links: List[str] = []):
         self.__links = links
         self.__updates = list()
-        self.__finished_links = deque(maxlen=60)
+        self.__finished_guids = deque(maxlen=255)
 
     def init_app(self, app: Flask) -> None:
         if 'RSS_MONITOR_CHANNELS' not in app.config:
@@ -66,6 +68,10 @@ class RSSMonitor:
         update_title = update['title']
         if NEW_PAGE in update_title:
             return RSSUpdateType.RSS_NEWPAGE
+        elif PAGE_RENAME in update_title:
+            return RSSUpdateType.RSS_RENAME
+        else:
+            return RSSUpdateType.RSS_UNKNOWN
         
     @staticmethod
     def en_page_exists(url: str) -> bool:
@@ -115,9 +121,6 @@ class RSSMonitor:
         return datetime.strptime(update['published'], "%a, %d %b %Y %H:%M:%S +%f")
 
     def _process_new_page(self, update) -> bool:
-        if update['link'] in self.__finished_links:
-            debug(f"Drop {update['link']}")
-            return False
         timestamp = RSSMonitor.get_rss_update_timestamp(update)
         title = RSSMonitor.get_rss_update_title(update)
         author = self.get_rss_update_author(update)
@@ -152,18 +155,19 @@ class RSSMonitor:
                 error(f"RSS Update failed for feed {link} ({e})")
                 
             for update in feed:
+                if update['guid'] in self.__finished_guids:
+                    debug(f"Skip GUID {update['guid']}")
+                    continue
                 update_type = RSSMonitor.get_rss_update_type(update)
                 match update_type:
                     case RSSUpdateType.RSS_NEWPAGE:
                         if self._process_new_page(update):
                             count +=1
-                        if update['link'] not in self.__finished_links:
-                            debug(f"{update['link']} mark finished")
-                            self.__finished_links.append(update['link'])
-                    case _:
-                        continue
+                if update['guid'] not in self.__finished_guids:
+                    debug(f"Add GUID {update['guid']}")
+                    self.__finished_guids.append(update['guid'])
 
-        info(f'Got {count or "no"} new pages from RSS feeds') #TODO
+        info(f'Got {count or "no"} new pages from RSS feeds')
 
     @property
     def updates(self) -> List[RSSUpdate]:
@@ -180,7 +184,6 @@ class RSSMonitor:
     def remove_update(self, uuid: str) -> Optional[str]:
         for u in self.__updates:
             if str(u.uuid).lower() == uuid.lower():
-                self.__finished_links.append(u.link)
                 debug(f'{u.link} mark finished (remove)')
                 self.__updates.remove(u)
                 return u.title

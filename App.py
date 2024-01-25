@@ -11,7 +11,7 @@ from flask_login import current_user
 from waitress import serve
 
 # Internal
-from models.user import get_user_role, User
+from models.user import get_user_role, get_role_color, User
 from passwords import pw_hash
 from utils import ensure_config
 from discord import DiscordClient
@@ -34,7 +34,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    sort = request.args.get('sort', type=str, default='az')
+    sort = request.args.get('sort', type=str, default='points')
     return render_template('users.j2', users=dbs.get_stats(sort), lastupdate=dbs.lastupdated.strftime("%Y-%m-%d %H:%M:%S"))
 
 def init_logger() -> None:
@@ -143,6 +143,7 @@ if __name__ == '__main__':
 
     # Add useful template globals
     app.add_template_global(get_user_role)
+    app.add_template_global(get_role_color)
     app.add_template_global(current_user, 'current_user')
     
     # Load all the blueprints
