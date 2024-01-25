@@ -79,7 +79,7 @@ td {
   }
 
   .sorter-button {
-    @apply hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600;
+    @apply hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded flex-grow my-2 bg-green-600;
   }
 
 }
