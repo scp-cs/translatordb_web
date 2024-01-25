@@ -19,7 +19,7 @@ def add_user():
     if not form.validate_and_flash():
         return redirect(url_for('UserController.add_user'))
 
-    u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, not form.exempt.data, True)
+    u = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, True)
     uid, tpw = dbs.add_user(u, form.can_login.data)
 
     # Fetch nickname and profile in background
@@ -40,14 +40,14 @@ def edit_user(uid: int):
     u = dbs.get_user(uid) or abort(404)
 
     if request.method == "GET":
-        fdata = {'nickname': u.nickname, 'wikidot': u.wikidot, 'discord': u.discord, 'exempt': not int(u.exempt), 'login': int(u.password is not None)}
+        fdata = {'nickname': u.nickname, 'wikidot': u.wikidot, 'discord': u.discord, 'login': int(u.password is not None)}
         return render_template('edit_user.j2', form=EditUserForm(data=fdata), user=u)
     
     form = EditUserForm()
     if not form.validate_and_flash():
         return redirect(url_for('UserController.edit_user', uid=uid))
 
-    un = User(uid, form.nickname.data, form.wikidot.data, u.password, form.discord.data, u.exempt, u.temp_pw)
+    un = User(uid, form.nickname.data, form.wikidot.data, u.password, form.discord.data, u.temp_pw)
     dbs.update_user(un)
     info(f"User {un.nickname} (ID: {uid}) edited by {current_user.nickname} (ID: {current_user.uid})")
     return redirect(url_for('UserController.user', uid=uid))

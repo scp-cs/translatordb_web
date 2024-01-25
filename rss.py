@@ -14,6 +14,8 @@ from models.user import User
 
 # External
 import feedparser
+import requests
+from urllib import parse
 
 # Extract the actual title from the feed's title element
 r_title = re.compile(r"\"(.+)\".+", re.UNICODE)
@@ -25,6 +27,8 @@ r_user = re.compile(r'href="http:\/\/www\.wikidot\.com\/user:info\/(.+?)"', re.U
 NEW_PAGE = 'nová stránka'   # This text in the title indicates a new page
 IGNORE_BRANCH_TAG = '-cs' # Ignore new pages that start with this tag, doesn't work for tales but I don't really care
 TIMEZONE_UTC_OFFSET = timedelta(hours=2)
+
+USER_AGENT = "SCUTTLE Crawler (https://scp-wiki.cz, v1)"
 
 class RSSUpdateType(IntEnum):
     RSS_NEWPAGE = 0,
@@ -60,6 +64,32 @@ class RSSMonitor:
         update_title = update['title']
         if NEW_PAGE in update_title:
             return RSSUpdateType.RSS_NEWPAGE
+        
+    @staticmethod
+    def en_page_exists(url: str) -> bool:
+        """
+        Converts a branch URL into an EN URL of the same page and checks if it exists on EN
+        """
+        try:
+            parsed_url = parse.urlparse(url)
+        except ValueError:
+            error(f'Cannot parse URL "{url}"')
+            return False
+        parsed_url = parsed_url._replace(scheme='https')._replace(netloc='scp-wiki.wikidot.com')
+        en_url = parse.urlunparse(parsed_url)
+        try:
+            head_result = requests.head(en_url, headers={'User-Agent': USER_AGENT})
+        except requests.RequestException as e:
+            error(f'Request to {en_url} failed ({str(e)})')
+            return False
+        match head_result.status_code:
+            case 200:
+                return True
+            case 404:
+                return False
+            case _:
+                warning(f'Got unusual status code ({head_result.status_code}) for URL {en_url}')
+                return False
     
     def get_rss_update_author(self, update: dict) -> Optional[User]:
         update_description = update['description']
@@ -92,10 +122,14 @@ class RSSMonitor:
         if title.lower().endswith(IGNORE_BRANCH_TAG):
             info(f'Ignoring {title} in RSS feed (not a translation)')
             return False
-        if self.__dbs.get_translation_by_link(update['link']):
-            info(f'Ignoring {title} in RSS feed (added manually)')
-            return False
+        
         if timestamp+TIMEZONE_UTC_OFFSET > self.__dbs.lastupdated:
+            if self.__dbs.get_translation_by_link(update['link']):
+                info(f'Ignoring {title} in RSS feed (added manually)')
+                return False
+            if not RSSMonitor.en_page_exists(update['link']):
+                info(f'Ignoring {title} in RSS feed (EN Wiki page doesn\'t exist)')
+                return False
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
             return True
         return False

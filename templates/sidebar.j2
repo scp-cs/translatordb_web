@@ -2,46 +2,46 @@
 <div id="sidebar" class="md:bg-white/5 backdrop-blur-md md:w-64 fixed top-0 left-0 flex flex-col w-full h-screen p-4 transition-all duration-500 -translate-x-full">
     {% if not current_user.is_authenticated %}
     <a href="{{ url_for('UserAuth.login') }}">
-        <div class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md">
+        <div class="glass-btn-sidebar">
             <i class="bi bi-box-arrow-in-right text-lg"></i>
             <p>Přihlásit se</p>
         </div>
     </a>
     {% else %}
     <a href="{{ url_for('UserAuth.logout') }}">
-        <div class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md">
+        <div class="glass-btn-sidebar">
             <i class="bi bi-escape text-lg"></i>
             <p>Odhlásit se</p>
         </div>
     </a>
     {% endif %}
     <a href="{{ url_for('index') }}">
-        <div class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md">
+        <div class="glass-btn-sidebar">
             <i class="bi bi-trophy text-lg"></i>
             <p>Žebříček překladatelů</p>
         </div>
     </a>
     <a href="{{ url_for('StatisticsController.view_stats') }}">
-        <div class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md">
+        <div class="glass-btn-sidebar">
             <i class="bi bi-bar-chart text-lg"></i>
             <p>Statistiky</p>
         </div>
     </a>
     {% if current_user.is_authenticated %}
     <a href="{{ url_for('RssPageController.rss_changes') }}">
-        <div class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md">
+        <div class="glass-btn-sidebar">
             <i class="bi bi-rss text-lg"></i>
             <p>Nové stránky</p>
         </div>
     </a>
     <a href="{{ url_for('UserController.add_user') }}">
-        <div class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 transition-all border rounded-md">
+        <div class="glass-btn-sidebar">
             <i class="bi bi-person-add text-lg"></i>
             <p>Přidat uživatele</p>
         </div>
     </a>
     {% endif %}
-    <div id='sidebar-close' class="bg-white/5 hover:bg-white/20 border-white/20 flex flex-row items-center justify-between w-full h-12 px-3 py-2 my-3 mt-auto transition-all border rounded-md">
+    <div id='sidebar-close' class="glass-btn-sidebar mt-auto">
         <i class="bi bi-x-lg text-lg"></i>
         <p>Zavřít</p>
     </div>

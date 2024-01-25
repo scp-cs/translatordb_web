@@ -6,7 +6,7 @@
 
 {% block content %}
   
-<div class="bg-opacity-5 rounded-xl flex flex-col px-10 py-10 mx-10 my-4 bg-white shadow-2xl">
+<div class="bg-opacity-5 rounded-xl flex flex-col p-10 mx-10 my-4 bg-white shadow-2xl">
     <h1 class="mb-2 text-4xl font-bold">{{user.nickname}}</h1>
     <hr class="mb-4 border-white">
     <div class="flex flex-row items-center w-full">
@@ -19,10 +19,10 @@
             <p class="mt-1 text-xl"><b>Celkem překladů:</b> {{stats.count}}</p>
             {% if current_user.is_authenticated %}
             <div class="md:flex-row md:my-2 align-center flex flex-col gap-1 my-3">
-                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md"><i class="bi bi-file-earmark-plus mr-2 text-2xl"></i>Přidat překlad</a>
-                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md"><i class="bi bi-person-gear mr-2 text-2xl"></i>Upravit uživatele</a>
-                <a id="del-btn" href="javascript:void(0)" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center h-12 px-3 py-2 transition-all border rounded-md"><i class="bi bi-person-x mr-2 text-2xl"></i>Smazat uživatele</a>
-                <a id="del-confirm" href="{{url_for('UserController.delete_user', uid=user.uid)}}" class="bg-white/5 hover:bg-white/20 border-white/20 inline-flex items-center justify-center hidden h-12 px-3 py-2 transition-all border rounded-md">
+                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="glass-btn"><i class="bi bi-file-earmark-plus mr-2 text-2xl"></i>Přidat překlad</a>
+                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="glass-btn"><i class="bi bi-person-gear mr-2 text-2xl"></i>Upravit uživatele</a>
+                <a id="del-btn" href="javascript:void(0)" class="glass-btn"><i class="bi bi-person-x mr-2 text-2xl"></i>Smazat uživatele</a>
+                <a id="del-confirm" href="{{url_for('UserController.delete_user', uid=user.uid)}}" class="glass-btn hidden">
                     <i class="bi bi-check-lg mr-2 text-2xl"></i> Potvrdit smazání?
                 </a>
             </div>
@@ -35,9 +35,9 @@
 <div class="md:flex-row md:gap-0 flex flex-col justify-center w-full gap-6 mt-4">
     <div class="md:w-auto md:flex-row md:rounded-xl bg-opacity-5 inline-flex flex-col items-center px-10 py-5 mr-4 bg-white shadow-2xl">
         <h2 class="md:mr-6 text-lg font-bold">Řadit:</h2>
-        <a href="{{url_for('UserController.user', sort='az', uid=user.uid)}}" class="hover:bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">A-Z</a>
-        <a href="{{url_for('UserController.user', sort='latest', uid=user.uid)}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Nejnovější</a>
-        <a href="{{url_for('UserController.user', sort='words', uid=user.uid)}}" class="hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded w-4/5 my-2 bg-green-600">Počet slov</a>
+        <a href="{{url_for('UserController.user', sort='az', uid=user.uid)}}" class="sorter-button">A-Z</a>
+        <a href="{{url_for('UserController.user', sort='latest', uid=user.uid)}}" class="sorter-button">Nejnovější</a>
+        <a href="{{url_for('UserController.user', sort='words', uid=user.uid)}}" class="sorter-button">Počet slov</a>
     </div>
     
     <div class="md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl md:w-auto md:bg-white md:py-5 inline-block w-full px-4 text-center text-black shadow-2xl">

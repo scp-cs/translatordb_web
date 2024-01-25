@@ -1,21 +1,21 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center w-auto md:p-2">
+<div class="md:p-2 flex flex-col items-center justify-center w-auto">
     <div>
-        <div class="inline-flex flex-col items-center w-full px-10 py-5 mb-8 bg-white shadow-2xl md:mt-4 md:w-auto md:flex-row md:rounded-xl bg-opacity-5">
-        <h2 class="text-lg font-bold md:mr-6">Řadit:</h2>
-        <a href="{{url_for('index', sort='az')}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:w-auto md:my-0 md:mx-1 btn-rounded">A-Z</a>
-        <a href="{{url_for('index', sort='count')}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet článků</a>
-        <a href="{{url_for('index', sort='points')}}" class="w-4/5 my-2 bg-green-600 hover:bg-green-500 md:my-0 md:w-auto md:mx-1 btn-rounded">Počet bodů</a>
+        <div class="md:mt-4 md:w-auto md:flex-row md:rounded-xl bg-opacity-5 inline-flex flex-col items-center w-full px-10 py-5 mb-8 bg-white shadow-2xl">
+        <h2 class="md:mr-6 text-lg font-bold">Řadit:</h2>
+        <a href="{{url_for('index', sort='az')}}" class="sorter-button">A-Z</a>
+        <a href="{{url_for('index', sort='count')}}" class="sorter-button">Počet článků</a>
+        <a href="{{url_for('index', sort='points')}}" class="sorter-button">Počet bodů</a>
         </div>
         
-        <div class="inline-block w-full px-4 mb-6 ml-3 text-center text-black shadow-2xl md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl md:w-auto md:bg-white md:py-5">
-            <i class="mr-4 text-xl text-white bi bi-search"></i>
-            <input type="text" id="search-field" class="p-2 text-white rounded-md shadow-inner outline-none bg-white/20">
+        <div class="md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl md:w-auto md:bg-white md:py-5 inline-block w-full px-4 mb-6 ml-3 text-center text-black shadow-2xl">
+            <i class="bi bi-search mr-4 text-xl text-white"></i>
+            <input type="text" id="search-field" class="bg-white/20 p-2 text-white rounded-md shadow-inner outline-none">
         </div>
     </div>
-    <div class="italic opacity-40">Aktualizováno {{lastupdate}}</div>
+    <div class="opacity-40 italic">Aktualizováno {{lastupdate}}</div>
     <table class="w-full mt-2 text-center transition-all shadow-2xl md:bg-white md:border-separate md:table-auto md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 md:rounded-xl md:bg-opacity-5 md:backdrop-blur-2xl">
     <thead>
         <tr class="border-b-2 border-black">
@@ -31,7 +31,7 @@
     </thead>
     <tbody id="ut-body" class="transition-all">
         {% for user in users %}
-        <tr class="h-10 md:p-4 usr-row" id="u-{{user.id}}">
+        <tr class="md:p-4 usr-row h-10" id="u-{{user.id}}">
             <td data-label="Přezdívka">{{ user.nickname }}</td>
             <td data-label="Discord ID">
             {% if user.discord %}
@@ -41,8 +41,8 @@
             <td data-label="Počet překladů">{{ user.count }}</td>
             <td data-label="Počet bodů">{{ "%.1f" % user.points }}</td>
             <td data-label="Role">{{get_user_role(user.points)}}</td>
-            <td class="flex flex-col md:table-row">
-                <a class="inline-block w-full mb-2 md:inline md:w-auto md:mb-0" href="{{url_for('UserController.user', uid=user.id)}}"><i class="text-3xl transition-opacity bi bi-eye opacity-40 hover:opacity-100"></i></a>
+            <td class="md:table-row flex flex-col">
+                <a class="md:inline md:w-auto md:mb-0 inline-block w-full mb-2" href="{{url_for('UserController.user', uid=user.id)}}"><i class="bi bi-eye opacity-40 hover:opacity-100 text-3xl transition-opacity"></i></a>
             </td>
         </tr>
         {% endfor %}
