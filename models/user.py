@@ -20,7 +20,7 @@ ROLE_COLORS = {
     50: 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500',
     100: 'bg-gradient-to-r from-gray-700 via-gray-900 to-black',
     200: 'bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900',
-    500: 'bg-gradient-to-bl from-rose-800 via-black to-fuchsia-600'
+    500: 'gradient-background'
 }
 
 def get_user_role(points: int) -> str:

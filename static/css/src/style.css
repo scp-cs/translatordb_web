@@ -75,7 +75,7 @@ td {
   }
 
   .sorter-container {
-    
+    @apply first-letter:bg-gradient-to-bl from-rose-800 via-black to-fuchsia-600
   }
 
   .sorter-button {
@@ -90,4 +90,22 @@ td {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
   }
   
+}
+
+.gradient-background {
+  background: linear-gradient(15deg,#a71bb9,#000000,#9f1239);
+  background-size: 150% 150%;
+  animation: gradient-animation 6s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
