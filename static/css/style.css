@@ -925,17 +925,8 @@ video {
   width: 2rem;
 }
 
-.w-max{
-  width: -moz-max-content;
-  width: max-content;
-}
-
 .min-w-\[12em\]{
   min-width: 12em;
-}
-
-.flex-grow{
-  flex-grow: 1;
 }
 
 .border-spacing-x-12{
@@ -1245,10 +1236,6 @@ video {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
 
-.bg-gradient-to-bl{
-  background-image: linear-gradient(to bottom left, var(--tw-gradient-stops));
-}
-
 .bg-gradient-to-b{
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
 }
@@ -1289,12 +1276,6 @@ video {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.from-rose-800{
-  --tw-gradient-from: #9f1239;
-  --tw-gradient-to: rgb(159 18 57 / 0);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
 .via-red-500{
   --tw-gradient-to: rgb(239 68 68 / 0);
   --tw-gradient-stops: var(--tw-gradient-from), #ef4444, var(--tw-gradient-to);
@@ -1308,11 +1289,6 @@ video {
 .via-purple-900{
   --tw-gradient-to: rgb(88 28 135 / 0);
   --tw-gradient-stops: var(--tw-gradient-from), #581c87, var(--tw-gradient-to);
-}
-
-.via-black{
-  --tw-gradient-to: rgb(0 0 0 / 0);
-  --tw-gradient-stops: var(--tw-gradient-from), #000, var(--tw-gradient-to);
 }
 
 .to-gray-600{
@@ -1337,10 +1313,6 @@ video {
 
 .to-slate-900{
   --tw-gradient-to: #0f172a;
-}
-
-.to-fuchsia-600{
-  --tw-gradient-to: #c026d3;
 }
 
 .to-blue-900{
@@ -1721,6 +1693,26 @@ td::before{
   }
 }
 
+.gradient-background {
+  background: linear-gradient(15deg,#a71bb9,#000000,#9f1239);
+  background-size: 150% 150%;
+  animation: gradient-animation 6s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .hover\:bg-green-500:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(34 197 94 / var(--tw-bg-opacity));
@@ -1832,10 +1824,6 @@ td::before{
 
   .md\:w-64{
     width: 16rem;
-  }
-
-  .md\:w-full{
-    width: 100%;
   }
 
   .md\:min-w-\[60\%\]{
