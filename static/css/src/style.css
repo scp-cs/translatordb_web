@@ -11,6 +11,13 @@ html, body {
   font-family: 'IBM Plex Sans';
 }
 
+body {
+  background: black;
+  background-image: radial-gradient(#333 1px, transparent 0);
+  background-size: 40px 40px;
+  background-position: -19px -19px;
+}
+
 .bg-scp {
   background-image: url(../RAISA2.webp);
   background-position: top 1em left 1em;
@@ -63,11 +70,11 @@ td {
   }
 
   .progressbar {
-    @apply opacity-80 w-1/2 h-6 px-1 py-1 border-2 border-white rounded-lg; /* Used on the statistics page */
+    @apply w-1/2 h-6 px-1 py-1 border-2 border-white rounded-lg bg-black; /* Used on the statistics page */
   }
 
   .progressbar-inner {
-    @apply bg-gradient-to-r from-slate-300 to-green-400 w-0 h-full transition-all duration-700 rounded-lg; /* Used on the statistics page */
+    @apply bg-blue-600 w-0 h-full transition-all duration-700 rounded-lg; /* Used on the statistics page */
   }
 
   .bignumber {

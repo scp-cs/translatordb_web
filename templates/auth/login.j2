@@ -1,24 +1,24 @@
 {% extends "base.j2" %}
 
 {% block content %}
-<div class="md:p-10 flex flex-col items-center justify-center w-full h-full">
+<div class="flex flex-col items-center justify-center w-full h-full md:p-10">
 
 
 
-<form method="post" class="bg-opacity-5 md:rounded-xl flex flex-col items-center w-auto w-full px-24 py-8 text-lg bg-white shadow-2xl">
+<form method="post" class="flex flex-col items-center w-auto px-24 py-8 text-lg border shadow-2xl bg-black/30 backdrop-blur-sm border-slate-900 md:rounded-xl">
     <h1 class="pb-6 text-3xl font-semibold">Přihlásit se</h1>
     {{ form.hidden_tag() }}
     <div>
-    {{form.username.label(class='opacity-90 self-start text-sm font-thin')}}<br>
-    {{form.username(class='input-field mb-4', id='input-title')}}
+    {{form.username.label(class='self-start text-sm font-thin opacity-90')}}<br>
+    {{form.username(class='mb-4 input-field', id='input-title')}}
     </div>
     <div>
-    {{form.password.label(class='opacity-90 self-start text-sm font-thin')}}<br>
-    {{form.password(class='input-field mb-4', id='input-link')}}
+    {{form.password.label(class='self-start text-sm font-thin opacity-90')}}<br>
+    {{form.password(class='mb-4 input-field', id='input-link')}}
     </div>
     <div>
-    {{form.submit(class='w-36 btn-rounded hover:bg-green-500 inline mx-2 mb-2 bg-green-600')}}
-    <a href="{{url_for('OauthController.oauth_session')}}" class="w-36 btn-rounded hover:bg-blue-500 inline mx-2 bg-blue-600"><i class="bi bi-discord text-xl"></i></a>
+    {{form.submit(class='inline mx-2 mb-2 bg-green-600 w-36 btn-rounded hover:bg-green-500')}}
+    <a href="{{url_for('OauthController.oauth_session')}}" class="inline mx-2 bg-blue-600 w-36 btn-rounded hover:bg-blue-500"><i class="text-xl bi bi-discord"></i></a>
     </div>
 </form>
 
