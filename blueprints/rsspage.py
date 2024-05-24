@@ -2,7 +2,7 @@ from logging import info, warning
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 
-from extensions import rss
+from extensions import rss, sched
 
 RssPageController = Blueprint('RssPageController', __name__)
 
@@ -22,4 +22,10 @@ def ignore_update():
         warning(f'Removing non-existent RSS Update with UUID {uuid}')
     else:
         info(f'RSS Update {uuid} ({title}) ignored by {current_user.nickname} (ID: {current_user.uid})')
+    return redirect(url_for('RssPageController.rss_changes'))
+
+@RssPageController.route('/changes/forceupdate')
+@login_required
+def refresh():
+    sched.run_job('Fetch RSS updates')
     return redirect(url_for('RssPageController.rss_changes'))

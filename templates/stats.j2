@@ -3,8 +3,8 @@
 {% block content %}
 
 
-<div class="md:grid-cols-3 md:p-12 grid w-full grid-cols-1 gap-4">
-<div class="bg-black/30 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-around col-span-1 px-4 py-4 shadow-xl">
+<div class="grid w-[90%] mx-auto  grid-cols-1 gap-4 md:grid-cols-3 md:p-12">
+<div class="flex flex-col items-center justify-around col-span-1 px-4 py-4 border shadow-xl backdrop-blur-sm rounded-2xl border-slate-900">
     <h1 class="mb-6 text-2xl font-bold">Globální statistiky</h1>
     <div class="mb-4 text-center">
         <h2 class="bignumber" data-val="{{global_stats.total_users}}"></h2><p class="inline">  uživatelů</p>
@@ -16,16 +16,16 @@
         <h2 class="bignumber" data-val="{{global_stats.total_words}}"></h2><p class="inline">  slov</p>
     </div>
 </div>
-<div class="bg-black/30 rounded-2xl flex flex-col items-start justify-center col-span-1 px-4 py-4 shadow-xl">
+<div class="flex flex-col items-start justify-center col-span-1 px-4 py-4 border shadow-xl border-slate-900 backdrop-blur-sm rounded-2xl">
     {% for series in series_info if series.series < 6 %}
         {# 
-           <div class="rounded-xl bg-white/5 flex flex-col items-center justify-center col-span-1 px-4 py-2"></div> 
+           <div class="flex flex-col items-center justify-center col-span-1 px-4 py-2 rounded-xl bg-white/5"></div> 
         #}
         {% if series.series != 999 %}
             <h1 class="text-2xl font-bold">Série {{series.series}}</h1>
             <i>{{series.articles}} článků z 1000</i>
             <i>celkem {{series.words}} slov</i>
-            <div class="progressbar mb-6">
+            <div class="mb-6 progressbar">
                 <div class="progressbar-inner" data-val="{{series.articles}}"></div>
             </div>
         {% else %}
@@ -39,16 +39,16 @@
             
     {% endfor %}
 </div>
-<div class="bg-black/30 rounded-2xl flex flex-col col-span-1 px-4 py-4 shadow-xl">
+<div class="flex flex-col col-span-1 px-4 py-4 border shadow-xl bg-black/30 rounded-2xl backdrop-blur-sm border-slate-900">
     {% for series in series_info if series.series > 5 %}
         {# 
-           <div class="rounded-xl bg-white/5 flex flex-col items-center justify-center col-span-1 px-4 py-2"></div> 
+           <div class="flex flex-col items-center justify-center col-span-1 px-4 py-2 rounded-xl bg-white/5"></div> 
         #}
         {% if series.series != 999 %}
             <h1 class="text-2xl font-bold">Série {{series.series}}</h1>
             <i>{{series.articles}} článků z 1000</i>
             <i>celkem {{series.words}} slov</i>
-            <div class="progressbar mb-6">
+            <div class="mb-6 progressbar">
                 <div class="progressbar-inner" data-val="{{series.articles}}"></div>
             </div>
         {% else %}
@@ -67,16 +67,28 @@
 <script defer>
 let counters = {}
 
+function numberToText(number) {
+    if(number > 1_000_000_000) {
+        return `${(number/1000000000).toFixed(1)}B`
+    } else if(number > 1_000_000) {
+        return `${(number/1000000).toFixed(1)}M`
+    } else if(number > 1_000) {
+        return `${(number/1000).toFixed(1)}K`
+    } else {
+        return number
+    }
+}
+
 function countup(e, final) {
     counters[e] = 0
     let intid = setInterval((e, final) => {
         if(counters[e] == 90) {
-            e.innerHTML = final
+            e.innerHTML = numberToText(final)
             clearInterval(intid)
             return
         }
             counters[e]++
-        e.innerHTML = Math.floor((final/90)*counters[e])
+        e.innerHTML = numberToText(Math.floor((final/90)*counters[e]))
     }, 30, e, final)
 }
 

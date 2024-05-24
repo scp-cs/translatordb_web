@@ -84,17 +84,28 @@ class RSSMonitor:
             error(f'Cannot parse URL "{url}"')
             return False
         parsed_url = parsed_url._replace(scheme='https')._replace(netloc='scp-wiki.wikidot.com')
+        wl_parsed_url = parsed_url._replace(scheme='https')._replace(netloc='wanderers-library.wikidot.com')
         en_url = parse.urlunparse(parsed_url)
+        wl_url = parse.urlunparse(wl_parsed_url)
         try:
             head_result = requests.head(en_url, headers={'User-Agent': USER_AGENT})
         except requests.RequestException as e:
             error(f'Request to {en_url} failed ({str(e)})')
             return False
+        #TODO: Refactor this
         match head_result.status_code:
             case 200:
                 return True
             case 404:
-                return False
+                head_result = requests.head(wl_url, headers={'User-Agent': USER_AGENT})
+                match head_result.status_code:
+                    case 200:
+                        return True
+                    case 404:
+                        return False
+                    case _:
+                        warning(f'Got unusual status code ({head_result.status_code}) for URL {en_url}')
+                        return False
             case _:
                 warning(f'Got unusual status code ({head_result.status_code}) for URL {en_url}')
                 return False
