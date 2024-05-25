@@ -929,6 +929,11 @@ video {
   width: 2rem;
 }
 
+.w-max{
+  width: -moz-max-content;
+  width: max-content;
+}
+
 .min-w-\[12em\]{
   min-width: 12em;
 }
@@ -1310,10 +1315,6 @@ video {
 
 .to-slate-900{
   --tw-gradient-to: #0f172a;
-}
-
-.bg-fixed{
-  background-attachment: fixed;
 }
 
 .p-10{

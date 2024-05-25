@@ -40,7 +40,7 @@
             {% endif %}</td>
             <td data-label="Počet překladů">{{ user.count }}</td>
             <td data-label="Počet bodů">{{ "%.1f" % user.points }}</td>
-            <td data-label="Role"><div class=" bg-opacity-70 text-sm font-italic py-1 px-1 {{get_role_color(user.points)}} rounded-full shadow-lg">{{get_user_role(user.points)}}</div></td>
+            <td data-label="Role"><div class=" bg-opacity-70 text-sm font-italic py-1 px-1 {{get_role_color(user.points)}} rounded-full shadow-lg w-max">{{get_user_role(user.points)}}</div></td>
             <td class="flex flex-col md:table-row">
                 <a class="inline-block w-full mb-2 md:inline md:w-auto md:mb-0" href="{{url_for('UserController.user', uid=user.id)}}"><i class="text-3xl transition-opacity bi bi-eye opacity-40 hover:opacity-100"></i></a>
             </td>
