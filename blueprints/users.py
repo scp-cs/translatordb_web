@@ -55,8 +55,9 @@ def edit_user(uid: int):
 @UserController.route('/user/<int:uid>')
 def user(uid: int):
     sort = request.args.get('sort', 'latest', str)
+    page = request.args.get('p', 0, int)
     user=dbs.get_user(uid) or abort(404)
-    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid, sort))
+    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid, sort, page), sort=sort)
 
 @UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required

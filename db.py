@@ -16,6 +16,8 @@ from passwords import pw_check, pw_hash
 from models.translation import Translation
 from discord import DiscordClient
 
+PAGE_ITEMS = 20
+
 # Scripts
 db_create_script = """
 
@@ -237,7 +239,7 @@ class Database():
         else:
             return False
 
-    def get_translations_by_user(self, uid: int, sort='latest') -> t.Optional[list[Translation]]:
+    def get_translations_by_user(self, uid: int, sort='latest', page=0) -> t.Optional[list[Translation]]:
         match sort:
             case 'az':
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
@@ -247,8 +249,8 @@ class Database():
                 sorter = 'ORDER BY words DESC'
             case _:
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
-        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter
-        data = (uid,)
+        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter + " LIMIT ? OFFSET ?"
+        data = (uid, PAGE_ITEMS, page*PAGE_ITEMS)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
             return None
