@@ -43,17 +43,21 @@ function make_row(u, has_auth) {
 function search(target) {
     console.log('st')
     if (target.value == "" || target.value.length < 2) {
+        $('#page-selector').removeClass('hidden')
         if(!is_original) {
-            $('.usr-row').animate({opacity: 0}, 300)
-            setTimeout( () => table.innerHTML = originalHtml, 300)
+            
+            //setTimeout( () => table.innerHTML = originalHtml, 300)
+            table.innerHTML = originalHtml
             is_original = true
         }
         return
     }
-    $('.usr-row').animate({opacity: 0}, 300)
+    //$('.usr-row').animate({opacity: 0}, 300)
+    $("#page-selector").addClass('hidden')
     is_original = false
 
     let newHtml = ""
+    /*
     setTimeout(() => {
         
         fetch('/api/search/user?' + new URLSearchParams({
@@ -63,6 +67,13 @@ function search(target) {
         .then(r => r.result.forEach(a => {newHtml += make_row(a, r.has_auth)}))
         .then(() => table.innerHTML = newHtml)
     }, 300);
+    */
+    fetch('/api/search/user?' + new URLSearchParams({
+        'q': target.value
+    }))
+    .then(response => response.json())
+    .then(r => r.result.forEach(a => {newHtml += make_row(a, r.has_auth)}))
+    .then(() => table.innerHTML = newHtml)
 
 }
 

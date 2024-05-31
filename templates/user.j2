@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<table class="w-full text-center mx-auto my-4 bg-white/5 transition-all shadow-2xl  md:border-separate md:table-auto border border-slate-900 md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 md:rounded-xl backdrop-blur-sm">
+<table class="w-full text-center mx-auto mt-4 mb-2 bg-white/5 transition-all shadow-2xl  md:border-separate md:table-auto border border-slate-900 md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 md:rounded-xl backdrop-blur-sm">
     <thead>
     <tr>
         <th class="min-w-[12em]">Název</th>
@@ -85,8 +85,8 @@
     {% endfor %}
     </tbody>
 </table>
-<div class="flex flex-row items-center mx-auto border rounded-md w-min bg-white/5 backdrop-blur-sm border-slate-900">
-    {% for p in range((stats.count / 20)|round(0, 'ceil')|int) %}
+<div id="page-selector" class="flex flex-row items-center mx-auto border rounded-md w-min bg-white/5 backdrop-blur-sm border-slate-900">
+    {% for p in range((stats.count / 15)|round(0, 'ceil')|int) %}
     <a class="px-2 py-2 transition-all rounded-md hover:bg-white/30" href="{{url_for('UserController.user', sort=sort, p=p, uid=user.uid)}}">{{p+1}}</a>
     {% endfor %}
 </div>
