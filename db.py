@@ -16,6 +16,8 @@ from passwords import pw_check, pw_hash
 from models.translation import Translation
 from discord import DiscordClient
 
+PAGE_ITEMS = 15
+
 # Scripts
 db_create_script = """
 
@@ -111,7 +113,7 @@ class Database():
     def lastupdated(self) -> datetime:
         return self.__lastupdate
 
-    def get_stats(self, sort='points'):
+    def get_stats(self, sort='points', page=0):
         match sort:
             case 'az':
                 sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
@@ -121,8 +123,12 @@ class Database():
                 sorter = 'ORDER BY translation_count DESC'
             case _:
                 sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
-        data = self.__tryexec("SELECT * FROM Frontpage " + sorter).fetchall()
+        data = self.__tryexec("SELECT * FROM Frontpage " + sorter + " LIMIT ? OFFSET ?", (PAGE_ITEMS, PAGE_ITEMS*page)).fetchall()
         return [StatRow(*row) for row in data]
+
+    def get_user_count(self) -> int:
+        count = self.__tryexec("SELECT COUNT(id) FROM Frontpage").fetchone()[0]
+        return count
 
     def update_password(self, uid: int, new_pw: bytes):
         query = "UPDATE User SET password=?, temp_pw=0 WHERE id=?"
@@ -237,7 +243,7 @@ class Database():
         else:
             return False
 
-    def get_translations_by_user(self, uid: int, sort='latest') -> t.Optional[list[Translation]]:
+    def get_translations_by_user(self, uid: int, sort='latest', page=0) -> t.Optional[list[Translation]]:
         match sort:
             case 'az':
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
@@ -247,8 +253,8 @@ class Database():
                 sorter = 'ORDER BY words DESC'
             case _:
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
-        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter
-        data = (uid,)
+        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter + " LIMIT ? OFFSET ?"
+        data = (uid, PAGE_ITEMS, page*PAGE_ITEMS)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
             return None

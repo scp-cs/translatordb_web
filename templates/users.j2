@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="italic opacity-40">Aktualizováno {{lastupdate}}</div>
-    <table class="w-full mt-2 transition-all shadow-2xl bg-white/5 backdrop-blur-sm rounded-md md:border-separate md:table-auto md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 border-slate-900 border ">
+    <table class="w-full my-2 transition-all shadow-2xl bg-white/5 backdrop-blur-sm rounded-md md:border-separate md:table-auto md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 border-slate-900 border ">
     <thead>
         <tr class="border-b-2 border-black">
             <th>Nickname</th>
@@ -48,6 +48,11 @@
         {% endfor %}
     </tbody>
     </table>
+    <div id="page-selector" class="flex flex-row items-center mx-auto border rounded-md w-min bg-white/5 backdrop-blur-sm border-slate-900">
+        {% for p in range((user_count / 15)|round(0, 'ceil')|int) %}
+        <a class="px-2 py-2 transition-all rounded-md hover:bg-white/30" href="{{url_for('index', sort=sort, p=p)}}">{{p+1}}</a>
+        {% endfor %}
+    </div>
 </div>
 </div>
 

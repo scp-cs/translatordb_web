@@ -35,7 +35,9 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     sort = request.args.get('sort', type=str, default='points')
-    return render_template('users.j2', users=dbs.get_stats(sort), lastupdate=dbs.lastupdated.strftime("%Y-%m-%d %H:%M:%S"))
+    page = request.args.get('p', type=int, default=0)
+    user_count = dbs.get_user_count()
+    return render_template('users.j2', users=dbs.get_stats(sort, page), lastupdate=dbs.lastupdated.strftime("%Y-%m-%d %H:%M:%S"), user_count=user_count, sort=sort)
 
 def init_logger() -> None:
     """
