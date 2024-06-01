@@ -21,6 +21,13 @@ PAGE_ITEMS = 15
 # Scripts
 db_create_script = """
 
+CREATE TABLE IF NOT EXISTS UserType (
+    id          INTEGER     NOT NULL PRIMARY KEY,
+    name        TEXT        NOT NULL UNIQUE
+);
+
+INSERT OR IGNORE INTO UserType (id, name) VALUES (1, "translator"), (2, "corrector"), (3, "writer"), (4, "staff");
+
 CREATE TABLE IF NOT EXISTS User (
     id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
     nickname    TEXT        NOT NULL UNIQUE,
@@ -31,6 +38,14 @@ CREATE TABLE IF NOT EXISTS User (
     display_name    TEXT    DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS UserHasType (
+    id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
+    iduser      INTEGER     NOT NULL,
+    idtype      INTEGER     NOT NULL,
+    FOREIGN KEY (iduser) REFERENCES User(id) ON DELETE CASCADE,
+    FOREIGN KEY (idtype) REFERENCES UserType(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS Translation (
     id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
     name        TEXT        NOT NULL,
@@ -39,7 +54,9 @@ CREATE TABLE IF NOT EXISTS Translation (
     added       DATETIME    NOT NULL DEFAULT (datetime('now','localtime')),
     link        TEXT                 DEFAULT NULL,
     idauthor    INTEGER     NOT NULL,
-    FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE
+    idcorrector INTEGER     DEFAULT NULL,
+    FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE,
+    FOREIGN KEY (idcorrector) REFERENCES User(id)
 );
 
 CREATE TABLE IF NOT EXISTS Note (
@@ -108,6 +125,9 @@ class Database():
         except TypeError:
             warning(f"Unable to get last update timestamp")
             self.__lastupdate = datetime(2005, 1, 1)
+
+    def __make_translation(self, row) -> Translation:
+        return Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
 
     @property
     def lastupdated(self) -> datetime:
@@ -203,12 +223,16 @@ class Database():
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
-        tr = Translation(tid, row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
-        return tr
+        return self.__make_translation(row)
     
     def update_translation(self, t: Translation) -> None:
         query = "UPDATE Translation SET name=?, words=?, bonus=?, link=? WHERE id=?"
         data = (t.name, t.words, t.bonus, t.link, t.id)
+        self.__tryexec(query, data)
+
+    def assign_corrector(self, article: Translation, user: User):
+        query = "UPDATE Translation SET idcorrector=? WHERE id=?"
+        data = (user.uid, article.id)
         self.__tryexec(query, data)
 
     def update_user(self, u: User) -> None:
@@ -258,13 +282,13 @@ class Database():
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
             return None
-        return [Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5]) for row in rows]
+        return [self.__make_translation(row) for row in rows]
 
     def get_translation_by_link(self, link: str):
         query = "SELECT * FROM Translation WHERE link=?"
         data = (link,)
         row = self.__tryexec(query, data).fetchone()
-        return None if not row else Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
+        return None if not row else self.__make_translation(row)
     
     def get_user_point_count(self, uid: int) -> int:
         row = self.__tryexec("SELECT points FROM Frontpage WHERE id=?", (uid,)).fetchone()
