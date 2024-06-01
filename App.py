@@ -86,8 +86,6 @@ def extensions_init() -> None:
     login_manager.user_loader(lambda uid: dbs.get_user(uid))
     login_manager.init_app(app)
 
-    rss.init_app(app)
-    
     # Checking if we can enable Discord Login
     appid, appsecret = app.config.get('DISCORD_CLIENT_ID', None), app.config.get('DISCORD_CLIENT_SECRET', None)
     app.config['OAUTH_ENABLE'] = app.config.get('DISCORD_LOGIN_ENABLE', True)
@@ -121,6 +119,8 @@ def extensions_init() -> None:
     else:
         app.config['WEBHOOK_ENABLE'] = False
 
+    rss.init_app(app)
+
     # Checking if we have any RSS feeds configured
     if rss.has_links:
         sched.add_job('Fetch RSS updates', rss.check, trigger='interval', hours=1)
@@ -142,6 +142,7 @@ if __name__ == '__main__':
     app.config['scheduler'] = sched
     app.config['oauth'] = oauth
     app.config['rss'] = rss
+    app.config['webhook'] = webhook
 
     # Add useful template globals
     app.add_template_global(get_user_role)
