@@ -15,6 +15,7 @@ from models.user import get_user_role, get_role_color, User
 from passwords import pw_hash
 from utils import ensure_config
 from discord import DiscordClient
+from rss import RSSUpdateType
 
 # Blueprints
 from blueprints.auth import UserAuth
@@ -148,6 +149,7 @@ if __name__ == '__main__':
     app.add_template_global(get_user_role)
     app.add_template_global(get_role_color)
     app.add_template_global(current_user, 'current_user')
+    app.add_template_global(RSSUpdateType)
     
     # Load all the blueprints
     app.register_blueprint(ErrorHandler)
