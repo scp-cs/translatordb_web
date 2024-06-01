@@ -1,4 +1,5 @@
 # Builtins
+from distutils.log import warn
 from typing import List
 import re
 from logging import debug, info, error, warning, debug
@@ -27,17 +28,19 @@ r_user = re.compile(r'href="http:\/\/www\.wikidot\.com\/user:info\/(.+?)"', re.U
 # TODO: Move this to config, possibly create separate config for RSS feeds
 NEW_PAGE = 'nová stránka'   # This text in the title indicates a new page
 PAGE_RENAME = 'přesunout/přejmenovat stránku' # This text in the title indicates a page move
+CORRECTION_COMPLETE = 'Odstraněné štítky: korekce'
 IGNORE_BRANCH_TAG = '-cs' # Ignore new pages that start with this tag, doesn't work for tales but I don't really care
 TIMEZONE_UTC_OFFSET = timedelta(hours=2)
 
 USER_AGENT = "SCUTTLE Crawler (https://scp-wiki.cz, v1)"
 
 class RSSUpdateType(IntEnum):
-    RSS_NEWPAGE = 0,
+    RSS_NEWPAGE = 0
     RSS_RENAME = 1
-    RSS_SOURCECHANGE = 2,
-    RSS_DELETE = 3,
-    RSS_UNKNOWN = 4
+    RSS_SOURCECHANGE = 2
+    RSS_DELETE = 3
+    RSS_CORRECTION = 4
+    RSS_UNKNOWN = 5
 
 @dataclass
 class RSSUpdate:
@@ -60,6 +63,7 @@ class RSSMonitor:
             return
         self.__links = app.config['RSS_MONITOR_CHANNELS']
         self.__dbs = app.config['database']
+        self.__webhook = app.config['webhook']
 
         info(f'Loaded {len(self.__links)} RSSMonitor endpoints from config')
 
@@ -70,6 +74,8 @@ class RSSMonitor:
             return RSSUpdateType.RSS_NEWPAGE
         elif PAGE_RENAME in update_title:
             return RSSUpdateType.RSS_RENAME
+        elif CORRECTION_COMPLETE in update['description']:
+            return RSSUpdateType.RSS_CORRECTION
         else:
             return RSSUpdateType.RSS_UNKNOWN
         
@@ -152,6 +158,39 @@ class RSSMonitor:
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
             return True
         return False
+
+    def _process_correction(self, update) -> bool:
+        real_title = update["title"].split("\"")[1]
+        author = self.get_rss_update_author(update)
+        if not author:
+            self.__webhook.send_text(f'Korekci pro {real_title} nelze přiřadit k autorovi. Uživatel neexistuje.')
+            warning(f"Correction for {real_title} cannot be assigned to a user")
+        else:
+            translation = self.__dbs.get_translation_by_link(update['link'])
+            if not translation:
+                self.__webhook.send_text(f'Korekci od {author.nickname} pro {real_title} nelze přiřadit k článku. Zapište manuálně.')
+                warning(f"Correction for {real_title} by {author.nickname} cannot be assigned to an article")
+            else:
+                self.__dbs.assign_corrector(translation, author)
+                info(f'Assigned correction by {author.nickname} to {translation.name}')
+
+    def _process_update(self, update) -> bool:
+        if update['guid'] in self.__finished_guids:
+            debug(f"Skip GUID {update['guid']}")
+            return False
+        update_type = RSSMonitor.get_rss_update_type(update)
+        match update_type:
+            case RSSUpdateType.RSS_NEWPAGE:
+                if self._process_new_page(update):
+                    return True
+            case RSSUpdateType.RSS_CORRECTION:
+                self._process_correction(update)
+
+        if update['guid'] not in self.__finished_guids:
+            debug(f"Add GUID {update['guid']}")
+            self.__finished_guids.append(update['guid'])
+
+        return False
         
     def check(self):
         info(f'Fetching {len(self.__links)} RSS feeds')
@@ -166,17 +205,7 @@ class RSSMonitor:
                 error(f"RSS Update failed for feed {link} ({e})")
                 
             for update in feed:
-                if update['guid'] in self.__finished_guids:
-                    debug(f"Skip GUID {update['guid']}")
-                    continue
-                update_type = RSSMonitor.get_rss_update_type(update)
-                match update_type:
-                    case RSSUpdateType.RSS_NEWPAGE:
-                        if self._process_new_page(update):
-                            count +=1
-                if update['guid'] not in self.__finished_guids:
-                    debug(f"Add GUID {update['guid']}")
-                    self.__finished_guids.append(update['guid'])
+                if self._process_update(update): count += 1
 
         info(f'Got {count or "no"} new pages from RSS feeds')
 
