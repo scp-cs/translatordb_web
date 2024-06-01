@@ -49,6 +49,7 @@ class RSSUpdate:
     title: str
     author: User
     uuid: UUID
+    update_type: RSSUpdateType
 
 class RSSMonitor:
     
@@ -155,20 +156,22 @@ class RSSMonitor:
             if not RSSMonitor.en_page_exists(update['link']):
                 info(f'Ignoring {title} in RSS feed (EN Wiki page doesn\'t exist)')
                 return False
-            self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4()))
+            self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4(), RSSUpdateType.RSS_NEWPAGE))
             return True
         return False
 
     def _process_correction(self, update) -> bool:
         real_title = update["title"].split("\"")[1]
         author = self.get_rss_update_author(update)
+        timestamp = RSSMonitor.get_rss_update_timestamp(update)
         if not author:
             self.__webhook.send_text(f'Korekci pro {real_title} nelze přiřadit k autorovi. Uživatel neexistuje.')
             warning(f"Correction for {real_title} cannot be assigned to a user")
         else:
             translation = self.__dbs.get_translation_by_link(update['link'])
             if not translation:
-                self.__webhook.send_text(f'Korekci od {author.nickname} pro {real_title} nelze přiřadit k článku. Zapište manuálně.')
+                self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], real_title, author, uuid4(), RSSUpdateType.RSS_CORRECTION))
+                #self.__webhook.send_text(f'Korekci od {author.nickname} pro {real_title} nelze přiřadit k článku. Zapište manuálně.')
                 warning(f"Correction for {real_title} by {author.nickname} cannot be assigned to an article")
             else:
                 self.__dbs.assign_corrector(translation, author)

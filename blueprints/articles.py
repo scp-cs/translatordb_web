@@ -7,7 +7,7 @@ from flask import Blueprint, flash, redirect, request, render_template, abort, u
 from flask_login import current_user, login_required
 
 # Internal
-from forms import NewArticleForm, EditArticleForm
+from forms import NewArticleForm, EditArticleForm, AssignCorrectionForm
 from models.translation import Translation
 from models.user import get_user_role
 from extensions import dbs, rss, webhook
@@ -89,3 +89,26 @@ def edit_article(aid: int):
     info(f"Article {t.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
 
     return redirect(url_for('UserController.user', uid=a.author.get_id()))
+
+@ArticleController.route('/article/assign-correction', methods=["POST"])
+@login_required
+def assign_correction():
+    form = AssignCorrectionForm()
+    back_to_changes = redirect(url_for('RssPageController.rss_changes'))
+    try:
+        article = dbs.get_translation(form.article_id.data)
+    except:
+        flash('Neplatné ID')
+        return back_to_changes
+    if not article:
+        flash('Neplatné ID')
+        return back_to_changes
+
+    corrector = dbs.get_user(form.corrector_id.data)
+    if not corrector:
+        flash('Nastala chyba, zkuste to znovu')
+        return back_to_changes
+
+    dbs.assign_corrector(article, corrector)
+    rss.remove_update(form.guid.data)
+    return back_to_changes

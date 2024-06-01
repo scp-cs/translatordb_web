@@ -24,7 +24,7 @@ def add_user():
 
     # Fetch nickname and profile in background
     sched.add_job('Immediate nickname update', lambda: dbs.update_nickname(form.discord.data))
-    sched.add_job('Immediate profile update', func=lambda: DiscordClient.download_avatars([form.discord.data]))
+    sched.add_job('Immediate profile update', lambda: DiscordClient.download_avatars([form.discord.data]))
     
     if form.can_login.data:
         info(f"Administrator account created for {form.nickname.data} with ID {uid} by {current_user.nickname} (ID: {current_user.uid})")
