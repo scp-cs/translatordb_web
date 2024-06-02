@@ -127,7 +127,7 @@ class Database():
             self.__lastupdate = datetime(2005, 1, 1)
 
     def __make_translation(self, row) -> Translation:
-        return Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), row[5])
+        return Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), self.get_user(row[7]), row[5])
 
     @property
     def lastupdated(self) -> datetime:

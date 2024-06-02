@@ -13,4 +13,5 @@ class Translation():
     bonus: int
     added: datetime
     author: User
+    corrector: t.Optional[User]
     link: t.Optional[str] = None
