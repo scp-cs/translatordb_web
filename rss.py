@@ -55,7 +55,7 @@ class RSSMonitor:
     
     def __init__(self, links: List[str] = []):
         self.__links = links
-        self.__updates = list()
+        self.__updates = list() #TODO: Make this a dict indexed by the GUID
         self.__finished_guids = deque(maxlen=255)
 
     def init_app(self, app: Flask) -> None:

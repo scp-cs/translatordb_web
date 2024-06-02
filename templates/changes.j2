@@ -1,7 +1,11 @@
 {% extends "base.j2" %}
 
+{% block head %}
+<script src="{{url_for('static', filename='js/changes.js')}}" defer></script>
+{% endblock head %}
+
 {% block content %}
-<div class="flex flex-col items-center justify-center px-10 py-4">
+<div class="px-10 py-4 flex-col-center">
     <h1 class="my-5 text-3xl font-semibold">Nové stránky</h1>
     <table class="w-full text-center mx-auto my-4 transition-all shadow-2xl bg-white/5 md:border-separate md:table-auto md:py-5 md:w-auto md:min-w-[60%] border border-slate-900 border-spacing-x-12 border-spacing-y-0 md:rounded-lg backdrop-blur-sm">
     <thead>
@@ -47,12 +51,7 @@
             <td data-label="Přidáno">{{ ch.timestamp }}</td>
             <td data-label="Korektor"><a href="{{ url_for('UserController.user', uid=ch.author.uid) }}" class="underline transition-all decoration-white/50 hover:text-blue-400">{{ ch.author.nickname }}</a></td>
             <td>
-                <form class="flex flex-col gap-2 md:table-row" method="post", action="{{ url_for('ArticleController.assign_correction')}}">
-                {{ form.guid(value=ch.uuid) }}
-                {{ form.corrector_id(value=ch.author.uid) }}
-                {{ form.article_id(class='w-16 px-2 bg-transparent border-2 rounded-md appearance-none border-slate-800', placeholder="ID") }}
-                {{ form.submit(class="px-1 ml-2 transition-all bg-transparent border-2 rounded-md border-slate-800 text-white/90 hover:bg-white/10")}}
-                </form>
+                <button class="small-button" onclick="modalOpen('{{ch.uuid}}', {{ch.author.uid}}, '{{ch.link}}')">Přiřadit článek</button>
             </td>
         </tr>
         {% endfor %}
@@ -62,5 +61,40 @@
 </div>
 <div class="absolute top-0 left-0 opacity-50">
 </div>
+
+<div id="modal-overlay" class="absolute top-0 left-0 z-10 flex-col items-center justify-center hidden max-size backdrop-blur-sm">
+    <div id="modal-window" class="px-10 py-8 bg-black border rounded-md border-slate-400 flex-col-center">
+        <h1 class="mb-3 text-xl font-bold">Najít článek</h1>
+        <input id="input-search" type="text" class="px-2 bg-transparent border-2 rounded-md appearance-none border-slate-400">
+        <hr class="w-full my-6 border-white">
+        <table class="border-separate border-spacing-x-12">
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Autor</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="result-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<template id='search-result-template'>
+<tr>
+    <td id="result-name">SCP-3125</td>
+    <td id="result-author">Xan</td>
+    <td>
+        <form action="/article/assign-correction" method="post">
+            {{ form.article_id(id='form-article') }}
+            {{ form.corrector_id(id='form-corrector') }}
+            {{ form.guid(id='form-guid') }}
+            {{ form.link(id='form-link') }}
+            {{ form.submit(id='form-submit', class='small-button')}}
+        </form>
+    </td>
+</tr>
+</template>
 
 {% endblock content %}

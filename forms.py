@@ -65,7 +65,8 @@ class PasswordChangeForm(FlaskFormEx):
     submit = SubmitField('Potvrdit')
 
 class AssignCorrectionForm(FlaskFormEx):
-    article_id = StringField('ID', validators=[NumberRange(0, message="ID musí být číslo")])
+    article_id = HiddenField('id', validators=[NumberRange(0, message="ID musí být číslo")])
     corrector_id = HiddenField('corrector')
     guid = HiddenField('guid')
+    link = HiddenField('link')
     submit = SubmitField('Přiřadit')

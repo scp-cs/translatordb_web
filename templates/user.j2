@@ -39,7 +39,7 @@
 
 <div class="pb-3">
 <div class="flex flex-col justify-center w-full gap-6 mt-4 md:flex-row md:gap-0">
-    <div class="inline-flex flex-row flex-wrap items-center justify-center w-full gap-2 px-10 py-5 mr-4 bg-white border shadow-2xl border-slate-900 backdrop-blur-sm md:gap-0 md:w-auto md:flex-row md:rounded-xl bg-opacity-5">
+    <div class="inline-flex flex-row flex-wrap items-center justify-center w-full gap-2 px-10 py-5 mr-4 bg-white border shadow-2xl border-slate-900 backdrop-blur-sm md:gap-0 md:w-auto md:rounded-xl bg-opacity-5">
         <h2 class="w-full text-lg font-bold text-center md:w-auto md:mr-6">Řadit:</h2>
         <a href="{{url_for('UserController.user', sort='az', uid=user.uid)}}" class="sorter-button">A-Z</a>
         <a href="{{url_for('UserController.user', sort='latest', uid=user.uid)}}" class="sorter-button">Nejnovější</a>

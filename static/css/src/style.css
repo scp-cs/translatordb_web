@@ -89,12 +89,28 @@ td {
     @apply hover:bg-white/30 md:my-0 md:w-auto md:mx-1 btn-rounded border border-slate-900 flex-grow my-2 bg-white/10;
   }
 
+  .small-button {
+    @apply px-1 ml-2 transition-all bg-transparent border-2 rounded-md border-slate-800 text-white/90 hover:bg-white/10;
+  }
+
 }
 
 @layer utilities {
   
   .shadow-inner {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  .flex-row-center {
+    @apply flex flex-row items-center justify-center;
+  }
+
+  .max-size {
+    @apply w-full h-full;
   }
   
 }

@@ -15,6 +15,7 @@ function get_role(point_count) {
     return role
 }
 
+//TODO: Use an HTML template for this holy shit
 function make_row(t, has_auth) {
     let titlelink = t.link ? `<a class="hover:underline" target="_blank" href="${t.link}">${t.name}</a>` : `<span class="text-gray-500">${t.name}</span>`
     btns = `<td class="flex flex-col gap-2 md:table-row"><a class="" href="/article/${t.id}/edit"><i class="bi bi-pencil-square opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a><a class="" onclick="delete_confirm(this);"><i class="bi bi-x-circle opacity-40 hover:opacity-100 text-2xl transition-opacity"></i></a></td>`

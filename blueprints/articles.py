@@ -1,6 +1,6 @@
 # Builtins
 from datetime import datetime
-from logging import info
+from logging import info, debug
 
 # External
 from flask import Blueprint, flash, redirect, request, render_template, abort, url_for, session, current_app
@@ -111,4 +111,7 @@ def assign_correction():
 
     dbs.assign_corrector(article, corrector)
     rss.remove_update(form.guid.data)
+    article.link = form.link.data
+    dbs.update_translation(article)
+    flash('Článek aktualizován')
     return back_to_changes

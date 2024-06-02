@@ -38,6 +38,7 @@ function clickAway(e) {
     if (!sidebar.contains(e.target) && e.target.id != 'sidebar-toggle'){
         closeSidebar();
     } 
+    
 }
 
 toggle.addEventListener('click', openSidebar);

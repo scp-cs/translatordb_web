@@ -30,7 +30,11 @@ def search_user_article():
             'result': []
         }), 400
     
-    results = dbs.search_article_by_user(query, author)
+    if author == -1:
+        results = dbs.search_article(query)
+    else:
+        results = dbs.search_article_by_user(query, author)
+        
     return jsonify({
         'status': 'OK',
         'result': results,
