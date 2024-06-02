@@ -58,6 +58,7 @@
         <th class="min-w-[12em]">Název</th>
         <th>Počet slov</th>
         <th>Bonusové body</th>
+        <th>Korektoval</th>
         <th>Zapsáno</th>
         {% if current_user.is_authenticated %}
         <th></th>
@@ -74,6 +75,7 @@
         </td>
         <td data-label="Počet slov:">{{tr.words}}</td>
         <td data-label="Bonus:">{{tr.bonus}}</td>
+        <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.uid)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
         <td data-label="Zapsáno:">{{tr.added.strftime('%d.%m.%Y %H:%M')}}</td>
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
