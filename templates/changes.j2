@@ -50,8 +50,9 @@
             <td data-label="Název">{{ ch.title }}</td>
             <td data-label="Přidáno">{{ ch.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
             <td data-label="Korektor"><a href="{{ url_for('UserController.user', uid=ch.author.uid) }}" class="underline transition-all decoration-white/50 hover:text-blue-400">{{ ch.author.nickname }}</a></td>
-            <td>
+            <td class="flex flex-row">
                 <button class="small-button" onclick="modalOpen('{{ch.uuid}}', {{ch.author.uid}}, '{{ch.link}}', '{{ch.title}}')">Přiřadit článek</button>
+                <a class="small-button" href="{{url_for('RssPageController.ignore_update', u=ch.uuid)}}">Ignorovat</a>
             </td>
         </tr>
         {% endfor %}
