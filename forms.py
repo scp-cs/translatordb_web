@@ -69,4 +69,5 @@ class AssignCorrectionForm(FlaskFormEx):
     corrector_id = HiddenField('corrector')
     guid = HiddenField('guid')
     link = HiddenField('link')
+    title = HiddenField('title')
     submit = SubmitField('Přiřadit')

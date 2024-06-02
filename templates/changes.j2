@@ -51,7 +51,7 @@
             <td data-label="Přidáno">{{ ch.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
             <td data-label="Korektor"><a href="{{ url_for('UserController.user', uid=ch.author.uid) }}" class="underline transition-all decoration-white/50 hover:text-blue-400">{{ ch.author.nickname }}</a></td>
             <td>
-                <button class="small-button" onclick="modalOpen('{{ch.uuid}}', {{ch.author.uid}}, '{{ch.link}}')">Přiřadit článek</button>
+                <button class="small-button" onclick="modalOpen('{{ch.uuid}}', {{ch.author.uid}}, '{{ch.link}}', '{{ch.title}}')">Přiřadit článek</button>
             </td>
         </tr>
         {% endfor %}
@@ -91,6 +91,7 @@
             {{ form.corrector_id(id='form-corrector') }}
             {{ form.guid(id='form-guid') }}
             {{ form.link(id='form-link') }}
+            {{ form.title(id='form-title') }}
             {{ form.submit(id='form-submit', class='small-button')}}
         </form>
     </td>

@@ -112,6 +112,7 @@ def assign_correction():
     dbs.assign_corrector(article, corrector)
     rss.remove_update(form.guid.data)
     article.link = form.link.data
+    article.name = form.title.data
     dbs.update_translation(article)
     flash('Článek aktualizován')
     return back_to_changes

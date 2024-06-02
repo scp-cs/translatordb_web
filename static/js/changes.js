@@ -4,6 +4,7 @@ const modOverlay = document.getElementById('modal-overlay')
 let currentCorrector;
 let currentGuid;
 let currentLink;
+let currentTitle;
 
 let timeoutID = 0;
 
@@ -19,13 +20,14 @@ function modalClose() {
     $('#input-search').off('input', handleSearch)
 }
 
-function modalOpen(guid, correctorId, link) {
+function modalOpen(guid, correctorId, link, title) {
     $("#modal-overlay").css("display", "flex").hide().fadeIn(200)
     setTimeout(() => $(window).on("click", clickOut), 100)
     $('#input-search').on('input', handleSearch).val("")
     currentCorrector = correctorId;
     currentGuid = guid;
     currentLink = link;
+    currentTitle = title;
 }
 
 function addRow(row) {
@@ -37,6 +39,7 @@ function addRow(row) {
     newRow.find('#form-corrector').val(currentCorrector)
     newRow.find('#form-guid').val(currentGuid)
     newRow.find('#form-link').val(currentLink)
+    newRow.find('#form-title').val(currentTitle)
     $('#result-table-body').append(newRow)
 }
 
