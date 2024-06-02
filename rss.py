@@ -200,7 +200,7 @@ class RSSMonitor:
         if not self.__links:
             return
         
-        count = 0
+        new_count = 0
         for link in self.__links:
             try:
                 feed = feedparser.parse(link).get('entries')
@@ -208,9 +208,9 @@ class RSSMonitor:
                 error(f"RSS Update failed for feed {link} ({e})")
                 
             for update in feed:
-                if self._process_update(update): count += 1
+                if self._process_update(update): new_count += 1
 
-        info(f'Got {count or "no"} new pages from RSS feeds')
+        info(f'Got {new_count or "no"} new pages from RSS feeds')
 
     @property
     def updates(self) -> List[RSSUpdate]:
@@ -225,11 +225,11 @@ class RSSMonitor:
         return len(self.__links) > 0
     
     def remove_update(self, uuid: str) -> Optional[str]:
-        for u in self.__updates:
-            if str(u.uuid).lower() == uuid.lower():
-                debug(f'{u.link} mark finished (remove)')
-                self.__updates.remove(u)
-                return u.title
+        for update in self.__updates:
+            if str(update.uuid).lower() == uuid.lower():
+                debug(f'{update.link} mark finished (remove)')
+                self.__updates.remove(update)
+                return update.title
         return None
 
     def flush_updates(self) -> None:

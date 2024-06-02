@@ -24,15 +24,15 @@ def login():
     if not form.validate_and_flash():
         return redirect(url_for('UserAuth.login'))
 
-    uid = dbs.verify_login(form.username.data, form.password.data)
-    if not uid:
+    user_id = dbs.verify_login(form.username.data, form.password.data)
+    if not user_id:
         flash('Nesprávné uživatelské jméno nebo heslo')
         return redirect(url_for('UserAuth.login'))
-    u = dbs.get_user(uid)
-    if u.temp_pw:
-        session['PRE_LOGIN_UID'] = uid
+    user = dbs.get_user(user_id)
+    if user.temp_pw:
+        session['PRE_LOGIN_UID'] = user_id
         return redirect(url_for('UserAuth.pw_change'))
-    login_user(dbs.get_user(uid))
+    login_user(user)
     referrer = session['login_next']
     del session['login_next']
     return redirect(referrer or url_for('index'))
@@ -71,8 +71,8 @@ def temp_pw():
 
     if 'tpw' not in session:
         return redirect(url_for('UserAuth.login'))
-    u = dbs.get_user(session['tmp_uid'])
+    user = dbs.get_user(session['tmp_uid'])
     tpw = session['tpw']
     del session['tpw']
     del session['tmp_uid']
-    return render_template('auth/temp_pw.j2', user=u, tpw=tpw)
+    return render_template('auth/temp_pw.j2', user=user, tpw=tpw)

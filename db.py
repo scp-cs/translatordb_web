@@ -1,5 +1,4 @@
 # Builtins
-import json
 import sqlite3
 from datetime import datetime
 import typing as t
@@ -113,8 +112,8 @@ class Database():
     def __tryexec(self, query: str, data: t.Tuple = (), script=False) -> sqlite3.Cursor:
         try:
             with self.connection as con:
-                cur = con.cursor()
-                return cur.executescript(query) if script else cur.execute(query, data)
+                cursor = con.cursor()
+                return cursor.executescript(query) if script else cursor.execute(query, data)
         except sqlite3.Error as e:
             error(f'Database query "{query}" aborted with error: {str(e)}')
 
@@ -192,8 +191,8 @@ class Database():
     
     def verify_login(self, username: str, password: str) -> t.Optional[int]:
         query = "SELECT id, nickname, password, temp_pw FROM User WHERE nickname=?"
-        cur = self.__tryexec(query, (username,))
-        row = cur.fetchone()
+        cursor = self.__tryexec(query, (username,))
+        row = cursor.fetchone()
         if not row or not row[2]:
             return None
         if not pw_check(password, row[2]):
@@ -246,8 +245,7 @@ class Database():
     # TODO: Calling an API adapter in a database class is absolutely horrible
     def update_discord_nicknames(self) -> None:
         query = "SELECT discord FROM User"
-        cur = self.__tryexec(query)
-        ids = cur.fetchall()
+        ids = self.__tryexec(query).fetchall()
         users = dict()
         for id_ in ids:
             users[id_[0]] = DiscordClient.get_global_username(id_[0])
@@ -256,13 +254,13 @@ class Database():
             self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
 
     def update_nickname(self, uid) -> None:
-        nick = DiscordClient.get_global_username(uid)
-        self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nick, uid))
+        nickname = DiscordClient.get_global_username(uid)
+        self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
 
     def translation_exists(self, name: str) -> bool:
         query = "SELECT * FROM Translation WHERE name=? COLLATE NOCASE"
-        cur = self.__tryexec(query, (name.lower(),))
-        if len(cur.fetchall()) != 0:
+        cursor = self.__tryexec(query, (name.lower(),))
+        if len(cursor.fetchall()) != 0:
             return True
         else:
             return False
@@ -315,12 +313,12 @@ class Database():
     def add_user(self, u: User, gen_password=False) -> t.Tuple[int, t.Optional[str]]:
         query = "INSERT INTO User (nickname, wikidot, password, discord) VALUES (?, ?, ?, ?)"
         if gen_password:
-            tpw = token_urlsafe(8)
-            password = pw_hash(tpw)
+            temp_password = token_urlsafe(8)
+            password = pw_hash(temp_password)
         else:
-            tpw = None
+            temp_password = None
             password = u.password
-        return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord)).lastrowid, tpw)
+        return (self.__tryexec(query, (u.nickname, u.wikidot, password, u.discord)).lastrowid, temp_password)
 
     def search_user(self, param: str) -> t.List[dict]:
         query = "SELECT * FROM Frontpage WHERE nickname LIKE :param OR wikidot LIKE :param OR display LIKE :param OR discord=:param"
@@ -341,12 +339,12 @@ class Database():
         query = "SELECT * FROM Translation WHERE name LIKE :param OR link LIKE :link"
         results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%"}).fetchall()
         search_result = list()
-        ucache = dict()
+        user_cache = dict()
         for result in results:
-            if result[6] not in ucache: # Ugly but saves us a lot of useless queries
-                author = ucache[result[6]] = self.get_user(result[6])
+            if result[6] not in user_cache: # Ugly but saves us a lot of useless queries
+                author = user_cache[result[6]] = self.get_user(result[6])
             else:
-                author = ucache[result[6]]
+                author = user_cache[result[6]]
             if not author: # Ideally, this shouldn't happen. In practice I forgot to enable foreign keys initially so it's possible
                 continue
             search_result.append({

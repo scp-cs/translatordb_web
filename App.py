@@ -65,17 +65,17 @@ def user_init() -> None:
     Registers an administrator from environment variables
     """
 
-    init_user, pwd = env.get("SCP_INIT_USER"), env.get("SCP_INIT_PASSWORD")
+    init_user, init_password = env.get("SCP_INIT_USER"), env.get("SCP_INIT_PASSWORD")
     if not init_user:
         return
-    if not pwd:
+    if not init_password:
         error(f"Password not specified for {init_user}")
         exit(-1)
     if dbs.user_exists(init_user):
         warning(f"Initial user {init_user} already exists")
         return
     info(f"Adding initial user {init_user}")
-    dbs.add_user(User(1, init_user, "", pw_hash(pwd), ""))
+    dbs.add_user(User(1, init_user, "", pw_hash(init_password), ""))
 
 def extensions_init() -> None:
     """
@@ -104,8 +104,8 @@ def extensions_init() -> None:
         sched.start()
 
     # Checking if we can enable the API connection
-    token = app.config.get('DISCORD_TOKEN', None)
-    if token:
+    discord_token = app.config.get('DISCORD_TOKEN', None)
+    if discord_token:
         DiscordClient.init_app(app)
         sched.add_job('Download avatars', lambda: DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar'), trigger='interval', days=3)
         sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
