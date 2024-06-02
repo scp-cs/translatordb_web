@@ -74,7 +74,7 @@
         </td>
         <td data-label="Počet slov:">{{tr.words}}</td>
         <td data-label="Bonus:">{{tr.bonus}}</td>
-        <td data-label="Zapsáno:">{{tr.added}}</td>
+        <td data-label="Zapsáno:">{{tr.added.strftime('%d.%m.%Y %H:%M')}}</td>
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
             <a class="" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}"><i class="text-2xl transition-opacity bi bi-pencil-square opacity-40 hover:opacity-100"></i></a>

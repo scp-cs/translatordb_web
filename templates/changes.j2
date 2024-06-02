@@ -22,7 +22,7 @@
         {% if ch.update_type == RSSUpdateType.RSS_NEWPAGE %}
         <tr class="h-10 p-4" id="ch-{{ch.uuid}}">
             <td data-label="Název">{{ ch.title }}</td>
-            <td data-label="Přidáno">{{ ch.timestamp }}</td>
+            <td data-label="Přidáno">{{ ch.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
             <td data-label="Autor"><a href="{{ url_for('UserController.user', uid=ch.author.uid) }}" class="underline transition-all decoration-white/50 hover:text-blue-400">{{ ch.author.nickname }}</a></td>
             <td data-label="Odkaz"><a href="{{ ch.link }}" class="underline transition-all decoration-white/50 hover:text-blue-400">{{ ch.title }}</a></td>
             <td class="flex flex-col gap-2 md:table-row">
@@ -48,7 +48,7 @@
         {% for ch in changes %}
         <tr class="h-10 p-4" id="ch-{{ch.uuid}}">
             <td data-label="Název">{{ ch.title }}</td>
-            <td data-label="Přidáno">{{ ch.timestamp }}</td>
+            <td data-label="Přidáno">{{ ch.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
             <td data-label="Korektor"><a href="{{ url_for('UserController.user', uid=ch.author.uid) }}" class="underline transition-all decoration-white/50 hover:text-blue-400">{{ ch.author.nickname }}</a></td>
             <td>
                 <button class="small-button" onclick="modalOpen('{{ch.uuid}}', {{ch.author.uid}}, '{{ch.link}}')">Přiřadit článek</button>
