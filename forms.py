@@ -40,7 +40,7 @@ class NewArticleForm(FlaskFormEx):
     translator = StringField('Překladatel')
     words = IntegerField('Počet slov', validators=[DataRequired(message="Zadejte počet slov")])
     bonus = IntegerField('Bonusové body', default=0)
-    link = StringField('Odkaz', validators=[url(require_tld=True, message="Neplatný odkaz")])
+    link = StringField('Odkaz')
     submit = SubmitField('Odeslat')
 
 class EditArticleForm(NewArticleForm):
