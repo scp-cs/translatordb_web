@@ -1069,10 +1069,6 @@ video {
   flex-direction: column;
 }
 
-.flex-wrap{
-  flex-wrap: wrap;
-}
-
 .items-start{
   align-items: flex-start;
 }
@@ -1412,11 +1408,6 @@ video {
   padding-bottom: 0.25rem;
 }
 
-.py-5{
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-}
-
 .px-8{
   padding-left: 2rem;
   padding-right: 2rem;
@@ -1425,6 +1416,11 @@ video {
 .py-6{
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+
+.py-5{
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
 }
 
 .px-1{
