@@ -335,18 +335,25 @@ class Database():
             'points': result[6]
         } for result in results]
 
-    def search_article(self, param: str) -> t.List[Translation]:
-        query = "SELECT * FROM Translation WHERE name LIKE :param OR link LIKE :link"
+    def search_article(self, param: str) -> t.List[Article]:    # TODO: Add parameter for translation/original
+        query = "SELECT * FROM Article WHERE name LIKE :param OR link LIKE :link"
         results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%"}).fetchall()
-        search_result = list()
-        user_cache = dict()
+        search_result = []
+        user_cache = {}
         for result in results:
-            if result[6] not in user_cache: # Ugly but saves us a lot of useless queries
+            if result[6] not in user_cache: # Ugly but saves us a lot of queries
                 author = user_cache[result[6]] = self.get_user(result[6])
             else:
                 author = user_cache[result[6]]
             if not author: # Ideally, this shouldn't happen. In practice I forgot to enable foreign keys initially so it's possible
                 continue
+            if result[7]:
+                if result[7] not in user_cache:
+                    corrector = user_cache[result[7]] = self.get_user(result[7])
+                else:
+                    corrector = user_cache[result[7]]
+            else:
+                corrector = None
             search_result.append({
                 'id': result[0],
                 'name': result[1],
@@ -355,18 +362,37 @@ class Database():
                 'author': {
                     'id': author.uid,
                     'name': author.display_name or author.nickname
+                },
+                'corrector': {
+                    'id': corrector.uid if corrector else 0,
+                    'name': (corrector.display_name or corrector.nickname) if corrector else 'N/A'
                 }
             })
         return search_result
 
     def search_article_by_user(self, param: str, uid: int):
-        query = "SELECT * FROM Translation WHERE (name LIKE :param OR link LIKE :link) AND idauthor=:uid"
+        query = "SELECT * FROM Article WHERE (name LIKE :param OR link LIKE :link) AND idauthor=:uid"
         results = self.__tryexec(query, {'param': f'%{param}%', 'link': f"%.wikidot.com/%{param}%", 'uid': uid}).fetchall()
-        return [{
-            'id': result[0],
-            'name': result[1],
-            'link': result[5],
-            'words': result[2],
-            'bonus': result[3],
-            'added': result[4]
-        } for result in results]
+        user_cache = {}
+        search_result = []
+        for result in results:
+            if result[7]:
+                if result[7] not in user_cache:
+                    corrector = user_cache[result[7]] = self.get_user(result[7])
+                else:
+                    corrector = user_cache[result[7]]
+            else:
+                corrector = None
+            search_result.append({
+                'id': result[0],
+                'name': result[1],
+                'link': result[5],
+                'words': result[2],
+                'bonus': result[3],
+                'added': result[4],
+                'corrector': {
+                    'id': corrector.uid if corrector else 0,
+                    'name': (corrector.display_name or corrector.nickname) if corrector else 'N/A'
+                }
+            })
+        return search_result
