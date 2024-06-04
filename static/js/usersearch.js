@@ -11,7 +11,7 @@ const ROLE_LIMITS = {
 const ROLE_NONE = 'Žádná'
 
 const table = document.getElementById('ut-body')
-const originalHtml = table.innerHTML
+const originalTable = table.innerHTML
 
 let is_original = true
 let timeoutID = 0
@@ -47,7 +47,7 @@ function search(target) {
         if(!is_original) {
             
             //setTimeout( () => table.innerHTML = originalHtml, 300)
-            table.innerHTML = originalHtml
+            table.innerHTML = originalTable
             is_original = true
         }
         return

@@ -12,7 +12,7 @@ from secrets import token_urlsafe
 # Internal
 from models.user import User
 from passwords import pw_check, pw_hash
-from models.translation import Translation
+from models.article import Article
 from discord import DiscordClient
 
 PAGE_ITEMS = 15
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS UserHasType (
     FOREIGN KEY (idtype) REFERENCES UserType(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Translation (
+CREATE TABLE IF NOT EXISTS Article (
     id          INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
     name        TEXT        NOT NULL,
     words       INTEGER     NOT NULL,
@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS Translation (
     link        TEXT                 DEFAULT NULL,
     idauthor    INTEGER     NOT NULL,
     idcorrector INTEGER     DEFAULT NULL,
+    is_original BOOLEAN     NOT NULL DEFAULT FALSE,
     FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY (idcorrector) REFERENCES User(id)
 );
@@ -67,27 +68,28 @@ CREATE TABLE IF NOT EXISTS Note (
 );
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
-    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Translation.id) AS translation_count, (TOTAL(Translation.words)/1000.0)+TOTAL(Translation.bonus) AS points
+    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Article.id) AS translation_count, (TOTAL(Article.words)/1000.0)+TOTAL(Article.bonus) AS points
         FROM user
-            LEFT JOIN Translation 
-                ON User.id = Translation.idauthor
+            LEFT JOIN Article 
+                ON User.id = Article.idauthor
+        WHERE Article.is_original = FALSE
         GROUP BY User.nickname;
 
 CREATE VIEW IF NOT EXISTS Series AS 
     SELECT (SUBSTR(name, 5)/1000)+1 AS series, COUNT(id) AS articles, SUM(words) AS words 
-        FROM translation 
-        WHERE name 
-            LIKE 'SCP-___' OR name LIKE 'SCP-____' 
+        FROM Article 
+        WHERE (name 
+            LIKE 'SCP-___' OR name LIKE 'SCP-____') AND is_original=FALSE 
         GROUP BY SERIES
     UNION
     SELECT 999 AS series, COUNT(id) AS articles, SUM(words) AS words
-        FROM TRANSLATION
+        FROM Article
         WHERE name
-            NOT LIKE 'SCP-___' AND name NOT LIKE 'SCP-____';
+            NOT LIKE 'SCP-___' AND name NOT LIKE 'SCP-____' AND is_original=FALSE;
 
 CREATE VIEW IF NOT EXISTS Statistics AS
     SELECT SUM(t.words) AS total_words, COUNT(t.id) AS total_articles, (SELECT COUNT(id) FROM user) AS total_users
-        FROM translation AS t;
+        FROM Article AS t WHERE t.is_original=FALSE;
 """
 
 StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
@@ -118,15 +120,15 @@ class Database():
             error(f'Database query "{query}" aborted with error: {str(e)}')
 
     def __mark_updated(self) -> None:
-        query = "SELECT MAX(added) FROM Translation"
+        query = "SELECT MAX(added) FROM Article"
         try:
             self.__lastupdate = datetime.strptime(self.__tryexec(query).fetchone()[0], "%Y-%m-%d %H:%M:%S")
         except TypeError:
             warning(f"Unable to get last update timestamp")
             self.__lastupdate = datetime(2005, 1, 1)
 
-    def __make_translation(self, row) -> Translation:
-        return Translation(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), self.get_user(row[7]), row[5])
+    def __make_article(self, row) -> Article:
+        return Article(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), self.get_user(row[7]), row[5])
 
     @property
     def lastupdated(self) -> datetime:
@@ -200,15 +202,15 @@ class Database():
         return row[0]
 
     def delete_user(self, uid: int) -> None:
-        queries = [
-            "DELETE FROM Translation WHERE idauthor=?",
+        queries = [ # TODO: Maybe we shouldn't delete the articles with the user
+            "DELETE FROM Article WHERE idauthor=?",
             "DELETE FROM Note WHERE idauthor=?",
             "DELETE FROM User WHERE id=?"]
         for query in queries:   # No cascade delete because I'm dumb
             self.__tryexec(query, (uid, ))
 
     def delete_article(self, aid: int) -> None:
-        query = "DELETE FROM Translation WHERE id=?"
+        query = "DELETE FROM Article WHERE id=?"
         self.__tryexec(query, (aid, ))
 
     def users(self) -> t.List:
@@ -216,21 +218,21 @@ class Database():
         rows = self.__tryexec(query).fetchall()
         return [User(*row) for row in rows]
 
-    def get_translation(self, tid: int) -> t.Optional[Translation]:
-        query = "SELECT * FROM Translation WHERE id=?"
+    def get_article(self, tid: int) -> t.Optional[Article]:
+        query = "SELECT * FROM Article WHERE id=?"
         data = (tid,)
         row = self.__tryexec(query, data).fetchone()
         if row is None:
             return None
-        return self.__make_translation(row)
+        return self.__make_article(row)
     
-    def update_translation(self, t: Translation) -> None:
-        query = "UPDATE Translation SET name=?, words=?, bonus=?, link=? WHERE id=?"
+    def update_translation(self, t: Article) -> None:
+        query = "UPDATE Article SET name=?, words=?, bonus=?, link=? WHERE id=?"
         data = (t.name, t.words, t.bonus, t.link, t.id)
         self.__tryexec(query, data)
 
-    def assign_corrector(self, article: Translation, user: User):
-        query = "UPDATE Translation SET idcorrector=? WHERE id=?"
+    def assign_corrector(self, article: Article, user: User):
+        query = "UPDATE Article SET idcorrector=? WHERE id=?"
         data = (user.uid, article.id)
         self.__tryexec(query, data)
 
@@ -239,7 +241,7 @@ class Database():
         data = (u.nickname, u.wikidot, u.discord, u.password, u.uid)
         self.__tryexec(query, data)
 
-    def rename_translation(self, name: str, new_name: str):
+    def rename_article(self, name: str, new_name: str):
         ... # We need to update the link too
 
     # TODO: Calling an API adapter in a database class is absolutely horrible
@@ -258,14 +260,14 @@ class Database():
         self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
 
     def translation_exists(self, name: str) -> bool:
-        query = "SELECT * FROM Translation WHERE name=? COLLATE NOCASE"
+        query = "SELECT * FROM Article WHERE name=? COLLATE NOCASE"
         cursor = self.__tryexec(query, (name.lower(),))
         if len(cursor.fetchall()) != 0:
             return True
         else:
             return False
 
-    def get_translations_by_user(self, uid: int, sort='latest', page=0) -> t.Optional[list[Translation]]:
+    def get_translations_by_user(self, uid: int, sort='latest', page=0) -> t.Optional[list[Article]]:
         match sort:
             case 'az':
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
@@ -275,18 +277,18 @@ class Database():
                 sorter = 'ORDER BY words DESC'
             case _:
                 sorter = 'ORDER BY name COLLATE NOCASE ASC'
-        query = "SELECT * FROM Translation WHERE idauthor=? " + sorter + " LIMIT ? OFFSET ?"
+        query = "SELECT * FROM Article WHERE idauthor=? AND is_original=FALSE " + sorter + " LIMIT ? OFFSET ?"
         data = (uid, PAGE_ITEMS, page*PAGE_ITEMS)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
             return None
-        return [self.__make_translation(row) for row in rows]
+        return [self.__make_article(row) for row in rows]
 
-    def get_translation_by_link(self, link: str):
-        query = "SELECT * FROM Translation WHERE link=?"
+    def get_article_by_link(self, link: str):
+        query = "SELECT * FROM Article WHERE link=?"
         data = (link,)
         row = self.__tryexec(query, data).fetchone()
-        return None if not row else self.__make_translation(row)
+        return None if not row else self.__make_article(row)
     
     def get_user_point_count(self, uid: int) -> int:
         row = self.__tryexec("SELECT points FROM Frontpage WHERE id=?", (uid,)).fetchone()
@@ -302,9 +304,9 @@ class Database():
         data = self.__tryexec(query).fetchone()
         return StatisticsRow(*data)
     
-    def add_article(self, a: Translation) -> int:
-        query = "INSERT INTO Translation (name, words, bonus, added, link, idauthor) VALUES (?, ?, ?, ?, ?, ?)"
-        data = (a.name, a.words, a.bonus, a.added.strftime('%Y-%m-%d %H:%M:%S'), a.link, a.author.get_id())
+    def add_article(self, a: Article) -> int:
+        query = "INSERT INTO Article (name, words, bonus, added, link, idauthor, is_original) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        data = (a.name, a.words, a.bonus, a.added.strftime('%Y-%m-%d %H:%M:%S'), a.link, a.author.get_id(), a.is_original)
         rowid = self.__tryexec(query, data).lastrowid
         self.__mark_updated()
         return rowid

@@ -150,7 +150,7 @@ class RSSMonitor:
             return False
         
         if timestamp+TIMEZONE_UTC_OFFSET > self.__dbs.lastupdated:
-            if self.__dbs.get_translation_by_link(update['link']):
+            if self.__dbs.get_article_by_link(update['link']):
                 info(f'Ignoring {title} in RSS feed (added manually)')
                 return False
             if not RSSMonitor.en_page_exists(update['link']):
@@ -168,7 +168,7 @@ class RSSMonitor:
             self.__webhook.send_text(f'Korekci pro {real_title} nelze přiřadit k autorovi. Uživatel neexistuje.')
             warning(f"Correction for {real_title} cannot be assigned to a user")
         else:
-            translation = self.__dbs.get_translation_by_link(update['link'])
+            translation = self.__dbs.get_article_by_link(update['link'])
             if not translation:
                 self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], real_title, author, uuid4(), RSSUpdateType.RSS_CORRECTION))
                 #self.__webhook.send_text(f'Korekci od {author.nickname} pro {real_title} nelze přiřadit k článku. Zapište manuálně.')

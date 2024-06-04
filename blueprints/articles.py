@@ -8,7 +8,7 @@ from flask_login import current_user, login_required
 
 # Internal
 from forms import NewArticleForm, EditArticleForm, AssignCorrectionForm
-from models.translation import Translation
+from models.article import Article
 from models.user import get_user_role
 from extensions import dbs, rss, webhook
 
@@ -26,7 +26,7 @@ def notify_rolemaster(uid, point_amount):
 @ArticleController.route('/article/<int:aid>/delete', methods=["POST"])
 @login_required
 def delete_article(aid: int):
-    name = dbs.get_translation(aid).name
+    name = dbs.get_article(aid).name
     dbs.delete_article(aid)
     info(f"Article {name} deleted by {current_user.nickname} (ID: {current_user.uid})")
     flash(f'Článek {name} smazán')
@@ -58,7 +58,7 @@ def add_article(uid):
     if current_app.config['WEBHOOK_ENABLE']:
         notify_rolemaster(uid, form.words.data / 1000 + form.bonus.data)
 
-    article = Translation(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), form.link.data)
+    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), form.link.data)
     article_id = dbs.add_article(article)
     
     if 'NEW_FROM_RSS' in session:
@@ -75,7 +75,7 @@ def add_article(uid):
 @login_required
 def edit_article(aid: int):
 
-    article = dbs.get_translation(aid)
+    article = dbs.get_article(aid)
     if not article:
         abort(404)
 
@@ -88,7 +88,7 @@ def edit_article(aid: int):
         return redirect(url_for('UserController.user', uid=article.author.get_id()))
 
     title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
-    new_article = Translation(article.id, title, form.words.data, form.bonus.data, article.added, article.author, form.link.data)
+    new_article = Article(article.id, title, form.words.data, form.bonus.data, article.added, article.author, form.link.data)
     dbs.update_translation(new_article)
     info(f"Article {new_article.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
 
@@ -100,7 +100,7 @@ def assign_correction():
     form = AssignCorrectionForm()
     back_to_changes = redirect(url_for('RssPageController.rss_changes'))
     try:
-        article = dbs.get_translation(form.article_id.data)
+        article = dbs.get_article(form.article_id.data)
     except:
         flash('Neplatné ID')
         return back_to_changes

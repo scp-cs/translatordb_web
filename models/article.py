@@ -6,7 +6,7 @@ import typing as t
 from models.user import User
 
 @dataclass
-class Translation():
+class Article():
     id: int
     name: str
     words: int
@@ -15,3 +15,4 @@ class Translation():
     author: User
     corrector: t.Optional[User]
     link: t.Optional[str] = None
+    is_original: bool = False
