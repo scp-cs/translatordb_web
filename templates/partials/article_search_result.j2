@@ -1,17 +1,16 @@
-<tr id="t-{{tr.id}}" class="h-12">
-    <td data-label="Název:">
-        {% if tr.link %} <a class="hover:underline" target="_blank" href="{{tr.link}}">{{tr.name}}</a>
-        {% else %} <span class="text-gray-500">{{tr.name}}</span>
-        {% endif %}
-    </td>
-    <td data-label="Počet slov:">{{tr.words}}</td>
-    <td data-label="Bonus:">{{tr.bonus}}</td>
-    <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.uid)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
-    <td data-label="Zapsáno:">{{tr.added.strftime('%d.%m.%Y %H:%M')}}</td>
-    {% if current_user.is_authenticated %}
-    <td class="flex flex-col gap-2 md:table-row">
-        <a class="" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}"><i class="text-2xl transition-opacity bi bi-pencil-square opacity-40 hover:opacity-100"></i></a>
-        <a class="" onclick="delete_confirm(this);"><i class="text-2xl transition-opacity bi bi-x-circle opacity-40 hover:opacity-100"></i></a>
-    </td>
-    {% endif %}
+<template id="translation-search-template">
+<tr class="h-12">
+    <td id="translation-name" data-label="Název:"></td>
+    <td id="translation-words" data-label="Počet slov:"></td>
+    <td id="translation-bonus" data-label="Bonus:"></td>
+    <td id="translation-corrector" data-label="Korektoval:"></td>
+    <td id="translation-timestamp" data-label="Zapsáno:"></td>
 </tr>
+</template>
+
+<template id="translation-actions-template">
+    <td class="flex flex-col gap-2 md:table-row">
+        <a id="translation-edit" href=""><i class="text-2xl transition-opacity bi bi-pencil-square opacity-40 hover:opacity-100"></i></a>
+        <a id="translation-delete" onclick="delete_confirm(this);"><i class="text-2xl transition-opacity bi bi-x-circle opacity-40 hover:opacity-100"></i></a>
+    </td>
+</template>

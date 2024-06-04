@@ -96,9 +96,9 @@
     {% endfor %}
     </tbody>
 </table>
-<div id="page-selector" class="flex flex-row items-center mx-auto border rounded-md w-min bg-white/5 backdrop-blur-sm border-slate-900">
+<div id="page-selector" class="flex flex-row items-center mx-auto border rounded-md cursor-pointer select-none w-min bg-white/5 backdrop-blur-sm border-slate-900">
     {% for p in range((stats.count / 15)|round(0, 'ceil')|int) %}
-    <a class="px-2 py-2 transition-all rounded-md hover:bg-white/30" href="{{url_for('UserController.user', sort=sort, p=p, uid=user.uid)}}">{{p+1}}</a>
+    <span class="px-2 py-2 transition-all rounded-md hover:bg-white/30" onclick="showPage({{p}})">{{p+1}}</span>
     {% endfor %}
 </div>
 </div>
@@ -115,6 +115,7 @@
 <div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-80 bg-slate-900">
 </div>
 
+{% include 'partials/article_search_result.j2'%}
 
 <script defer>
 $('#del-btn').click(() => {$('#del-btn').addClass('hidden'); $('#del-confirm').removeClass('hidden')})
