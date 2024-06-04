@@ -2,7 +2,7 @@ const table = document.getElementById('tb-articles')
 const originalTable = table.innerHTML
 const uid = window.location.pathname.split('/').at(-1)
 
-let is_original = true
+let isOriginal = true
 let timeoutID = 0
 let originalPageCount = parseInt($("#page-selector").children().last().text())
 
@@ -88,17 +88,17 @@ function addRow(article, has_auth) {
 function search(query) {
     if (query == "" || query.length < 2) {
         isSearching = false
-        if(!is_original) {
+        if(!isOriginal) {
             $('.usr-row').animate({opacity: 0}, 300)
             setPageCount(originalPageCount)
             setTimeout( () => table.innerHTML = originalTable, 300)
-            is_original = true
+            isOriginal = true
         }
         return
     }
     isSearching = true
     $('.usr-row').animate({opacity: 0}, 300)
-    is_original = false
+    isOriginal = false
     
 
     $("#tb-articles").empty()
