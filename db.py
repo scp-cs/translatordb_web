@@ -13,6 +13,7 @@ from secrets import token_urlsafe
 from models.user import User
 from passwords import pw_check, pw_hash
 from models.article import Article
+from models.correction import Correction
 from discord import DiscordClient
 
 PAGE_ITEMS = 15
@@ -90,6 +91,10 @@ CREATE VIEW IF NOT EXISTS Series AS
 CREATE VIEW IF NOT EXISTS Statistics AS
     SELECT SUM(t.words) AS total_words, COUNT(t.id) AS total_articles, (SELECT COUNT(id) FROM user) AS total_users
         FROM Article AS t WHERE t.is_original=FALSE;
+
+CREATE VIEW IF NOT EXISTS Correction AS
+    SELECT id as article_id, idauthor AS author, idcorrector AS corrector
+        FROM Article WHERE idcorrector IS NOT NULL;
 """
 
 StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
@@ -398,3 +403,20 @@ class Database():
                 }
             })
         return search_result
+
+    def get_corrections_by_user(self, user_id: int) -> t.Optional[t.List[Correction]]:
+        user_cache = {}
+        result = []
+        corrector = self.get_user(user_id)
+        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=?", (user_id)).fetchall()
+        if not corrections:
+            return None
+        for correction in corrections:
+            article = self.get_article(correction[0])
+            if correction[1] in user_cache:
+                author = user_cache[correction[1]]
+            else:
+                author = self.get_user(correction[1])
+                user_cache[correction[1]] = author
+            result.append(Correction(article, author, corrector))
+        return result
