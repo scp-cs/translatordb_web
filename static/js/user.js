@@ -1,35 +1,159 @@
-const overlay_bg = document.getElementById('overlay');
-let overlay_dialog = document.getElementById('overlay-dialog');
-const overlay_flex = document.getElementById('overlay-flex');
+const modWindow = document.getElementById('modal-window')
+const modOverlay = document.getElementById('modal-overlay')
 
-let article = "";
-let aid = 0;
+const table = document.getElementById('tb-articles')
+const originalTable = table.innerHTML
+const uid = window.location.pathname.split('/').at(-1)
 
-function delete_confirm(btn) {
-    overlay_bg.classList.remove('hidden');
-    overlay_flex.classList.remove('hidden');
-    let row = btn.parentNode.parentNode;
-    article = row.getElementsByTagName('td')[0].innerText;
-    aid = parseInt(row.id.slice(2));
-    document.getElementById('confirm-text').innerText = `Opravdu chcete smazat článek ${article}?`;
-}
+let isOriginal = true
+let timeoutID = 0
+let originalPageCount = parseInt($("#page-selector").children().last().text())
 
-function delete_send(btn) {
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", `/article/${aid}/delete`);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = () => {
-        if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-            console.log('XHR finished');
-            window.location.reload();
-        }
+let searchResults = {}
+let isSearching = false
+
+function clickOut(e) {
+    if(!modWindow.contains(e.target)) {
+        modalClose()
     }
-    console.log('sending xhr...');
-    xhr.send(null);
 }
 
-function hide_overlay() {
-    overlay_bg.classList.add('hidden');
-    overlay_flex.classList.add('hidden');
-    overlay_dialog.innerHTML = '<h2 class="mb-2 text-xl font-semibold">Potvrzení</h2><p id="confirm-text" class="mb-4"></p><div id="confirm-buttons" class="flex flex-row justify-center w-full"><a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a><a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a> </div>'
+function modalClose() {
+    //$("body").css("overflow-y", "scroll") // Re-enable body scrolling
+    $("#modal-overlay").fadeOut(200)
+    $(window).off("click", clickOut)
 }
+
+function modalOpen(articleId, articleName) {
+    //$("body").css("overflow-y", "hidden")   // Disable body scrolling while the modal is open
+    $("#confirm-text").text(`Chcete smazat článek "${articleName.trim()}"?`)
+    $("#btn-delete-yes").on("click", () => deleteArticle(articleId))
+    $("#modal-overlay").css("display", "flex").hide().fadeIn(200)
+    setTimeout(() => $(window).on("click", clickOut), 100)  // Wait for a bit so the event doesn't fire from the current click
+}
+
+function deleteArticle(id) {
+    fetch(`/article/${id}/delete`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+    }).then(() => window.location.reload())
+}
+
+function dateAsLocal(dateString) {
+    const date = new Date(Date.parse(dateString))
+    return date.toLocaleString("cs-CZ", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})
+}
+
+function setPageCount(count) {
+    console.log(count)
+    $("#page-selector").empty()
+    for(let i = 0; i < count; i++) {
+        $("<span>", {
+            class: "px-2 py-2 transition-all rounded-md hover:bg-white/30",
+            text: i+1,
+        }).appendTo("#page-selector").on("click", () => {showPage(i)})
+    }
+}
+
+function showPage(page) {
+    if(isSearching) {
+        $('#tb-articles').empty()
+        searchResults.result
+            .slice(page*15, (page+1)*15)
+            .forEach(row => {addRow(row, searchResults.has_auth)})
+    } else {
+        let currentLocation = new URL(window.location.href)
+        currentLocation.searchParams.set("p", page)
+        window.location = currentLocation.toString()
+    }
+}
+
+function get_role(point_count) {
+    role = ROLE_NONE
+    for(const [limit, text] of Object.entries(ROLE_LIMITS)) {
+        if(limit > point_count) 
+            return role
+        role = text
+    }
+    return role
+}
+
+function addRow(article, has_auth) {
+    let template = $("#translation-search-template").contents().clone(true, true)
+
+    if(article.link) {
+        let link = $("<a>", {
+            class: "hover:underline",
+            href: article.link,
+            target: "_blank",
+            text: article.name})
+        template.find("#translation-name").append(link)
+    } else {
+        template.find("#translation-name").addClass("text-gray-500").text(article.name)
+    }
+    template.find('#translation-bonus').text(article.bonus)
+    template.find('#translation-words').text(article.words)
+    
+    if(article.corrector.id) {
+        let link = $("<a>", {
+            class: "hover:underline",
+            href: `/user/${article.corrector.id}`,
+            text: article.corrector.name})
+        template.find("#translation-corrector").append(link)
+    } else {
+        template.find("#translation-corrector").text("N/A")
+    }
+
+    template.find("#translation-timestamp").text(dateAsLocal(article.added))
+    
+    if(has_auth) {
+        let action_template = $("#translation-actions-template").contents().clone(true, true)
+        action_template.find("#translation-edit").prop("href", `/article/${article.id}/edit`)
+        template.append(action_template)
+    }
+
+    $("#tb-articles").append(template)
+}
+
+function search(query) {
+    if (query == "" || query.length < 2) {
+        isSearching = false
+        if(!isOriginal) {
+            $('.usr-row').animate({opacity: 0}, 300)
+            setPageCount(originalPageCount)
+            setTimeout( () => table.innerHTML = originalTable, 300)
+            isOriginal = true
+        }
+        return
+    }
+    isSearching = true
+    $('.usr-row').animate({opacity: 0}, 300)
+    isOriginal = false
+    
+
+    $("#tb-articles").empty()
+    setTimeout(() => {
+        fetch('/api/search/article?' + new URLSearchParams({
+            'q': query,
+            'u': uid
+        })).then(response => response.json()).then(r => {
+            searchResults = r
+            setPageCount(Math.ceil(r.result.length/15))
+            showPage(0)
+        })
+    }, 300);
+
+}
+
+function handleSearch(e) {
+    clearTimeout(timeoutID)
+    if(e.target.value.length > 1) {
+        timeoutID = setTimeout(search, 300, e.target.value)
+    } else {
+        search(e.target.value)
+    }
+}
+
+$("#search-field").on("input", handleSearch)

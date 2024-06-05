@@ -97,6 +97,9 @@ td {
     @apply inline-flex flex-row flex-wrap items-center justify-center w-full gap-2 px-10 py-5 mr-4 bg-white border shadow-2xl border-slate-900 backdrop-blur-sm md:gap-0 md:w-auto md:flex-row md:rounded-xl bg-opacity-5;
   }
 
+  .modal-overlay {
+    @apply fixed top-0 left-0 z-10 flex-col items-center justify-center hidden max-size backdrop-blur-sm;
+  }
 }
 
 @layer utilities {

@@ -89,7 +89,7 @@
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
             <a class="" href="{{url_for('ArticleController.edit_article', aid=tr.id)}}"><i class="text-2xl transition-opacity bi bi-pencil-square opacity-40 hover:opacity-100"></i></a>
-            <a class="" onclick="delete_confirm(this);"><i class="text-2xl transition-opacity bi bi-x-circle opacity-40 hover:opacity-100"></i></a>
+            <a class="" onclick="modalOpen('{{tr.id}}', '{{tr.name}}')"><i class="text-2xl transition-opacity bi bi-x-circle opacity-40 hover:opacity-100"></i></a>
         </td>
         {% endif %}
     </tr>
@@ -102,17 +102,17 @@
     {% endfor %}
 </div>
 </div>
-<div id="overlay-flex" class="fixed top-0 left-0 z-40 flex flex-col items-center justify-center hidden w-full h-full overflow-hidden transition-all bg-transparent">
-    <div id="overlay-dialog" class="z-50 flex flex-col items-center justify-center px-8 py-6 border rounded-lg border-slate-400 bg-slate-900">
+
+
+<div id="modal-overlay" class="modal-overlay">
+    <div id="modal-window" class="px-10 py-8 bg-black border rounded-md border-slate-400 flex-col-center">
         <h2 class="mb-2 text-xl font-semibold">Potvrzení</h2>
         <p id='confirm-text' class="mb-4"></p>
         <div id='confirm-buttons' class="flex flex-row justify-center w-full">
-            <a class="mx-1 bg-green-600 w-36 btn-rounded hover:bg-green-500" onclick="delete_send(this);">Ano</a>
-            <a class="mx-1 bg-red-600 w-36 btn-rounded hover:bg-red-500" onclick="hide_overlay();">Ne</a>
+            <a id="btn-delete-yes" class="mx-1 border-2 border-green-800 w-36 btn-rounded hover:border-green-500">Ano</a>
+            <a id="btn-delete-no" class="mx-1 border-2 border-red-900 w-36 btn-rounded hover:border-red-500" onclick="modalClose()">Ne</a>
         </div>
     </div>
-</div>
-<div id="overlay" class="fixed top-0 left-0 z-30 hidden w-full h-full overflow-hidden transition-all opacity-80 bg-slate-900">
 </div>
 
 {% include 'partials/article_search_result.j2'%}
@@ -121,5 +121,4 @@
 $('#del-btn').click(() => {$('#del-btn').addClass('hidden'); $('#del-confirm').removeClass('hidden')})
 </script>
 <script src="{{url_for('static', filename='js/user.js')}}"></script>
-<script src="{{url_for('static', filename='js/articlesearch.js')}}"></script>
 {% endblock content %}
