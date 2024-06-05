@@ -58,7 +58,7 @@ def add_article(uid):
     if current_app.config['WEBHOOK_ENABLE']:
         notify_rolemaster(uid, form.words.data / 1000 + form.bonus.data)
 
-    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), form.link.data)
+    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), None, form.link.data)
     article_id = dbs.add_article(article)
     
     if 'NEW_FROM_RSS' in session:
@@ -88,7 +88,7 @@ def edit_article(aid: int):
         return redirect(url_for('UserController.user', uid=article.author.get_id()))
 
     title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
-    new_article = Article(article.id, title, form.words.data, form.bonus.data, article.added, article.author, form.link.data)
+    new_article = Article(article.id, title, form.words.data, form.bonus.data, article.added, article.author, article.corrector, form.link.data)
     dbs.update_translation(new_article)
     info(f"Article {new_article.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
 
