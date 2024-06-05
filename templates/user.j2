@@ -50,9 +50,9 @@
 
     <div class="sorter-group">
         <h2 class="w-full text-lg font-bold text-center md:w-auto md:mr-6">Řadit:</h2>
-        <a href="{{url_for('UserController.user', sort='az', uid=user.uid)}}" class="sorter-button">A-Z</a>
-        <a href="{{url_for('UserController.user', sort='latest', uid=user.uid)}}" class="sorter-button">Nejnovější</a>
-        <a href="{{url_for('UserController.user', sort='words', uid=user.uid)}}" class="sorter-button">Počet slov</a>
+        <button onclick="setSorting('az')" class="sorter-button">A-Z</button>
+        <button onclick="setSorting('latest')" class="sorter-button">Nejnovější</button>
+        <button onclick="setSorting('words')" class="sorter-button">Počet slov</button>
     </div>
     
     <div class="inline-block w-full px-4 text-center text-black bg-white border border-slate-900 md:shadow-2xl md:rounded-xl bg-opacity-5 backdrop-blur-sm md:w-auto md:py-5">

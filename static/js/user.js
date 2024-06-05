@@ -11,6 +11,32 @@ let originalPageCount = parseInt($("#page-selector").children().last().text())
 
 let searchResults = {}
 let isSearching = false
+let currentPage = 0
+
+// ===== UTILITY FUNCTIONS ======
+
+/**
+ * Accepts a parsable date string and converts it to the "cs-CZ" locale format
+ * @param {string} dateString 
+ * @returns string
+ */
+function dateAsLocal(dateString) {
+    const date = new Date(Date.parse(dateString))
+    return date.toLocaleString("cs-CZ", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})
+}
+
+/**
+ * Adds or changes a URL GET parameter and reloads the page
+ * @param {string} key The key to be added / changed
+ * @param {string} value The value to set
+ */
+function addGetParam(key, value) {
+    let currentLocation = new URL(window.location.href)
+    currentLocation.searchParams.set(key, value)
+    window.location = currentLocation.toString()
+}
+
+// ===== MODAL FUNCTIONS =====
 
 function clickOut(e) {
     if(!modWindow.contains(e.target)) {
@@ -41,10 +67,7 @@ function deleteArticle(id) {
     }).then(() => window.location.reload())
 }
 
-function dateAsLocal(dateString) {
-    const date = new Date(Date.parse(dateString))
-    return date.toLocaleString("cs-CZ", {year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit"})
-}
+// ===== SEARCH FUNCTIONS =====
 
 function setPageCount(count) {
     console.log(count)
@@ -59,25 +82,34 @@ function setPageCount(count) {
 
 function showPage(page) {
     if(isSearching) {
+        currentPage = page
         $('#tb-articles').empty()
         searchResults.result
             .slice(page*15, (page+1)*15)
             .forEach(row => {addRow(row, searchResults.has_auth)})
     } else {
-        let currentLocation = new URL(window.location.href)
-        currentLocation.searchParams.set("p", page)
-        window.location = currentLocation.toString()
+        addGetParam("p", page)
     }
 }
 
-function get_role(point_count) {
-    role = ROLE_NONE
-    for(const [limit, text] of Object.entries(ROLE_LIMITS)) {
-        if(limit > point_count) 
-            return role
-        role = text
+function setSorting(order) {
+    if(isSearching) {
+        switch (order) {
+            case 'az':
+                searchResults.result.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}))
+                break
+            case 'latest':
+                searchResults.result.sort((a, b) => {return Date.parse(b.added) - Date.parse(a.added)})
+                break
+            case 'words':
+                searchResults.result.sort((a, b) => b.words - a.words)
+            default:
+                break
+        }
+        showPage(currentPage)
+    } else {
+        addGetParam("sort", order)
     }
-    return role
 }
 
 function addRow(article, has_auth) {
@@ -118,32 +150,24 @@ function addRow(article, has_auth) {
 }
 
 function search(query) {
-    if (query == "" || query.length < 2) {
-        isSearching = false
-        if(!isOriginal) {
-            $('.usr-row').animate({opacity: 0}, 300)
+    if (query == "" || query.length <= 2) {
+        if(isSearching) {
             setPageCount(originalPageCount)
-            setTimeout( () => table.innerHTML = originalTable, 300)
-            isOriginal = true
+            table.innerHTML = originalTable
+            isSearching = false
         }
         return
     }
     isSearching = true
     $('.usr-row').animate({opacity: 0}, 300)
-    isOriginal = false
-    
-
-    $("#tb-articles").empty()
-    setTimeout(() => {
-        fetch('/api/search/article?' + new URLSearchParams({
-            'q': query,
-            'u': uid
-        })).then(response => response.json()).then(r => {
-            searchResults = r
-            setPageCount(Math.ceil(r.result.length/15))
-            showPage(0)
-        })
-    }, 300);
+    fetch('/api/search/article?' + new URLSearchParams({
+        'q': query,
+        'u': uid
+    })).then(response => response.json()).then(r => {
+        searchResults = r
+        setPageCount(Math.ceil(r.result.length/15))
+        showPage(0)
+    })
 
 }
 

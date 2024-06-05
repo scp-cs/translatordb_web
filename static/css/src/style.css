@@ -86,7 +86,7 @@ td {
   }
 
   .sorter-button {
-    @apply hover:bg-white/30 md:my-0 md:w-auto md:mx-1 btn-rounded border border-slate-900 flex-grow my-2 bg-white/10;
+    @apply hover:bg-white/30 md:my-0 md:w-auto md:mx-1 btn-rounded border border-slate-900 flex-grow my-2 bg-white/10 cursor-pointer;
   }
 
   .small-button {
