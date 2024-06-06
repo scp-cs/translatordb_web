@@ -9,3 +9,10 @@ class Correction():
     article: Article
     author: User
     corrector: User
+
+    def to_dict(self):
+        return {
+            'article': self.article.to_dict(),
+            'author': self.author.to_dict(),
+            'corrector': self.corrector.to_dict()
+        }

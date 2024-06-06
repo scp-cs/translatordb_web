@@ -16,3 +16,15 @@ class Article():
     corrector: t.Optional[User]
     link: t.Optional[str] = None
     is_original: bool = False
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "words": self.words,
+            "bonus": self.bonus,
+            "added": self.added,
+            "author": self.author.to_dict(),
+            "corrector": self.corrector.to_dict() if self.corrector else None,
+            "link": self.link
+            }
