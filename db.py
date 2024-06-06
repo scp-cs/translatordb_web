@@ -408,7 +408,7 @@ class Database():
         user_cache = {}
         result = []
         corrector = self.get_user(user_id)
-        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=?", (user_id)).fetchall()
+        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=?", (user_id,)).fetchall()
         if not corrections:
             return None
         for correction in corrections:
