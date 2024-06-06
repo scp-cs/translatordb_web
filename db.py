@@ -404,11 +404,11 @@ class Database():
             })
         return search_result
 
-    def get_corrections_by_user(self, user_id: int) -> t.Optional[t.List[Correction]]:
+    def get_corrections_by_user(self, user_id: int, page=0) -> t.Optional[t.List[Correction]]:
         user_cache = {}
         result = []
         corrector = self.get_user(user_id)
-        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=?", (user_id,)).fetchall()
+        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=? LIMIT ? OFFSET ?", (user_id, PAGE_ITEMS, PAGE_ITEMS*page)).fetchall()
         if not corrections:
             return None
         for correction in corrections:
