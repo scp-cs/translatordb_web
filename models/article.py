@@ -14,6 +14,7 @@ class Article():
     added: datetime
     author: User
     corrector: t.Optional[User]
+    corrected: datetime = None
     link: t.Optional[str] = None
     is_original: bool = False
 
@@ -26,5 +27,6 @@ class Article():
             "added": self.added,
             "author": self.author.to_dict(),
             "corrector": self.corrector.to_dict() if self.corrector else None,
+            "corrected": self.corrected,
             "link": self.link
             }

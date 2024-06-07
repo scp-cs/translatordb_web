@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS Article (
     link        TEXT                 DEFAULT NULL,
     idauthor    INTEGER     NOT NULL,
     idcorrector INTEGER     DEFAULT NULL,
+    corrected   DATETIME    DEFAULT NULL,
     is_original BOOLEAN     NOT NULL DEFAULT FALSE,
     FOREIGN KEY (idauthor) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY (idcorrector) REFERENCES User(id)
@@ -133,7 +134,7 @@ class Database():
             self.__lastupdate = datetime(2005, 1, 1)
 
     def __make_article(self, row) -> Article:
-        return Article(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), self.get_user(row[7]), row[5])
+        return Article(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), self.get_user(row[7]), datetime.strptime(row[9], '%Y-%m-%d %H:%M:%S'), row[5], row[8])
 
     @property
     def lastupdated(self) -> datetime:
