@@ -15,7 +15,7 @@
     </td>
 </template>
 
-<template id="translation-table">
+<template id="translation-table-partial">
     <table class="w-full text-center mx-auto mt-4 mb-2 bg-white/5 transition-all shadow-2xl  md:border-separate md:table-auto border border-slate-900 md:py-5 md:w-auto md:min-w-[60%] border-spacing-x-12 border-spacing-y-0 md:rounded-xl backdrop-blur-sm">
         <thead>
         <tr>
@@ -53,11 +53,11 @@
     </table>
 </template>
 
-<template id="correction-table">
-    <table class="w-full mx-auto mt-4 mb-2 text-center transition-all border shadow-2xl bg-white/5 md:border-separate md:table-auto md:min-w-[40%] border-slate-900 md:py-5 md:w-auto border-spacing-x-12 border-spacing-y-0 md:rounded-xl backdrop-blur-sm">
+<template id="correction-table-partial">
+    <table class="w-full mx-auto mt-4 mb-2 text-center transition-all border shadow-2xl bg-white/5 md:border-separate md:table-auto md:min-w-[60%] border-slate-900 md:py-5 md:w-auto border-spacing-x-12 border-spacing-y-0 md:rounded-xl backdrop-blur-sm">
     <thead>
         <tr>
-            <th class="min-w-[12em]">Název</th>
+            <th>Název</th>
             <th>Počet slov</th>
             <th>Autor</th>
             {% if current_user.is_authenticated %}

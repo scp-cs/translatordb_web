@@ -1,17 +1,16 @@
 const modWindow = document.getElementById('modal-window')
 const modOverlay = document.getElementById('modal-overlay')
 
-const table = document.getElementById('tb-articles')
-const originalTable = table.innerHTML
 const uid = window.location.pathname.split('/').at(-1)
 
 let isOriginal = true
 let timeoutID = 0
 let originalPageCount = parseInt($("#page-selector").children().last().text())
 
-let searchResults = {}
+let currentData = {}
 let isSearching = false
 let currentPage = 0
+let currentSorting = "latest"
 
 // ===== UTILITY FUNCTIONS ======
 
@@ -70,25 +69,33 @@ function deleteArticle(id) {
 // ===== SEARCH FUNCTIONS =====
 
 function setPageCount(count) {
-    console.log(count)
     $("#page-selector").empty()
     for(let i = 0; i < count; i++) {
         $("<span>", {
-            class: "px-2 py-2 transition-all rounded-md hover:bg-white/30",
+            class: `px-2 py-2 transition-all rounded-md ${i == currentPage ? "bg-white/10" : "hover:bg-white/30"}`,
             text: i+1,
         }).appendTo("#page-selector").on("click", () => {showPage(i)})
     }
 }
 
-function showPage(page) {
+function setSelectedPage(x) {
+    currentPage = x
+    $("#page-selector").children().removeClass('bg-white/10')
+    $("#page-selector").children().eq(x).addClass('bg-white/10')
+}
+
+async function showPage(page) {
+    setSelectedPage(page)
     if(isSearching) {
-        currentPage = page
         $('#tb-articles').empty()
-        searchResults.result
+        currentData.result
             .slice(page*15, (page+1)*15)
-            .forEach(row => {addRow(row, searchResults.has_auth)})
+            .forEach(row => {addRow(row, currentData.has_auth)})
     } else {
-        addGetParam("p", page)
+        fetchPage(page, currentSorting).then(data => {
+            $('#tb-articles').empty()
+            data.result.forEach(row => {addRow(row, currentData.has_auth)})
+        })  
     }
 }
 
@@ -96,19 +103,20 @@ function setSorting(order) {
     if(isSearching) {
         switch (order) {
             case 'az':
-                searchResults.result.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}))
+                currentData.result.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}))
                 break
             case 'latest':
-                searchResults.result.sort((a, b) => {return Date.parse(b.added) - Date.parse(a.added)})
+                currentData.result.sort((a, b) => {return Date.parse(b.added) - Date.parse(a.added)})
                 break
             case 'words':
-                searchResults.result.sort((a, b) => b.words - a.words)
+                currentData.result.sort((a, b) => b.words - a.words)
             default:
                 break
         }
-        showPage(currentPage)
+        showPage(0)
     } else {
-        addGetParam("sort", order)
+        currentSorting = order
+        showPage(0)
     }
 }
 
@@ -128,11 +136,11 @@ function addRow(article, has_auth) {
     template.find('#translation-bonus').text(article.bonus)
     template.find('#translation-words').text(article.words)
     
-    if(article.corrector.id) {
+    if(article.corrector) {
         let link = $("<a>", {
-            class: "hover:underline",
+            class: "underline",
             href: `/user/${article.corrector.id}`,
-            text: article.corrector.name})
+            text: article.corrector.nickname})
         template.find("#translation-corrector").append(link)
     } else {
         template.find("#translation-corrector").text("N/A")
@@ -149,12 +157,17 @@ function addRow(article, has_auth) {
     $("#tb-articles").append(template)
 }
 
+async function fetchPage(page, sort = 'latest', type = 'translation') {
+    const pageData = await fetch(`/api/user/${uid}/articles?` + new URLSearchParams({p: page, s: sort, t: type})).then(response => response.json())
+    setPageCount(Math.ceil(pageData.total/15))
+    return pageData
+}
+
 function search(query) {
     if (query == "" || query.length <= 2) {
         if(isSearching) {
-            setPageCount(originalPageCount)
-            table.innerHTML = originalTable
             isSearching = false
+            showPage(0)
         }
         return
     }
@@ -164,7 +177,7 @@ function search(query) {
         'q': query,
         'u': uid
     })).then(response => response.json()).then(r => {
-        searchResults = r
+        currentData = r
         setPageCount(Math.ceil(r.result.length/15))
         showPage(0)
     })
@@ -181,3 +194,4 @@ function handleSearch(e) {
 }
 
 $("#search-field").on("input", handleSearch)
+setSelectedPage(0)

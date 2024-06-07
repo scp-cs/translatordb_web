@@ -6,12 +6,12 @@ from extensions import dbs
 
 ApiController = Blueprint('ApiController', __name__)
 
-def result_ok(result):
+def result_ok(result, extra_data = {}):
     return jsonify({
         'status': 'OK',
         'result': result,
         'has_auth': current_user.is_authenticated
-    })
+    } | extra_data)
 
 def result_error(error_message = "", status_code = 400):
     return jsonify({
@@ -67,10 +67,11 @@ def api_get_articles(uid: int):
 
     page = request.args.get("p", 0, int)
     article_type = request.args.get("t", "translation", str)
+    sort = request.args.get("s", "latest", str)
 
     match article_type:
         case 'translation':
-            results = [t.to_dict() for t in dbs.get_translations_by_user(uid, page=page)]
+            results = [t.to_dict() for t in dbs.get_translations_by_user(uid, page=page, sort=sort)]
         case 'correction':
             results = [c.to_dict() for c in dbs.get_corrections_by_user(uid, page=page)]
         case 'original':
@@ -78,4 +79,6 @@ def api_get_articles(uid: int):
         case _:
             return result_error('Invalid type')
 
-    return result_ok(results)
+    total = dbs.get_article_counts(uid).translations[0]
+
+    return result_ok(results, {"total": total})

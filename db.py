@@ -101,6 +101,7 @@ CREATE VIEW IF NOT EXISTS Correction AS
 StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
 SeriesRow = namedtuple('SeriesRow', "series articles words")
 StatisticsRow = namedtuple('StatisticsRow', "total_words total_articles total_users")
+Counts = namedtuple('Counts', 'translations corrections originals')
 
 class Database():
     
@@ -134,7 +135,17 @@ class Database():
             self.__lastupdate = datetime(2005, 1, 1)
 
     def __make_article(self, row) -> Article:
-        return Article(row[0], row[1], row[2], row[3], datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), self.get_user(row[6]), self.get_user(row[7]), datetime.strptime(row[9], '%Y-%m-%d %H:%M:%S'), row[5], row[8])
+        return Article(
+        row[0], # id 
+        row[1], # title
+        row[2], # word count
+        row[3], # bonus points
+        datetime.strptime(row[4], '%Y-%m-%d %H:%M:%S'), # date added
+        self.get_user(row[6]), # author
+        self.get_user(row[7]), # corrector
+        datetime.strptime(row[9], '%Y-%m-%d %H:%M:%S') if row[9] else None, # date corrected
+        row[5], # link
+        row[8]) # original or translation
 
     @property
     def lastupdated(self) -> datetime:
@@ -152,6 +163,12 @@ class Database():
                 sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
         data = self.__tryexec("SELECT * FROM Frontpage " + sorter + " LIMIT ? OFFSET ?", (PAGE_ITEMS, PAGE_ITEMS*page)).fetchall()
         return [StatRow(*row) for row in data]
+
+    def get_article_counts(self, uid: int) -> Counts:
+        translations = self.__tryexec("SELECT COUNT(id) FROM Article WHERE idauthor=? AND is_original=FALSE", (uid,)).fetchone()
+        corrections = self.__tryexec("SELECT COUNT(article_id) FROM Correction WHERE corrector=?", (uid,)).fetchone()
+        originals = self.__tryexec("SELECT COUNT(id) FROM Article WHERE idauthor=? AND is_original=TRUE", (uid,)).fetchone()
+        return Counts(translations, corrections, originals)
 
     def get_user_count(self) -> int:
         count = self.__tryexec("SELECT COUNT(id) FROM Frontpage").fetchone()[0]
