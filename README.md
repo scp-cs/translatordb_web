@@ -37,6 +37,7 @@ cd translatordb_web
     "DISCORD_CLIENT_ID": [YOUR DISCORD APP ID],
     "DISCORD_REDIRECT_URI": "https://your-app-url.xyz/oauth/callback",
     "DISCORD_WEBHOOK_URL": "https://discord.com/api/webhooks/XXXXXXXXXXXX",
+    "DISCORD_ROLEMASTER_ID": 012345678912345678,
     "RSS_MONITOR_CHANNELS": [
         "http://your-wiki.wikidot.com/feed/site-changes.xml",
         "http://your-wanderers-library.wikidot.com/feed/site-changes.xml",
