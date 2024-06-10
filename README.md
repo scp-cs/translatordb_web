@@ -35,12 +35,24 @@ cd translatordb_web
     "DISCORD_TOKEN": "[YOUR DISCORD APP TOKEN]"
     "DISCORD_CLIENT_SECRET": "[YOUR DISCORD OAUTH SECRET]",
     "DISCORD_CLIENT_ID": [YOUR DISCORD APP ID],
-    "DISCORD_REDIRECT_URI": "https://your-app-url.xyz/oauth/callback"
+    "DISCORD_REDIRECT_URI": "https://your-app-url.xyz/oauth/callback",
+    "DISCORD_WEBHOOK_URL": "https://discord.com/api/webhooks/XXXXXXXXXXXX",
+    "RSS_MONITOR_CHANNELS": [
+        "http://your-wiki.wikidot.com/feed/site-changes.xml",
+        "http://your-wanderers-library.wikidot.com/feed/site-changes.xml",
+        "http://your-backrooms-or-whatever.wikidot.com/feed/site-changes.xml"
+    ]
 }
 ```
 `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` can be found on your [Discord Developer Portal](https://discord.com/developers/applications).
 > [!NOTE]
 > Keep in mind that your redirect URI must *exactly* match one of the URIs entered on the developer portal, even when testing locally. Login attempts will fail otherwise.
+
+`DISCORD_WEBHOOK_URL` - A webhook that will be used to send notifications and alerts, you can generate one in your server settings.
+
+`DISCORD_ROLEMASTER_ID` - User ID of the moderator responsible for roles.
+
+`RSS_MONITOR_CHANNELS` - An RSS feed URL for each one of your sites.
 
 `SECRET_KEY` should be a reasonably long random string and never shared with anyone. You can generate one, for example, using the Python `secrets` library:
 ```python
