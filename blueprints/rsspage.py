@@ -3,13 +3,14 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 
 from extensions import rss, sched
+from forms import AssignCorrectionForm
 
 RssPageController = Blueprint('RssPageController', __name__)
 
 @RssPageController.route('/changes')
 @login_required
 def rss_changes():
-    return render_template('changes.j2', changes=rss.updates)
+    return render_template('changes.j2', changes=rss.updates, form=AssignCorrectionForm())
 
 @RssPageController.route('/changes/ignore')
 @login_required

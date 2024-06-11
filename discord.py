@@ -112,15 +112,15 @@ class DiscordClient():
             users (List[int]): The User IDs
             path (str): The Download directory
         """
-        for u in users:
-            if u is None or not DiscordClient._validate_user_id(u):
-                warning(f"Skipping profile update for {u}")
+        for user in users:
+            if user is None or not DiscordClient._validate_user_id(user):
+                warning(f"Skipping profile update for {user}")
                 continue
-            avatar = DiscordClient.get_avatar(u)
+            avatar = DiscordClient.get_avatar(user)
             if avatar is not None:
-                with open(join(path,f'{u}.png'), 'wb') as file:
+                with open(join(path,f'{user}.png'), 'wb') as file:
                     file.write(avatar)
-                    Image.open(BytesIO(avatar)).resize((64, 64), Image.Resampling.NEAREST).save(join(path,f'{u}_thumb.png'))
+                    Image.open(BytesIO(avatar)).resize((64, 64), Image.Resampling.NEAREST).save(join(path,f'{user}_thumb.png'))
 
                 time.sleep(0.1) # Wait for a bit so we don't hit the rate limit
 

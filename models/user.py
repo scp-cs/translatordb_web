@@ -55,4 +55,12 @@ class User(UserMixin):
     @property
     def can_login(self) -> bool:
         return self.password != None
-        
+
+    def to_dict(self) -> dict:
+        return {
+        'id': self.uid,
+        'nickname': self.nickname,
+        'wikidot': self.wikidot,
+        'discord': self.discord,
+        'displayName': self.display_name
+    }

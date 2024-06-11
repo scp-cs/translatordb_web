@@ -86,15 +86,38 @@ td {
   }
 
   .sorter-button {
-    @apply hover:bg-white/30 md:my-0 md:w-auto md:mx-1 btn-rounded border border-slate-900 flex-grow my-2 bg-white/10;
+    @apply hover:bg-white/30 md:my-0 md:w-auto md:mx-1 btn-rounded border border-slate-900 flex-grow my-2 bg-white/10 cursor-pointer;
   }
 
+  .small-button {
+    @apply px-1 ml-2 transition-all bg-transparent border-2 rounded-md border-slate-800 text-white/90 hover:bg-white/10;
+
+  }
+  .sorter-group {
+    @apply inline-flex flex-row flex-wrap items-center justify-center w-full gap-2 px-10 py-5 mr-4 bg-white border shadow-2xl border-slate-900 backdrop-blur-sm md:gap-0 md:w-auto md:flex-row md:rounded-xl bg-opacity-5;
+  }
+
+  .modal-overlay {
+    @apply fixed top-0 left-0 z-10 flex-col items-center justify-center hidden max-size backdrop-blur-sm;
+  }
 }
 
 @layer utilities {
   
   .shadow-inner {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  .flex-row-center {
+    @apply flex flex-row items-center justify-center;
+  }
+
+  .max-size {
+    @apply w-full h-full;
   }
   
 }

@@ -165,5 +165,7 @@ translations_new.json
 *.db
 *.db-wal
 *.db-shm
+*.csv
 config.json
+czech.json
 temp
