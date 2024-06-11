@@ -15,7 +15,7 @@ function title_update(event) {
 }
 
 let urlParams = new URLSearchParams(window.location.search)
-if(!urlParams.has('rss')) {
+if(!urlParams.has('rss') & !link.value) {
     link.value = 'https://scp-cs.wikidot.com/';
     titlebox.addEventListener("input", title_update);
     link.addEventListener('input', () => {titlebox.removeEventListener('input', title_update);})
