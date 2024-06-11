@@ -46,6 +46,7 @@
     </thead>
     <tbody>
         {% for ch in changes %}
+        {% if ch.update_type == RSSUpdateType.RSS_CORRECTION %}
         <tr class="h-10 p-4" id="ch-{{ch.uuid}}">
             <td data-label="Název">{{ ch.title }}</td>
             <td data-label="Přidáno">{{ ch.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
@@ -55,6 +56,7 @@
                 <a class="small-button" href="{{url_for('RssPageController.ignore_update', u=ch.uuid)}}">Ignorovat</a>
             </td>
         </tr>
+        {% endif %}
         {% endfor %}
     </tbody>
     </table>
