@@ -1,7 +1,7 @@
 from typing import Any
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, BooleanField, ValidationError
-from wtforms.validators import EqualTo, Length, DataRequired, url
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, BooleanField, ValidationError, HiddenField
+from wtforms.validators import EqualTo, Length, DataRequired, url, NumberRange
 from flask import flash
 
 class FlaskFormEx(FlaskForm):
@@ -63,3 +63,11 @@ class PasswordChangeForm(FlaskFormEx):
     pw = PasswordField('Heslo', validators=[DataRequired()])
     pw_confirm = PasswordField('Potvrzení hesla', validators=[DataRequired(), EqualTo('pw', message="Hesla se musí shodovat")])
     submit = SubmitField('Potvrdit')
+
+class AssignCorrectionForm(FlaskFormEx):
+    article_id = HiddenField('id', validators=[NumberRange(0, message="ID musí být číslo")])
+    corrector_id = HiddenField('corrector')
+    guid = HiddenField('guid')
+    link = HiddenField('link')
+    title = HiddenField('title')
+    submit = SubmitField('Přiřadit')

@@ -15,6 +15,7 @@ from models.user import get_user_role, get_role_color, User
 from passwords import pw_hash
 from utils import ensure_config
 from discord import DiscordClient
+from rss import RSSUpdateType
 
 # Blueprints
 from blueprints.auth import UserAuth
@@ -24,7 +25,7 @@ from blueprints.errorhandler import ErrorHandler
 from blueprints.users import UserController
 from blueprints.articles import ArticleController
 from blueprints.stats import StatisticsController
-from blueprints.search import SearchController
+from blueprints.api import ApiController
 from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
 
@@ -64,17 +65,17 @@ def user_init() -> None:
     Registers an administrator from environment variables
     """
 
-    init_user, pwd = env.get("SCP_INIT_USER"), env.get("SCP_INIT_PASSWORD")
+    init_user, init_password = env.get("SCP_INIT_USER"), env.get("SCP_INIT_PASSWORD")
     if not init_user:
         return
-    if not pwd:
+    if not init_password:
         error(f"Password not specified for {init_user}")
         exit(-1)
     if dbs.user_exists(init_user):
         warning(f"Initial user {init_user} already exists")
         return
     info(f"Adding initial user {init_user}")
-    dbs.add_user(User(1, init_user, "", pw_hash(pwd), ""))
+    dbs.add_user(User(1, init_user, "", pw_hash(init_password), ""))
 
 def extensions_init() -> None:
     """
@@ -86,8 +87,6 @@ def extensions_init() -> None:
     login_manager.user_loader(lambda uid: dbs.get_user(uid))
     login_manager.init_app(app)
 
-    rss.init_app(app)
-    
     # Checking if we can enable Discord Login
     appid, appsecret = app.config.get('DISCORD_CLIENT_ID', None), app.config.get('DISCORD_CLIENT_SECRET', None)
     app.config['OAUTH_ENABLE'] = app.config.get('DISCORD_LOGIN_ENABLE', True)
@@ -105,8 +104,8 @@ def extensions_init() -> None:
         sched.start()
 
     # Checking if we can enable the API connection
-    token = app.config.get('DISCORD_TOKEN', None)
-    if token:
+    discord_token = app.config.get('DISCORD_TOKEN', None)
+    if discord_token:
         DiscordClient.init_app(app)
         sched.add_job('Download avatars', lambda: DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar'), trigger='interval', days=3)
         sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
@@ -120,6 +119,8 @@ def extensions_init() -> None:
         app.config['WEBHOOK_ENABLE'] = True
     else:
         app.config['WEBHOOK_ENABLE'] = False
+
+    rss.init_app(app)
 
     # Checking if we have any RSS feeds configured
     if rss.has_links:
@@ -142,11 +143,13 @@ if __name__ == '__main__':
     app.config['scheduler'] = sched
     app.config['oauth'] = oauth
     app.config['rss'] = rss
+    app.config['webhook'] = webhook
 
     # Add useful template globals
     app.add_template_global(get_user_role)
     app.add_template_global(get_role_color)
     app.add_template_global(current_user, 'current_user')
+    app.add_template_global(RSSUpdateType)
     
     # Load all the blueprints
     app.register_blueprint(ErrorHandler)
@@ -156,7 +159,7 @@ if __name__ == '__main__':
     app.register_blueprint(UserController)
     app.register_blueprint(ArticleController)
     app.register_blueprint(StatisticsController)
-    app.register_blueprint(SearchController)
+    app.register_blueprint(ApiController)
     app.register_blueprint(OauthController)
     app.register_blueprint(RssPageController)
 

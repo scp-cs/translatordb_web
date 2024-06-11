@@ -16,22 +16,22 @@ def oauth_callback():
 
     try:
         oauth.callback()
-        uid = oauth.fetch_user().id
+        user_id = oauth.fetch_user().id
     except OAuth2Error as e:
         error(f'Oauth Failed: {str(e)}')
         flash('Autentizace selhala, zkuste to prosím znovu.')
         return redirect(url_for('UserAuth.login'))
     
-    usr = dbs.get_user_by_discord(uid)
-    if not usr:
-        warning(f'Login attempt with unregistered ID {uid} from {request.remote_addr}')
+    user = dbs.get_user_by_discord(user_id)
+    if not user:
+        warning(f'Login attempt with unregistered ID {user_id} from {request.remote_addr}')
         flash('Uživatel není registrován nebo má neplatné ID')
         return redirect(url_for('UserAuth.login'))
     
-    if not usr.can_login:
-        warning(f'Login attempt by unauthorized user {usr.nickname} from {request.remote_addr}')
+    if not user.can_login:
+        warning(f'Login attempt by unauthorized user {user.nickname} from {request.remote_addr}')
         flash('Přihlášení je povolené pouze moderátorům')
 
-    login_user(usr)
-    info(f'User {usr.nickname} (ID: {usr.uid}) logged in using Oauth (Authorized as {uid})')
+    login_user(user)
+    info(f'User {user.nickname} (ID: {user.uid}) logged in using Oauth (Authorized as {user_id})')
     return redirect(url_for('index'))   # TODO: Pamatovat si posledni URL i tady
