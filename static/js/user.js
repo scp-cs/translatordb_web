@@ -429,7 +429,7 @@ function searchArticle(query) {
 
 function handleSearch(e) {
     clearTimeout(timeoutID)
-    if(e.target.value.length > 3) {
+    if(e.target.value.length > 2) {
         timeoutID = setTimeout(searchArticle, 300, e.target.value)
     }
 }
