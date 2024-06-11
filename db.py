@@ -162,6 +162,10 @@ class Database():
                 sorter = 'ORDER BY points DESC'
             case 'count':
                 sorter = 'ORDER BY translation_count DESC'
+            case 'corrections':
+                sorter = 'ORDER BY correction_count DESC'
+            case 'originals':
+                sorter = 'ORDER BY original_count DESC'
             case _:
                 sorter = 'ORDER BY nickname COLLATE NOCASE ASC'
         data = self.__tryexec("SELECT * FROM Frontpage " + sorter + " LIMIT ? OFFSET ?", (PAGE_ITEMS, PAGE_ITEMS*page)).fetchall()
