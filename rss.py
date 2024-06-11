@@ -181,6 +181,10 @@ class RSSMonitor:
         if update['guid'] in self.__finished_guids:
             debug(f"Skip GUID {update['guid']}")
             return False
+
+        if update['guid'] not in self.__finished_guids:
+            debug(f"Add GUID {update['guid']}")
+            self.__finished_guids.append(update['guid'])
         update_type = RSSMonitor.get_rss_update_type(update)
         match update_type:
             case RSSUpdateType.RSS_NEWPAGE:
@@ -189,9 +193,7 @@ class RSSMonitor:
             case RSSUpdateType.RSS_CORRECTION:
                 self._process_correction(update)
 
-        if update['guid'] not in self.__finished_guids:
-            debug(f"Add GUID {update['guid']}")
-            self.__finished_guids.append(update['guid'])
+        
 
         return False
         
