@@ -58,7 +58,7 @@ def add_article(uid):
     if current_app.config['WEBHOOK_ENABLE']:
         notify_rolemaster(uid, form.words.data / 1000 + form.bonus.data)
 
-    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), link=form.link.data)
+    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), link=form.link.data, is_original=bool(request.args.get('original', False)))
     article_id = dbs.add_article(article)
     
     if 'NEW_FROM_RSS' in session:
@@ -88,8 +88,8 @@ def edit_article(aid: int):
         return redirect(url_for('UserController.user', uid=article.author.get_id()))
 
     title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data
-    new_article = Article(article.id, title, form.words.data, form.bonus.data, article.added, article.author, article.corrector, article.corrected, form.link.data)
-    dbs.update_translation(new_article)
+    new_article = Article(article.id, title, form.words.data, form.bonus.data, article.added, article.author, article.corrector, article.corrected, form.link.data, article.is_original)
+    dbs.update_article(new_article)
     info(f"Article {new_article.name} (ID: {aid}) edited by {current_user.nickname} (ID: {current_user.uid})")
 
     return redirect(url_for('UserController.user', uid=article.author.get_id()))
@@ -117,6 +117,7 @@ def assign_correction():
     rss.remove_update(form.guid.data)
     article.link = form.link.data
     article.name = form.title.data
-    dbs.update_translation(article)
+    dbs.update_article(article)
     flash('Článek aktualizován')
     return back_to_changes
+

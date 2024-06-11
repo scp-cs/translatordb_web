@@ -70,12 +70,15 @@ CREATE TABLE IF NOT EXISTS Note (
 );
 
 CREATE VIEW IF NOT EXISTS Frontpage AS
-    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, COUNT(Article.id) AS translation_count, (TOTAL(Article.words)/1000.0)+TOTAL(Article.bonus) AS points
+    SELECT User.id AS id, User.nickname AS nickname, User.discord AS discord, User.wikidot AS wikidot, User.display_name as display, 
+    SUM(CASE WHEN Article.is_original=FALSE THEN 1 ELSE 0 END) AS translation_count, 
+    (SUM(CASE WHEN Article.is_original=FALSE THEN Article.words ELSE 0 END)/1000.0)+TOTAL(Article.bonus) AS points,
+    (SELECT COUNT(article_id) FROM Correction WHERE Corrector=User.id) AS correction_count,
+    SUM(CASE WHEN Article.is_original=TRUE THEN 1 ELSE 0 END) AS original_count
         FROM user
             LEFT JOIN Article 
                 ON User.id = Article.idauthor
-        WHERE Article.is_original = FALSE
-        GROUP BY User.nickname;
+        GROUP BY User.id;
 
 CREATE VIEW IF NOT EXISTS Series AS 
     SELECT (SUBSTR(name, 5)/1000)+1 AS series, COUNT(id) AS articles, SUM(words) AS words 
@@ -94,11 +97,11 @@ CREATE VIEW IF NOT EXISTS Statistics AS
         FROM Article AS t WHERE t.is_original=FALSE;
 
 CREATE VIEW IF NOT EXISTS Correction AS
-    SELECT id as article_id, idauthor AS author, idcorrector AS corrector
+    SELECT id as article_id, idauthor AS author, idcorrector AS corrector, corrected AS timestamp, words, name
         FROM Article WHERE idcorrector IS NOT NULL;
 """
 
-StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points")
+StatRow = namedtuple('StatRow', "id nickname discord wikidot display count points corrections originals")
 SeriesRow = namedtuple('SeriesRow', "series articles words")
 StatisticsRow = namedtuple('StatisticsRow', "total_words total_articles total_users")
 Counts = namedtuple('Counts', 'translations corrections originals')
@@ -249,14 +252,19 @@ class Database():
             return None
         return self.__make_article(row)
     
-    def update_translation(self, t: Article) -> None:
+    def update_article(self, t: Article) -> None:
         query = "UPDATE Article SET name=?, words=?, bonus=?, link=? WHERE id=?"
         data = (t.name, t.words, t.bonus, t.link, t.id)
         self.__tryexec(query, data)
 
     def assign_corrector(self, article: Article, user: User):
-        query = "UPDATE Article SET idcorrector=? WHERE id=?"
-        data = (user.uid, article.id)
+        query = "UPDATE Article SET idcorrector=?, corrected=? WHERE id=?"
+        data = (user.uid, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), article.id)
+        self.__tryexec(query, data)
+
+    def unassign_corrector(self, article: Article):
+        query = "UPDATE Article SET idcorrector=NULL, corrected=NULL WHERE id=?"
+        data = (article.id,)
         self.__tryexec(query, data)
 
     def update_user(self, u: User) -> None:
@@ -304,7 +312,22 @@ class Database():
         data = (uid, PAGE_ITEMS, page*PAGE_ITEMS)
         rows = self.__tryexec(query, data).fetchall()
         if rows is None:
-            return None
+            return []
+        return [self.__make_article(row) for row in rows]
+
+    def get_originals_by_user(self, uid: int, sort='latest', page=0) -> t.Optional[list[Article]]:
+        match sort:
+            case 'az':
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+            case 'latest':
+                sorter = 'ORDER BY added DESC, id DESC'
+            case _:
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+        query = "SELECT * FROM Article WHERE idauthor=? AND is_original=TRUE " + sorter + " LIMIT ? OFFSET ?"
+        data = (uid, PAGE_ITEMS, page*PAGE_ITEMS)
+        rows = self.__tryexec(query, data).fetchall()
+        if rows is None:
+            return []
         return [self.__make_article(row) for row in rows]
 
     def get_article_by_link(self, link: str):
@@ -422,13 +445,22 @@ class Database():
             })
         return search_result
 
-    def get_corrections_by_user(self, user_id: int, page=0) -> t.Optional[t.List[Correction]]:
+    def get_corrections_by_user(self, user_id: int, page=0, sort='latest') -> t.Optional[t.List[Correction]]:
+        match sort:
+            case 'az':
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
+            case 'latest':
+                sorter = 'ORDER BY timestamp DESC, article_id DESC'
+            case 'words':
+                sorter = 'ORDER BY words DESC'
+            case _:
+                sorter = 'ORDER BY name COLLATE NOCASE ASC'
         user_cache = {}
         result = []
         corrector = self.get_user(user_id)
-        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=? LIMIT ? OFFSET ?", (user_id, PAGE_ITEMS, PAGE_ITEMS*page)).fetchall()
+        corrections = self.__tryexec("SELECT * FROM Correction WHERE corrector=? " + sorter + " LIMIT ? OFFSET ?", (user_id, PAGE_ITEMS, PAGE_ITEMS*page)).fetchall()
         if not corrections:
-            return None
+            return []
         for correction in corrections:
             article = self.get_article(correction[0])
             if correction[1] in user_cache:
@@ -436,5 +468,5 @@ class Database():
             else:
                 author = self.get_user(correction[1])
                 user_cache[correction[1]] = author
-            result.append(Correction(article, author, corrector))
+            result.append(Correction(article, author, corrector, datetime.strptime(correction[3], '%Y-%m-%d %H:%M:%S'), correction[4]))
         return result

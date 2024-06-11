@@ -30,7 +30,7 @@ function modalOpen(guid, correctorId, link, title) {
     currentTitle = title;
 }
 
-function addRow(row) {
+function addTranslationRow(row) {
     const template = $('#search-result-template')
     let newRow = template.contents().clone(true, true)
     newRow.find('#result-name').text(row.name)
@@ -43,19 +43,19 @@ function addRow(row) {
     $('#result-table-body').append(newRow)
 }
 
-function search(query) {
+function searchArticle(query) {
     console.log(`search for ${query}`)
     $('#result-table-body').empty()
     fetch('/api/search/article?' + new URLSearchParams({
         'q': query,
         'u': -1
-    })).then(response => response.json()).then(r => r.result.slice(0, 10).forEach(result => addRow(result)))
+    })).then(response => response.json()).then(r => r.result.slice(0, 10).forEach(result => addTranslationRow(result)))
 }
 
 function handleSearch(e) {
     clearTimeout(timeoutID)
     if(e.target.value.length > 2) {
-        timeoutID = setTimeout(search, 300, e.target.value)
+        timeoutID = setTimeout(searchArticle, 300, e.target.value)
     }
 }
 

@@ -1,16 +1,16 @@
-from os import abort
-from flask import jsonify, request, Blueprint
-from flask_login import current_user
+from logging import warning, info, error
+from flask import jsonify, request, Blueprint, flash, redirect, url_for, abort
+from flask_login import current_user, login_required
 
 from extensions import dbs
 
 ApiController = Blueprint('ApiController', __name__)
 
-def result_ok(result, extra_data = {}):
+def result_ok(result = [], extra_data = {}):
     return jsonify({
         'status': 'OK',
         'result': result,
-        'has_auth': current_user.is_authenticated
+        'hasAuth': current_user.is_authenticated
     } | extra_data)
 
 def result_error(error_message = "", status_code = 400):
@@ -72,13 +72,47 @@ def api_get_articles(uid: int):
     match article_type:
         case 'translation':
             results = [t.to_dict() for t in dbs.get_translations_by_user(uid, page=page, sort=sort)]
+            total = dbs.get_article_counts(uid).translations[0]
         case 'correction':
-            results = [c.to_dict() for c in dbs.get_corrections_by_user(uid, page=page)]
+            results = [c.to_dict() for c in dbs.get_corrections_by_user(uid, page=page, sort=sort)]
+            total = dbs.get_article_counts(uid).corrections[0]
         case 'original':
-            return result_error('Not implemented yet')
+            results = [o.to_dict() for o in dbs.get_originals_by_user(uid, page=page, sort=sort)]
+            total = dbs.get_article_counts(uid).originals[0]
         case _:
             return result_error('Invalid type')
 
-    total = dbs.get_article_counts(uid).translations[0]
-
     return result_ok(results, {"total": total})
+
+@ApiController.route('/api/user/<int:uid>/assign-correction', methods=['POST'])
+@login_required
+def assign_correction(uid: int):
+    article_id = request.form.get('aid', None, int)
+    if not article_id:
+        flash('Neplatný článek')
+        return result_error('Neplatný článek')
+    article = dbs.get_article(article_id)
+    if not article:
+        flash('Neplatný článek')
+        return result_error('Neplatný článek')
+    corrector = dbs.get_user(uid)
+    if not corrector:
+        flash('Neplatný uživatel')
+        return result_error('Neplatný uživatel')
+    dbs.assign_corrector(article, corrector)
+    info(f"Assigning correction of \"{article.name}\" ({article.id}) to {corrector.nickname} ({corrector.uid})")
+    flash('Korekce zapsána')
+    return result_ok()
+
+@ApiController.route('/api/article/<int:aid>/remove-correction', methods=["POST"])
+@login_required
+def remove_correction(aid: int):
+
+    article = dbs.get_article(aid)
+    if not article:
+        flash('Neplatný článek')
+        return result_error('Neplatný článek')
+
+    dbs.unassign_corrector(article)
+    flash('Korekce odstraněna')
+    return result_ok()

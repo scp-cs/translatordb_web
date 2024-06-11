@@ -1,5 +1,7 @@
 const modWindow = document.getElementById('modal-window')
 const modOverlay = document.getElementById('modal-overlay')
+const pickerWindow = document.getElementById('picker-window')
+const pickerOverlay = document.getElementById('picker-overlay')
 
 const uid = window.location.pathname.split('/').at(-1)
 
@@ -11,6 +13,8 @@ let currentData = {}
 let isSearching = false
 let currentPage = 0
 let currentSorting = "latest"
+
+let currentType = "translation"
 
 // ===== UTILITY FUNCTIONS ======
 
@@ -39,20 +43,24 @@ function addGetParam(key, value) {
 
 function clickOut(e) {
     if(!modWindow.contains(e.target)) {
-        modalClose()
+        deleteModalClose()
     }
 }
 
-function modalClose() {
+function deleteModalClose() {
     //$("body").css("overflow-y", "scroll") // Re-enable body scrolling
     $("#modal-overlay").fadeOut(200)
     $(window).off("click", clickOut)
 }
 
-function modalOpen(articleId, articleName) {
+function deleteModalOpen(articleId, articleName, correction=false) {
     //$("body").css("overflow-y", "hidden")   // Disable body scrolling while the modal is open
-    $("#confirm-text").text(`Chcete smazat článek "${articleName.trim()}"?`)
-    $("#btn-delete-yes").on("click", () => deleteArticle(articleId))
+    $("#confirm-text").text(`Chcete smazat ${correction ? "korekci" : "článek"} "${articleName.trim()}"?`)
+    if(correction) {
+        $("#btn-delete-yes").on("click", () => unassignCorrection(articleId))
+    } else {
+        $("#btn-delete-yes").on("click", () => deleteArticle(articleId))
+    }
     $("#modal-overlay").css("display", "flex").hide().fadeIn(200)
     setTimeout(() => $(window).on("click", clickOut), 100)  // Wait for a bit so the event doesn't fire from the current click
 }
@@ -64,6 +72,24 @@ function deleteArticle(id) {
             "Content-Type": "application/x-www-form-urlencoded"
         }
     }).then(() => window.location.reload())
+}
+
+function clickOut(e) {
+    if(!pickerWindow.contains(e.target)) {
+        articlePickerClose()
+    }
+}
+
+function articlePickerClose() {
+    $("#picker-overlay").fadeOut(200)
+    $(window).off("click", clickOut)
+    $('#input-search').off('input', handleSearch)
+}
+
+function articlePickerOpen() {
+    $("#picker-overlay").css("display", "flex").hide().fadeIn(200)
+    setTimeout(() => $(window).on("click", clickOut), 100)
+    $('#input-search').on('input', handleSearch).val("")
 }
 
 // ===== SEARCH FUNCTIONS =====
@@ -84,22 +110,88 @@ function setSelectedPage(x) {
     $("#page-selector").children().eq(x).addClass('bg-white/10')
 }
 
+function setSelectedSorter(sort) {
+    let x;
+    switch (sort) {
+        case 'az':
+            x = 1
+            break;
+        
+        case 'latest':
+            x = 2
+            break;
+
+        case 'words':
+            x = 3
+            break;
+
+        default:
+            break;
+    }
+    $("#sort-selector").children().removeClass('bg-white/30')
+    $("#sort-selector").children().eq(x).addClass('bg-white/30')
+}
+
+function setSelectedType(type) {
+    let x;
+    switch (type) {
+        case 'translation':
+            x = 1
+            break;
+        
+        case 'correction':
+            x = 2
+            break;
+
+        case 'original':
+            x = 3
+            break;
+
+        default:
+            break;
+    }
+    $("#type-selector").children().removeClass('bg-white/30')
+    $("#type-selector").children().eq(x).addClass('bg-white/30')
+}
+
 async function showPage(page) {
     setSelectedPage(page)
     if(isSearching) {
-        $('#tb-articles').empty()
-        currentData.result
-            .slice(page*15, (page+1)*15)
-            .forEach(row => {addRow(row, currentData.has_auth)})
+        addRows(currentData.result
+            .slice(page*15, (page+1)*15), currentData.hasAuth)
     } else {
-        fetchPage(page, currentSorting).then(data => {
-            $('#tb-articles').empty()
-            data.result.forEach(row => {addRow(row, currentData.has_auth)})
+        await fetchPage(page, currentSorting, currentType).then(data => {
+            debugger
+            setPageCount(Math.ceil(data.total/15))
+            addRows(data.result, data.hasAuth)
         })  
     }
 }
 
+function addRows(rows, hasAuth) {
+    switch (currentType) {
+        case 'translation':
+            $('#tb-articles').empty()
+            rows.forEach(row => {addTranslationRow(row, hasAuth)})
+            break;
+
+        case 'correction':
+            $('#co-articles').empty()
+            rows.forEach(row => {addCorrectionRow(row, hasAuth)})
+            break;
+        
+        case 'original':
+            $('#or-articles').empty()
+            rows.forEach(row => {addOriginalRow(row, hasAuth)})
+            break;
+
+        default:
+            break;
+    }
+}
+
 function setSorting(order) {
+    setSelectedSorter(order)
     if(isSearching) {
         switch (order) {
             case 'az':
@@ -120,8 +212,8 @@ function setSorting(order) {
     }
 }
 
-function addRow(article, has_auth) {
-    let template = $("#translation-search-template").contents().clone(true, true)
+function addTranslationRow(article, hasAuth) {
+    let template = $("#translation-row-template").contents().clone(true, true)
 
     if(article.link) {
         let link = $("<a>", {
@@ -148,13 +240,73 @@ function addRow(article, has_auth) {
 
     template.find("#translation-timestamp").text(dateAsLocal(article.added))
     
-    if(has_auth) {
+    if(hasAuth) {
         let action_template = $("#translation-actions-template").contents().clone(true, true)
         action_template.find("#translation-edit").prop("href", `/article/${article.id}/edit`)
+        action_template.find("#translation-delete").on("click", () => {deleteModalOpen(article.id, article.name)})
         template.append(action_template)
     }
 
     $("#tb-articles").append(template)
+}
+
+function addOriginalRow(article, hasAuth) {
+    let template = $("#original-row-template").contents().clone(true, true)
+
+    if(article.link) {
+        let link = $("<a>", {
+            class: "hover:underline",
+            href: article.link,
+            target: "_blank",
+            text: article.name})
+        template.find("#article-name").append(link)
+    } else {
+        template.find("#article-name").addClass("text-gray-500").text(article.name)
+    }
+    template.find('#translation-words').text(article.words)
+    
+    if(article.corrector) {
+        let link = $("<a>", {
+            class: "underline",
+            href: `/user/${article.corrector.id}`,
+            text: article.corrector.nickname})
+        template.find("#article-corrector").append(link)
+    } else {
+        template.find("#article-corrector").text("N/A")
+    }
+
+    template.find("#article-timestamp").text(dateAsLocal(article.added))
+    
+    if(hasAuth) {
+        let action_template = $("#translation-actions-template").contents().clone(true, true)
+        action_template.find("#translation-edit").prop("href", `/article/${article.id}/edit`)
+        action_template.find("#translation-delete").on("click", () => {deleteModalOpen(article.id, article.name)})
+        template.append(action_template)
+    }
+
+    $("#or-articles").append(template)
+}
+
+function addCorrectionRow(correction, hasAuth) {
+    let template = $('#correction-row-template').contents().clone(true, true)
+    template.find('#correction-name').text(correction.article.name)
+    template.find('#correction-words').text(correction.article.words)
+
+    let authorLink = $("<a>", {
+        class: "underline",
+        href: `/user/${correction.author.id}`,
+        text: correction.author.nickname})
+
+    template.find('#correction-author').append(authorLink)
+    template.find('#correction-timestamp').text(dateAsLocal(correction.timestamp))
+
+    if(hasAuth) {
+        let action_template = $("#correction-actions-template").contents().clone(true, true)
+        action_template.find("#correction-delete").on("click", () => {deleteModalOpen(correction.article.id, correction.article.name, true)})
+        template.append(action_template)
+    }
+
+    $('#co-articles').append(template)
 }
 
 async function fetchPage(page, sort = 'latest', type = 'translation') {
@@ -163,7 +315,7 @@ async function fetchPage(page, sort = 'latest', type = 'translation') {
     return pageData
 }
 
-function search(query) {
+function searchArticle(query) {
     if (query == "" || query.length <= 2) {
         if(isSearching) {
             isSearching = false
@@ -184,14 +336,101 @@ function search(query) {
 
 }
 
+async function setType(type) {
+    setSelectedType(type)
+    switch (type) {
+        case 'translation':
+            $("#search-field").on("input", handleSearch)
+            currentType = type
+            console.log("Set type to Translation")
+            await showPage(0)
+            $(".active-table").replaceWith($('#translation-table-partial').contents().clone(true, true).addClass('active-table'))
+            setSelectedPage(0)
+            setSorting('latest')
+            break
+
+        case 'correction':
+            $("#search-field").off("input", handleSearch)
+            currentType = type
+            console.log("Set type to Correction")
+            $(".active-table").replaceWith($('#correction-table-partial').contents().clone(true, true).addClass('active-table'))
+            showPage(0)
+            break
+
+        case 'original':
+            currentType = type
+            console.log("Set type to Original")
+            $("#search-field").off("input", handleSearch)
+            $(".active-table").replaceWith($('#original-table-partial').contents().clone(true, true).addClass('active-table'))
+            showPage(0)
+            break
+
+        default:
+            console.error("Unknown type")
+            break
+    }
+}
+
 function handleSearch(e) {
     clearTimeout(timeoutID)
     if(e.target.value.length > 1) {
-        timeoutID = setTimeout(search, 300, e.target.value)
+        timeoutID = setTimeout(searchArticle, 300, e.target.value)
     } else {
-        search(e.target.value)
+        searchArticle(e.target.value)
     }
 }
 
 $("#search-field").on("input", handleSearch)
 setSelectedPage(0)
+setSelectedSorter('latest')
+setSelectedType('translation')
+
+// ===== ARTICLE PICKER FUNCTIONS =====
+
+function addPickerItem(row) {
+    const template = $('#search-result-template')
+    let newRow = template.contents().clone(true, true)
+    newRow.find('#result-name').text(row.name)
+    let authorLink = $("<a>", {
+        class: "underline",
+        href: `/user/${row.author.id}`,
+        text: row.author.name})
+    newRow.find('#result-author').append(authorLink)
+    newRow.find('#result-corrector').text(row.corrector.name)
+    newRow.find('#btn-pick').on('click', () => bindCorrection(row.id))
+    $('#result-table-body').append(newRow)
+}
+
+function bindCorrection(articleId) {
+    const data = new URLSearchParams({aid: articleId})
+    fetch(`/api/user/${uid}/assign-correction`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data
+    }).then(() => window.location.reload())
+}
+
+function unassignCorrection(articleId) {
+    fetch(`/api/article/${articleId}/remove-correction`, {
+        method: "POST"
+    }).then(() => window.location.reload())
+}
+
+function searchArticle(query) {
+    console.log(`search for ${query}`)
+    $('#result-table-body').empty()
+    fetch('/api/search/article?' + new URLSearchParams({
+        'q': query,
+        'u': -1
+    })).then(response => response.json()).then(r => r.result.slice(0, 10).forEach(result => addPickerItem(result)))
+}
+
+function handleSearch(e) {
+    clearTimeout(timeoutID)
+    if(e.target.value.length > 3) {
+        timeoutID = setTimeout(searchArticle, 300, e.target.value)
+    }
+}
+

@@ -153,9 +153,9 @@ class RSSMonitor:
             if self.__dbs.get_article_by_link(update['link']):
                 info(f'Ignoring {title} in RSS feed (added manually)')
                 return False
-            if not RSSMonitor.en_page_exists(update['link']):
-                info(f'Ignoring {title} in RSS feed (EN Wiki page doesn\'t exist)')
-                return False
+            #if not RSSMonitor.en_page_exists(update['link']):
+            #    info(f'Ignoring {title} in RSS feed (EN Wiki page doesn\'t exist)')
+            #    return False
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4(), RSSUpdateType.RSS_NEWPAGE))
             return True
         return False

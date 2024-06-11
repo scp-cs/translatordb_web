@@ -13,7 +13,7 @@ class Article():
     bonus: int
     added: datetime
     author: User
-    corrector: t.Optional[User]
+    corrector: t.Optional[User] = None
     corrected: datetime = None
     link: t.Optional[str] = None
     is_original: bool = False

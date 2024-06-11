@@ -58,7 +58,9 @@ def user(uid: int):
     page = request.args.get('p', 0, int)
     user = dbs.get_user(uid) or abort(404)
     corrections = dbs.get_corrections_by_user(uid)
-    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=dbs.get_translations_by_user(uid, sort, page), corrections=corrections, sort=sort)
+    translations = dbs.get_translations_by_user(uid, sort, page)
+    originals = dbs.get_originals_by_user(uid)
+    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=translations, corrections=corrections, originals=originals, sort=sort)
 
 @UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required

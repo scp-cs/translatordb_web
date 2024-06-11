@@ -1,0 +1,28 @@
+<div id="picker-overlay" class="modal-overlay">
+    <div id="picker-window" class="px-10 py-8 bg-black border rounded-md border-slate-400 flex-col-center">
+        <h1 class="mb-3 text-xl font-bold">Najít článek</h1>
+        <input id="input-search" type="text" class="px-2 bg-transparent border-2 rounded-md appearance-none border-slate-400">
+        <hr class="w-full my-6 border-white">
+        <table class="border-separate border-spacing-x-12">
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Autor</th>
+                    <th>Korektor</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody id="result-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<template id="search-result-template">
+<tr>
+    <td id="result-name"></td>
+    <td id="result-author"></td>
+    <td id="result-corrector"></td>
+    <td><button class="small-button" id="btn-pick">Vybrat</button></td>
+</tr>
+</template>
