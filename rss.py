@@ -144,6 +144,7 @@ class RSSMonitor:
         author = self.get_rss_update_author(update)
         if not author:
             info('Ignoring {title} in RSS feed (couldn\'t match wikidot username {author} to a user)')
+            return False
         debug(f'Check {title} with ts {timestamp}, last db update was {self.__dbs.lastupdated}')
         if title.lower().endswith(IGNORE_BRANCH_TAG):
             info(f'Ignoring {title} in RSS feed (not a translation)')
