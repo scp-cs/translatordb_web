@@ -33,6 +33,8 @@ from extensions import login_manager, dbs, sched, oauth, rss, webhook
 
 app = Flask(__name__)
 
+LOGGER_FORMAT_STR = '[%(asctime)s][%(module)s] %(levelname)s: %(message)s'
+
 @app.route('/')
 def index():
     sort = request.args.get('sort', type=str, default='points')
@@ -45,10 +47,10 @@ def init_logger() -> None:
     Sets up logging
     """
     
-    logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
+    logging.basicConfig(filename='translatordb.log', filemode='a', format=LOGGER_FORMAT_STR, encoding='utf-8')
     logging.getLogger().setLevel(logging.INFO)
     handler_st = logging.StreamHandler()
-    handler_st.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
+    handler_st.setFormatter(logging.Formatter(LOGGER_FORMAT_STR))
     logging.getLogger().addHandler(handler_st)
 
 def fix_proxy() -> None:
