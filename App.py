@@ -16,6 +16,7 @@ from passwords import pw_hash
 from utils import ensure_config
 from discord import DiscordClient
 from rss import RSSUpdateType
+from tasks import discord_tasks
 
 # Blueprints
 from blueprints.auth import UserAuth
@@ -109,8 +110,8 @@ def extensions_init() -> None:
     discord_token = app.config.get('DISCORD_TOKEN', None)
     if discord_token:
         DiscordClient.init_app(app)
-        sched.add_job('Download avatars', lambda: DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar'), trigger='interval', days=3)
-        sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
+        sched.add_job('Download avatars', lambda: discord_tasks.download_avatars_task(), trigger='interval', days=3)
+        sched.add_job('Fetch nicknames', lambda: discord_tasks.update_nicknames_task(), trigger='interval', days=4)
     else:
         warning('Discord API token not set. Profiles won\'t be updated!')
 
