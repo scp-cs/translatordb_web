@@ -14,7 +14,7 @@ def log_debug_access():
 @DebugTools.route('/debug/nickupdate')
 @login_required
 def nickupdate():
-    dbs.update_discord_nicknames()
+    sched.run_job('Fetch nicknames')
     return redirect(url_for('index'))
 
 @DebugTools.route('/debug/avupdate')

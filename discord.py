@@ -3,16 +3,16 @@ import json
 import time
 import typing as t
 from logging import warning, error, info
-from os.path import join
-from io import BytesIO
+from http import HTTPStatus
 
 # External
 import requests
-from PIL import Image
 
 API_UA = "SCUTTLE Discord service (https://scp-wiki.cz, v1)"
 API_URL = "https://discord.com/api"
 CDN_URL = "https://cdn.discordapp.com"
+
+RATELIMIT_RETRIES = 3
 
 class DiscordException(Exception):
     pass
@@ -45,13 +45,21 @@ class DiscordClient():
     
     @staticmethod
     def _get_user(uid: int) -> t.Optional[dict]:
-        response = requests.get(API_URL + f'/users/{uid}', headers=DiscordClient.__request_headers)
+        
+        retry = 0
+        while retry < RATELIMIT_RETRIES:
+            response = requests.get(API_URL + f'/users/{uid}', headers=DiscordClient.__request_headers)
+            if response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
+                wait_sec = 2**retry
+                warning(f"Rate limited! Waiting for {wait_sec}")
+                time.sleep(wait_sec)
+                retry += 1
+            else:
+                break
 
-        user = json.loads(response.content)
-
-        if response.status_code == 200:
-            return user
-        elif response.status_code == 404:
+        if response.status_code == HTTPStatus.OK:
+            return json.loads(response.content)
+        elif response.status_code == HTTPStatus.NOT_FOUND:
             warning(f'Discord user API returned 404 for {uid}')
             return None
         else:
@@ -60,6 +68,18 @@ class DiscordClient():
 
     @staticmethod
     def get_global_username(uid: int) -> t.Optional[str]:
+        """Fetches the global nickname, if the user doesn't have any set, returns the username
+
+        Args:
+            uid (int): The user's Discord ID
+
+        Raises:
+            DiscordException: Raised when either of the API requests fails
+
+        Returns:
+            str | None - The nickname / username. None is returned if the request succeeds but some other unexpected error occurs
+        """
+        
         try:
             user = DiscordClient._get_user(uid)
         except DiscordException as e:
@@ -93,39 +113,31 @@ class DiscordClient():
             return None
 
         endpoint = CDN_URL + f"/avatars/{uid}/{user['avatar']}.png"
-        response = requests.get(endpoint, headers=DiscordClient.__request_headers, params={'size': str(size)})
+        
+        retry = 0
+        while retry < RATELIMIT_RETRIES:
+            response = requests.get(endpoint, headers=DiscordClient.__request_headers, params={'size': str(size)})
+            if response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
+                wait_sec = 2**retry
+                warning(f"Rate limited! Waiting for {wait_sec}")
+                time.sleep(wait_sec)
+                retry += 1
+            else:
+                break
 
-        if response.status_code == 200:
+        if response.status_code == HTTPStatus.OK:
             return response.content
-        elif response.status_code == 404:
+        elif response.status_code == HTTPStatus.NOT_FOUND:
             warning(f"Discord CDN request returned 404 for {uid}")
             return None
         else:
             error(f"Discord CDN request failed for {uid}")
             raise DiscordException("CDN Request failed")
 
-    @staticmethod
-    def download_avatars(users, path: str = './temp/avatar') -> None:
-        """Downloads the avatars for multiple users
-
-        Args:
-            users (List[int]): The User IDs
-            path (str): The Download directory
-        """
-        for user in users:
-            if user is None or not DiscordClient._validate_user_id(user):
-                warning(f"Skipping profile update for {user}")
-                continue
-            avatar = DiscordClient.get_avatar(user)
-            if avatar is not None:
-                with open(join(path,f'{user}.png'), 'wb') as file:
-                    file.write(avatar)
-                    Image.open(BytesIO(avatar)).resize((64, 64), Image.Resampling.NEAREST).save(join(path,f'{user}_thumb.png'))
-
-                time.sleep(0.1) # Wait for a bit so we don't hit the rate limit
-
 class DiscordWebhook():
-
+    """
+    Utility class for sending webhooks
+    """
     def __init__(self, url: str = None, notify = 0) -> None:
         self.url = url
         self.notify = notify

@@ -263,7 +263,7 @@ function addOriginalRow(article, hasAuth) {
     } else {
         template.find("#article-name").addClass("text-gray-500").text(article.name)
     }
-    template.find('#translation-words').text(article.words)
+    template.find('#article-words').text(article.words)
     
     if(article.corrector) {
         let link = $("<a>", {

@@ -243,7 +243,10 @@ class Database():
         query = "DELETE FROM Article WHERE id=?"
         self.__tryexec(query, (aid, ))
 
-    def users(self) -> t.List:
+    def users(self) -> t.List[User]:
+        """
+        Fetches all users from the database
+        """
         query = "SELECT * FROM User"
         rows = self.__tryexec(query).fetchall()
         return [User(*row) for row in rows]
@@ -277,22 +280,7 @@ class Database():
         self.__tryexec(query, data)
 
     def rename_article(self, name: str, new_name: str):
-        ... # We need to update the link too
-
-    # TODO: Calling an API adapter in a database class is absolutely horrible
-    def update_discord_nicknames(self) -> None:
-        query = "SELECT discord FROM User"
-        ids = self.__tryexec(query).fetchall()
-        users = dict()
-        for id_ in ids:
-            users[id_[0]] = DiscordClient.get_global_username(id_[0])
-            time.sleep(0.2) # Wait a bit so the API doesn't 429
-        for uid, nickname in users.items():
-            self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
-
-    def update_nickname(self, uid) -> None:
-        nickname = DiscordClient.get_global_username(uid)
-        self.__tryexec("UPDATE User SET display_name=? WHERE discord=?", (nickname, uid))
+        ... # TODO: We need to update the link too
 
     def translation_exists(self, name: str) -> bool:
         query = "SELECT * FROM Article WHERE name=? COLLATE NOCASE"

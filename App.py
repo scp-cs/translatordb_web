@@ -16,6 +16,7 @@ from passwords import pw_hash
 from utils import ensure_config
 from discord import DiscordClient
 from rss import RSSUpdateType
+from tasks import discord_tasks
 
 # Blueprints
 from blueprints.auth import UserAuth
@@ -33,6 +34,8 @@ from extensions import login_manager, dbs, sched, oauth, rss, webhook
 
 app = Flask(__name__)
 
+LOGGER_FORMAT_STR = '[%(asctime)s][%(module)s] %(levelname)s: %(message)s'
+
 @app.route('/')
 def index():
     sort = request.args.get('sort', type=str, default='points')
@@ -45,10 +48,10 @@ def init_logger() -> None:
     Sets up logging
     """
     
-    logging.basicConfig(filename='translatordb.log', filemode='a', format='[%(asctime)s] %(levelname)s: %(message)s', encoding='utf-8')
+    logging.basicConfig(filename='translatordb.log', filemode='a', format=LOGGER_FORMAT_STR, encoding='utf-8')
     logging.getLogger().setLevel(logging.INFO)
     handler_st = logging.StreamHandler()
-    handler_st.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
+    handler_st.setFormatter(logging.Formatter(LOGGER_FORMAT_STR))
     logging.getLogger().addHandler(handler_st)
 
 def fix_proxy() -> None:
@@ -107,8 +110,8 @@ def extensions_init() -> None:
     discord_token = app.config.get('DISCORD_TOKEN', None)
     if discord_token:
         DiscordClient.init_app(app)
-        sched.add_job('Download avatars', lambda: DiscordClient.download_avatars([u.discord for u in dbs.users()], './temp/avatar'), trigger='interval', days=3)
-        sched.add_job('Fetch nicknames', lambda: dbs.update_discord_nicknames(), trigger='interval', days=4)
+        sched.add_job('Download avatars', lambda: discord_tasks.download_avatars_task(), trigger='interval', days=3)
+        sched.add_job('Fetch nicknames', lambda: discord_tasks.update_nicknames_task(), trigger='interval', days=4)
     else:
         warning('Discord API token not set. Profiles won\'t be updated!')
 
