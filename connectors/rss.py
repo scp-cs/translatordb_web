@@ -146,9 +146,9 @@ class RSSMonitor:
             info('Ignoring {title} in RSS feed (couldn\'t match wikidot username {author} to a user)')
             return False
         debug(f'Check {title} with ts {timestamp}, last db update was {self.__dbs.lastupdated}')
-        if title.lower().endswith(IGNORE_BRANCH_TAG):
-            info(f'Ignoring {title} in RSS feed (not a translation)')
-            return False
+        #if title.lower().endswith(IGNORE_BRANCH_TAG):
+        #    info(f'Ignoring {title} in RSS feed (not a translation)')
+        #    return False
         
         if timestamp+TIMEZONE_UTC_OFFSET > self.__dbs.lastupdated:
             if self.__dbs.get_article_by_link(update['link']):
