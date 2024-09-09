@@ -14,8 +14,8 @@ from waitress import serve
 from models.user import get_user_role, get_role_color, User
 from passwords import pw_hash
 from utils import ensure_config
-from discord import DiscordClient
-from rss import RSSUpdateType
+from connectors.discord import DiscordClient
+from connectors.rss import RSSUpdateType
 from tasks import discord_tasks
 
 # Blueprints

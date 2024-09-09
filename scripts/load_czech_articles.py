@@ -1,3 +1,7 @@
+"""
+Script used to load articles into the database from a listpages-generated CSV
+"""
+
 from collections import namedtuple
 from datetime import datetime
 from typing import List
