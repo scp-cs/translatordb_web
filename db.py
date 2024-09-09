@@ -14,7 +14,6 @@ from models.user import User
 from passwords import pw_check, pw_hash
 from models.article import Article
 from models.correction import Correction
-from discord import DiscordClient
 
 PAGE_ITEMS = 15
 

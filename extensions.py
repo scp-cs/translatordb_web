@@ -7,8 +7,8 @@ from db import Database
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager
 from flask_discord import DiscordOAuth2Session
-from rss import RSSMonitor
-from discord import DiscordWebhook
+from connectors.rss import RSSMonitor
+from connectors.discord import DiscordWebhook
 
 dbs = Database()
 sched = APScheduler()

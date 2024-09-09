@@ -1,4 +1,4 @@
-from discord import DiscordClient, DiscordException
+from connectors.discord import DiscordClient, DiscordException
 from extensions import dbs
 from PIL import Image
 from io import BytesIO

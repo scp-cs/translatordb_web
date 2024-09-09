@@ -3,7 +3,7 @@ from forms import NewUserForm, EditUserForm
 from flask_login import current_user, login_required
 from models.user import User
 from logging import info
-from discord import DiscordClient
+from connectors.discord import DiscordClient
 
 from extensions import dbs, sched
 
