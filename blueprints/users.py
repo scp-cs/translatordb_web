@@ -23,10 +23,11 @@ def add_user():
     user = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, True)
 
     user_id, temp_password = dbs.add_user(user, form.can_login.data)
+    user.uid = user_id
 
     # Fetch nickname and profile in background
     # !TODO: This is now broken because of discord client class rewrite
-    sched.add_job('Immediate nickname update', lambda: dbs.update_nickname(form.discord.data))
+    sched.add_job('Immediate nickname update', lambda: discord_tasks.update_nicknames_task(override_users=[user]))
     sched.add_job('Immediate profile update', lambda: discord_tasks.download_avatars_task(override_ids=[form.discord.data]))
     
     if form.can_login.data:

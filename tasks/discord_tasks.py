@@ -6,8 +6,8 @@ from logging import warning
 from os.path import join
 import time
 
-def update_nicknames_task():
-    users = dbs.users()
+def update_nicknames_task(override_users = None):
+    users = override_users or dbs.users()
     for user in users:
         if not user.discord:
             warning(f"Skipping nickname update for {user.nickname}")
