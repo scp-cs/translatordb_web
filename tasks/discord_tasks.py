@@ -22,8 +22,8 @@ def update_nicknames_task():
             dbs.update_user(user)
         time.sleep(0.2) # Wait a bit so the API doesn't 429
 
-def download_avatars_task(path: str = './temp/avatar'):
-    ids = [user.discord for user in dbs.users()]
+def download_avatars_task(path: str = './temp/avatar', override_ids = None):
+    ids = override_ids or [user.discord for user in dbs.users()]
     for user in ids:
         if user is None or not DiscordClient._validate_user_id(user):
             warning(f"Skipping profile update for {user} (Empty or invalid Discord ID)")
