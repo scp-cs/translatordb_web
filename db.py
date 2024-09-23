@@ -274,8 +274,8 @@ class Database():
         self.__tryexec(query, data)
 
     def update_user(self, u: User) -> None:
-        query = "UPDATE User SET nickname=?, wikidot=?, discord=?, password=? WHERE id=?"
-        data = (u.nickname, u.wikidot, u.discord, u.password, u.uid)
+        query = "UPDATE User SET nickname=?, wikidot=?, discord=?, password=?, display_name=? WHERE id=?"
+        data = (u.nickname, u.wikidot, u.discord, u.password, u.display_name, u.uid)
         self.__tryexec(query, data)
 
     def rename_article(self, name: str, new_name: str):
