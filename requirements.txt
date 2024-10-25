@@ -41,6 +41,6 @@ tzdata==2023.3
 tzlocal==5.0.1
 urllib3==2.2.2
 waitress==2.1.2
-Werkzeug==2.3.8
+Werkzeug==3.0.6
 wsproto==1.2.0
 WTForms==3.0.1
