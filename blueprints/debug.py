@@ -1,9 +1,9 @@
-from logging import warning, error
-from flask import Blueprint, redirect, url_for, current_app, request, render_template, send_from_directory, flash
+from logging import critical, warning, error
+from flask import Blueprint, redirect, url_for, current_app, request, render_template, send_from_directory, flash, abort
 from flask_login import login_required, current_user
 from datetime import datetime
 
-from extensions import dbs, sched, webhook
+from extensions import sched, webhook
 
 DebugTools = Blueprint('DebugTools', __name__)
 
@@ -52,3 +52,13 @@ def export_database():
     download_name=datetime.strftime(datetime.now(), 'scp_%d_%m_%Y.db')
     flash("Databáze exportována!")
     return send_from_directory('data', 'scp.db', as_attachment=True, download_name=download_name)
+
+@DebugTools.route('/debug/raise_error')
+def raise_error():
+    error("Error handling test")
+    abort(500)
+
+@DebugTools.route('/debug/raise_critical')
+def raise_critical_error():
+    critical("Critical error handling test")
+    abort(500)
