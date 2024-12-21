@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 from models.user import User
 from logging import info
 from connectors.discord import DiscordClient
+from tasks import discord_tasks
 
 from extensions import dbs, sched
 
@@ -20,11 +21,14 @@ def add_user():
         return redirect(url_for('UserController.add_user'))
 
     user = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, True)
+
     user_id, temp_password = dbs.add_user(user, form.can_login.data)
+    user.uid = user_id
 
     # Fetch nickname and profile in background
-    sched.add_job('Immediate nickname update', lambda: dbs.update_nickname(form.discord.data))
-    sched.add_job('Immediate profile update', lambda: DiscordClient.download_avatars([form.discord.data]))
+    # !TODO: This is now broken because of discord client class rewrite
+    sched.add_job('Immediate nickname update', lambda: discord_tasks.update_nicknames_task(override_users=[user]))
+    sched.add_job('Immediate profile update', lambda: discord_tasks.download_avatars_task(override_ids=[form.discord.data]))
     
     if form.can_login.data:
         info(f"Administrator account created for {form.nickname.data} with ID {user_id} by {current_user.nickname} (ID: {current_user.uid})")

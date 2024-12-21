@@ -100,6 +100,14 @@ td {
   .modal-overlay {
     @apply fixed top-0 left-0 z-10 flex-col items-center justify-center hidden max-size backdrop-blur-sm;
   }
+
+  .button-group {
+    @apply border border-white/40 bg-white/5 w-fit h-fit p-4 rounded-md flex flex-col items-center gap-3
+  }
+
+  .btn-danger {
+    @apply glass-btn border-red-500/40 hover:bg-red-500/40;
+  }
 }
 
 @layer utilities {
