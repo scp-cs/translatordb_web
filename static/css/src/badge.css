@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    font-family: 'IBM Plex Sans';
+}
+
+.gradient-background {
+    background: linear-gradient(15deg,#a71bb9,#000000,#9f1239);
+    background-size: 150% 150%;
+    animation: gradient-animation 6s ease infinite;
+  }
