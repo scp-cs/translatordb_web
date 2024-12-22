@@ -69,7 +69,8 @@ def user(uid: int):
 @UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required
 def delete_user(uid: int):
-    name = dbs.get_user(uid).nickname
+    user = dbs.get_user(uid) or abort(404)
+    name = user.nickname
     dbs.delete_user(uid)
     info(f"User {name} deleted by {current_user.nickname} (ID: {current_user.uid})")
     flash(f'Uživatel {name} smazán')
