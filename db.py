@@ -340,6 +340,14 @@ class Database():
         query = "SELECT * FROM Statistics"
         data = self.__tryexec(query).fetchone()
         return StatisticsRow(*data)
+
+    def get_last_translation(self, uid: int) -> t.Optional[Article]:
+        query = "SELECT * FROM Article WHERE idauthor=? AND is_original=FALSE ORDER BY added DESC, id DESC LIMIT 1"
+        data = (uid,)
+        row = self.__tryexec(query, data).fetchone()
+        if not row:
+            return None
+        return self.__make_article(row)
     
     def add_article(self, a: Article) -> int:
         query = "INSERT INTO Article (name, words, bonus, added, link, idauthor, is_original) VALUES (?, ?, ?, ?, ?, ?, ?)"

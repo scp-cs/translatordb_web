@@ -76,3 +76,12 @@ def delete_user(uid: int):
     flash(f'Uživatel {name} smazán')
     
     return redirect(url_for('index'))
+
+# TODO: Move this to separate Blueprint
+# TODO: Don't forget to add type parameter for forwards compatibility
+@UserController.route('/user/<int:uid>/embed', methods=["GET"])
+def user_badge(uid: int):
+    user = dbs.get_user(uid) or abort(404)
+    stats = dbs.get_user_stats(uid)
+    last = dbs.get_last_translation(uid)
+    return render_template("partials/translator_badge.j2", user=user, stats=stats, last=last)
