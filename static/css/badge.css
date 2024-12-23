@@ -106,20 +106,20 @@
   position: relative;
 }
 
-.bottom-0{
-  bottom: 0px;
-}
-
-.right-1{
-  right: 0.25rem;
-}
-
 .top-0{
   top: 0px;
 }
 
 .right-0{
   right: 0px;
+}
+
+.bottom-0{
+  bottom: 0px;
+}
+
+.right-1{
+  right: 0.25rem;
 }
 
 .m-0{
@@ -130,16 +130,8 @@
   margin-top: 0.25rem;
 }
 
-.mr-5{
-  margin-right: 1.25rem;
-}
-
 .block{
   display: block;
-}
-
-.inline{
-  display: inline;
 }
 
 .flex{
@@ -178,10 +170,6 @@
   border-radius: 0.5rem;
 }
 
-.rounded-xl{
-  border-radius: 0.75rem;
-}
-
 .rounded-l-lg{
   border-top-left-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
@@ -192,12 +180,12 @@
   border-bottom-right-radius: 0.5rem;
 }
 
-.rounded-tr-lg{
-  border-top-right-radius: 0.5rem;
-}
-
 .rounded-bl-lg{
   border-bottom-left-radius: 0.5rem;
+}
+
+.rounded-tr-lg{
+  border-top-right-radius: 0.5rem;
 }
 
 .border{
@@ -218,8 +206,17 @@
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
 }
 
+.bg-pink-900{
+  --tw-bg-opacity: 1;
+  background-color: rgb(131 24 67 / var(--tw-bg-opacity));
+}
+
 .bg-gradient-to-r{
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+.bg-\[url\(\'\.\.\/\.\.\/static\/catto\.png\'\)\]{
+  background-image: url('../../static/catto.png');
 }
 
 .from-gray-400{
@@ -255,6 +252,12 @@
 .from-slate-900{
   --tw-gradient-from: #0f172a;
   --tw-gradient-to: rgb(15 23 42 / 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-teal-200{
+  --tw-gradient-from: #99f6e4;
+  --tw-gradient-to: rgb(153 246 228 / 0);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -297,6 +300,18 @@
   --tw-gradient-to: #0f172a;
 }
 
+.to-teal-500{
+  --tw-gradient-to: #14b8a6;
+}
+
+.bg-\[size\:15\%\]{
+  background-size: 15%;
+}
+
+.bg-center{
+  background-position: center;
+}
+
 .p-2{
   padding: 0.5rem;
 }
@@ -310,14 +325,14 @@
   line-height: 1.75rem;
 }
 
-.text-xs{
-  font-size: 0.75rem;
-  line-height: 1rem;
-}
-
 .text-sm{
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+.text-xs{
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 .font-bold{
@@ -335,14 +350,6 @@
 
 .no-underline{
   text-decoration-line: none;
-}
-
-.opacity-50{
-  opacity: 0.5;
-}
-
-.opacity-40{
-  opacity: 0.4;
 }
 
 .opacity-25{
