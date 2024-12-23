@@ -76,4 +76,3 @@ def delete_user(uid: int):
     flash(f'Uživatel {name} smazán')
     
     return redirect(url_for('index'))
-
