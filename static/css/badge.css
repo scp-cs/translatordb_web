@@ -106,6 +106,7 @@
   position: relative;
 }
 
+
 .top-0{
   top: 0px;
 }
@@ -113,6 +114,7 @@
 .right-0{
   right: 0px;
 }
+
 
 .bottom-0{
   bottom: 0px;
@@ -122,6 +124,16 @@
   right: 0.25rem;
 }
 
+
+.top-0{
+  top: 0px;
+}
+
+.right-0{
+  right: 0px;
+}
+
+
 .m-0{
   margin: 0px;
 }
@@ -130,9 +142,20 @@
   margin-top: 0.25rem;
 }
 
+
+.mr-5{
+  margin-right: 1.25rem;
+}
+
+
 .block{
   display: block;
 }
+
+.inline{
+  display: inline;
+}
+
 
 .flex{
   display: flex;
@@ -170,6 +193,11 @@
   border-radius: 0.5rem;
 }
 
+
+.rounded-xl{
+  border-radius: 0.75rem;
+}
+
 .rounded-l-lg{
   border-top-left-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
@@ -186,6 +214,10 @@
 
 .rounded-tr-lg{
   border-top-right-radius: 0.5rem;
+}
+
+.rounded-bl-lg{
+  border-bottom-left-radius: 0.5rem;
 }
 
 .border{
@@ -331,6 +363,11 @@
   line-height: 1rem;
 }
 
+.text-sm{
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
 .font-bold{
   font-weight: 700;
 }
@@ -346,6 +383,14 @@
 
 .no-underline{
   text-decoration-line: none;
+}
+
+.opacity-50{
+  opacity: 0.5;
+}
+
+.opacity-40{
+  opacity: 0.4;
 }
 
 .opacity-25{
