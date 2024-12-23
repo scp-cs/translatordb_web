@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from logging import critical, warning, error
 from flask import Blueprint, redirect, url_for, current_app, request, render_template, send_from_directory, flash, abort
 from flask_login import login_required, current_user
@@ -56,9 +57,9 @@ def export_database():
 @DebugTools.route('/debug/raise_error')
 def raise_error():
     error("Error handling test")
-    abort(500)
+    abort(HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @DebugTools.route('/debug/raise_critical')
 def raise_critical_error():
     critical("Critical error handling test")
-    abort(500)
+    abort(HTTPStatus.INTERNAL_SERVER_ERROR)

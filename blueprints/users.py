@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from flask import Blueprint, url_for, redirect, session, request, render_template, abort, flash
 from forms import NewUserForm, EditUserForm
 from flask_login import current_user, login_required
@@ -41,7 +42,7 @@ def add_user():
 @UserController.route('/user/<int:uid>/edit', methods=["GET", "POST"])
 @login_required
 def edit_user(uid: int):
-    user = dbs.get_user(uid) or abort(404)
+    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND)
 
     if request.method == "GET":
         fdata = {'nickname': user.nickname, 'wikidot': user.wikidot, 'discord': user.discord, 'login': int(user.password is not None)}
@@ -60,7 +61,7 @@ def edit_user(uid: int):
 def user(uid: int):
     sort = request.args.get('sort', 'latest', str)
     page = request.args.get('p', 0, int)
-    user = dbs.get_user(uid) or abort(404)
+    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND)
     corrections = dbs.get_corrections_by_user(uid)
     translations = dbs.get_translations_by_user(uid, sort, page)
     originals = dbs.get_originals_by_user(uid)
@@ -69,7 +70,7 @@ def user(uid: int):
 @UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required
 def delete_user(uid: int):
-    user = dbs.get_user(uid) or abort(404)
+    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND)
     name = user.nickname
     dbs.delete_user(uid)
     info(f"User {name} deleted by {current_user.nickname} (ID: {current_user.uid})")

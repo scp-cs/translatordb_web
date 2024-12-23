@@ -33,7 +33,6 @@ def get_template(template_type: EmbedType, theme: str = "default"):
         # Don't abort on invalid theme, just use the default
         return f"embeds/{template_type}/default.j2"
 
-# TODO: Move this to separate Blueprint
 @EmbedController.route('/user/<int:uid>/embed', methods=["GET"])
 def user_badge(uid: int):
     embed_type = request.args.get("type", type=str, default=EmbedType.TRANSLATOR)
