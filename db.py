@@ -341,9 +341,9 @@ class Database():
         data = self.__tryexec(query).fetchone()
         return StatisticsRow(*data)
 
-    def get_last_translation(self, uid: int) -> t.Optional[Article]:
-        query = "SELECT * FROM Article WHERE idauthor=? AND is_original=FALSE ORDER BY added DESC, id DESC LIMIT 1"
-        data = (uid,)
+    def get_last_article(self, uid: int, original: bool = False) -> t.Optional[Article]:
+        query = "SELECT * FROM Article WHERE idauthor=? AND is_original=? ORDER BY added DESC, id DESC LIMIT 1"
+        data = (uid, original)
         row = self.__tryexec(query, data).fetchone()
         if not row:
             return None
