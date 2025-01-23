@@ -17,7 +17,10 @@ UserAuth = Blueprint('UserAuth', __name__)
 def login():
 
     if request.method == "GET":
-        session['login_next'] = request.referrer
+        # Saves the last URL, but prevents the user from staying on the logging page
+        # if the first login attempt fails
+        if not request.referrer.endswith('/login'):
+            session['login_next'] = request.referrer
         return render_template('auth/login.j2', form=LoginForm())
 
     form = LoginForm()
@@ -34,6 +37,7 @@ def login():
         return redirect(url_for('UserAuth.pw_change'))
     login_user(user)
     referrer = session['login_next']
+    info(referrer)
     del session['login_next']
     return redirect(referrer or url_for('index'))
 

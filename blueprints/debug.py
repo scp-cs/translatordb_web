@@ -1,8 +1,10 @@
-from logging import warning
-from flask import Blueprint, redirect, url_for, current_app, request
+from http import HTTPStatus
+from logging import critical, warning, error
+from flask import Blueprint, redirect, url_for, current_app, request, render_template, send_from_directory, flash, abort
 from flask_login import login_required, current_user
+from datetime import datetime
 
-from extensions import dbs, sched
+from extensions import sched, webhook
 
 DebugTools = Blueprint('DebugTools', __name__)
 
@@ -15,16 +17,49 @@ def log_debug_access():
 @login_required
 def nickupdate():
     sched.run_job('Fetch nicknames')
-    return redirect(url_for('index'))
+    flash("Aktualizace spuštěna na pozadí!")
+    return redirect(request.referrer or url_for('index'))
 
 @DebugTools.route('/debug/avupdate')
 @login_required
 def avdownload():
     sched.run_job('Download avatars')
-    return redirect(url_for('index'))
+    flash("Aktualizace spuštěna na pozadí!")
+    return redirect(request.referrer or url_for('index'))
 
 @DebugTools.route('/debug/rssupdate')
 @login_required
 def updaterss():
     sched.run_job('Fetch RSS updates')
-    return redirect(url_for('index'))
+    flash("Aktualizace spuštěna na pozadí!")
+    return redirect(request.referrer or url_for('index'))
+
+@DebugTools.route('/debug')
+def debug_index():
+    return render_template('debug/tools.j2')
+
+@DebugTools.route('/debug/test_webhook')
+def webhook_testing():
+    try:
+        webhook.send_text('TEST MESSAGE')
+        flash("Testovací webhook odeslán!")
+    except Exception as e:
+        flash("Testovací webhook se nepodařilo odeslat (zkontrolujte logy)")
+        error(f"Sending test webhook failed with error ({str(e)})")
+    return redirect(request.referrer or url_for('index'))
+    
+@DebugTools.route('/debug/db/export')
+def export_database():
+    download_name=datetime.strftime(datetime.now(), 'scp_%d_%m_%Y.db')
+    flash("Databáze exportována!")
+    return send_from_directory('data', 'scp.db', as_attachment=True, download_name=download_name)
+
+@DebugTools.route('/debug/raise_error')
+def raise_error():
+    error("Error handling test")
+    abort(HTTPStatus.INTERNAL_SERVER_ERROR)
+
+@DebugTools.route('/debug/raise_critical')
+def raise_critical_error():
+    critical("Critical error handling test")
+    abort(HTTPStatus.INTERNAL_SERVER_ERROR)

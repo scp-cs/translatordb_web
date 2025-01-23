@@ -29,6 +29,7 @@ from blueprints.stats import StatisticsController
 from blueprints.api import ApiController
 from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
+from blueprints.embed import EmbedController
 
 from extensions import login_manager, dbs, sched, oauth, rss, webhook
 
@@ -165,9 +166,12 @@ if __name__ == '__main__':
     app.register_blueprint(ApiController)
     app.register_blueprint(OauthController)
     app.register_blueprint(RssPageController)
+    app.register_blueprint(EmbedController)
 
     # Create the admin user
     user_init()
+
+    # Load extensions and enable integrations based on config
     extensions_init()
 
     # Force oauthlib to allow insecure transport when debugging
