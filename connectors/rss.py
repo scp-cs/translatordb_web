@@ -79,43 +79,6 @@ class RSSMonitor:
             return RSSUpdateType.RSS_CORRECTION
         else:
             return RSSUpdateType.RSS_UNKNOWN
-        
-    @staticmethod
-    def en_page_exists(url: str) -> bool:
-        """
-        Converts a branch URL into an EN URL of the same page and checks if it exists on EN
-        """
-        try:
-            parsed_url = parse.urlparse(url)
-        except ValueError:
-            error(f'Cannot parse URL "{url}"')
-            return False
-        parsed_url = parsed_url._replace(scheme='https')._replace(netloc='scp-wiki.wikidot.com')
-        wl_parsed_url = parsed_url._replace(scheme='https')._replace(netloc='wanderers-library.wikidot.com')
-        en_url = parse.urlunparse(parsed_url)
-        wl_url = parse.urlunparse(wl_parsed_url)
-        try:
-            head_result = requests.head(en_url, headers={'User-Agent': USER_AGENT})
-        except requests.RequestException as e:
-            error(f'Request to {en_url} failed ({str(e)})')
-            return False
-        #TODO: Refactor this
-        match head_result.status_code:
-            case 200:
-                return True
-            case 404:
-                head_result = requests.head(wl_url, headers={'User-Agent': USER_AGENT})
-                match head_result.status_code:
-                    case 200:
-                        return True
-                    case 404:
-                        return False
-                    case _:
-                        warning(f'Got unusual status code ({head_result.status_code}) for URL {en_url}')
-                        return False
-            case _:
-                warning(f'Got unusual status code ({head_result.status_code}) for URL {en_url}')
-                return False
     
     def get_rss_update_author(self, update: dict) -> Optional[User]:
         update_description = update['description']
@@ -146,17 +109,11 @@ class RSSMonitor:
             info('Ignoring {title} in RSS feed (couldn\'t match wikidot username {author} to a user)')
             return False
         debug(f'Check {title} with ts {timestamp}, last db update was {self.__dbs.lastupdated}')
-        #if title.lower().endswith(IGNORE_BRANCH_TAG):
-        #    info(f'Ignoring {title} in RSS feed (not a translation)')
-        #    return False
         
         if timestamp+TIMEZONE_UTC_OFFSET > self.__dbs.lastupdated:
             if self.__dbs.get_article_by_link(update['link']):
                 info(f'Ignoring {title} in RSS feed (added manually)')
                 return False
-            #if not RSSMonitor.en_page_exists(update['link']):
-            #    info(f'Ignoring {title} in RSS feed (EN Wiki page doesn\'t exist)')
-            #    return False
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4(), RSSUpdateType.RSS_NEWPAGE))
             return True
         return False
@@ -172,7 +129,6 @@ class RSSMonitor:
             translation = self.__dbs.get_article_by_link(update['link'])
             if not translation:
                 self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], real_title, author, uuid4(), RSSUpdateType.RSS_CORRECTION))
-                #self.__webhook.send_text(f'Korekci od {author.nickname} pro {real_title} nelze přiřadit k článku. Zapište manuálně.')
                 warning(f"Correction for {real_title} by {author.nickname} cannot be assigned to an article")
             else:
                 self.__dbs.assign_corrector(translation, author)
@@ -193,8 +149,6 @@ class RSSMonitor:
                     return True
             case RSSUpdateType.RSS_CORRECTION:
                 self._process_correction(update)
-
-        
 
         return False
         
