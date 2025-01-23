@@ -1,5 +1,6 @@
 # Builtins
 from datetime import datetime
+from http import HTTPStatus
 from logging import info
 
 # External
@@ -77,7 +78,7 @@ def edit_article(aid: int):
 
     article = dbs.get_article(aid)
     if not article:
-        abort(404)
+        abort(HTTPStatus.NOT_FOUND)
 
     if request.method == "GET":
         fdata = {'title': article.name, 'words': article.words, 'bonus': article.bonus, 'link': article.link, 'translator': article.author.nickname}

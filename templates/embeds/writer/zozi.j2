@@ -1,0 +1,14 @@
+<head>
+<link rel="stylesheet" href="{{url_for('static', filename='css/badge.css')}}">
+</head>
+
+<div class="relative flex flex-row items-center justify-start h-24 rounded-lg">
+    <img class="block h-full bg-black border border-white border-solid rounded-l-lg" src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0), s='full')}}">
+    <div class="flex flex-col flex-1 h-full pl-4 bg-center text-white bg-pink-900 bg-[url('../../static/catto.png')] rounded-r-lg">
+        <h1 class="m-0 mt-1 text-xl font-bold text-white">{{user.wikidot}}</h1>
+        <p class="m-0 text-sm"><b>{{stats.originals}}</b> Článků</p>
+        <p class="m-0 text-sm">Nejnovější článek: <b><a href="{{last.link}}" class="text-white transition-opacity hover:opacity-75" target="_top">{{last.name}}</b></a></p>
+    </div>
+    <div class="absolute top-0 right-0 block p-2 font-semibold text-white rounded-tr-lg rounded-bl-lg bg-gradient-to-r from-teal-200 to-teal-500">Spisovatel</div>
+    <a href="https://scuttle.scp-wiki.cz" class="absolute bottom-0 text-xs text-white no-underline transition-opacity opacity-25 right-1 hover:opacity-100" target="_top">Powered by SCUTTLE</a>
+</div>
