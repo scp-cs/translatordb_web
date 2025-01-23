@@ -40,7 +40,7 @@ tomli==2.0.1
 tzdata==2023.3
 tzlocal==5.0.1
 urllib3==2.2.2
-waitress==2.1.2
+waitress==3.0.1
 Werkzeug==2.3.8
 wsproto==1.2.0
 WTForms==3.0.1
