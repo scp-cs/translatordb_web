@@ -51,15 +51,16 @@ def add_article(uid):
         return redirect(url_for('ArticleController.add_article', uid=uid))
 
     title = form.title.data.upper() if form.title.data.lower().startswith('scp') else form.title.data # Capitalize SCP
+    is_original = bool(request.args.get('original', False))
 
     if dbs.translation_exists(title):
         flash('Překlad již existuje!')
         return redirect(url_for('ArticleController.add_article', uid=uid))
     
-    if current_app.config['WEBHOOK_ENABLE']:
+    if current_app.config['WEBHOOK_ENABLE'] and not is_original:
         notify_rolemaster(uid, form.words.data / 1000 + form.bonus.data)
 
-    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), link=form.link.data, is_original=bool(request.args.get('original', False)))
+    article = Article(0, title, form.words.data, form.bonus.data, datetime.now(), dbs.get_user(uid), link=form.link.data, is_original=is_original)
     article_id = dbs.add_article(article)
     
     if 'NEW_FROM_RSS' in session:
