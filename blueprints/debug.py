@@ -35,10 +35,12 @@ def updaterss():
     return redirect(request.referrer or url_for('index'))
 
 @DebugTools.route('/debug')
+@login_required
 def debug_index():
     return render_template('debug/tools.j2')
 
 @DebugTools.route('/debug/test_webhook')
+@login_required
 def webhook_testing():
     try:
         webhook.send_text('TEST MESSAGE')
@@ -49,17 +51,20 @@ def webhook_testing():
     return redirect(request.referrer or url_for('index'))
     
 @DebugTools.route('/debug/db/export')
+@login_required
 def export_database():
     download_name=datetime.strftime(datetime.now(), 'scp_%d_%m_%Y.db')
     flash("Databáze exportována!")
     return send_from_directory('data', 'scp.db', as_attachment=True, download_name=download_name)
 
 @DebugTools.route('/debug/raise_error')
+@login_required
 def raise_error():
     error("Error handling test")
     abort(HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @DebugTools.route('/debug/raise_critical')
+@login_required
 def raise_critical_error():
     critical("Critical error handling test")
     abort(HTTPStatus.INTERNAL_SERVER_ERROR)
