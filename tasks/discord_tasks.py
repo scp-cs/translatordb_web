@@ -1,13 +1,16 @@
+from os import PathLike
 from connectors.discord import DiscordClient, DiscordException
+from db_new import User
 from extensions import dbs
 from PIL import Image
 from io import BytesIO
 from logging import warning
 from os.path import join
+from typing import List, Optional
 import time
 
-def update_nicknames_task(override_users = None):
-    users = override_users or dbs.users()
+def update_nicknames_task(override_users: Optional[List[User]] = None):
+    users = override_users or list(User.select())
     for user in users:
         if not user.discord:
             warning(f"Skipping nickname update for {user.nickname}")
@@ -19,11 +22,11 @@ def update_nicknames_task(override_users = None):
             continue
         if new_nickname != None:
             user.display_name = new_nickname
-            dbs.update_user(user)
+            user.save()
         time.sleep(0.2) # Wait a bit so the API doesn't 429
 
-def download_avatars_task(path: str = './temp/avatar', override_ids = None):
-    ids = override_ids or [user.discord for user in dbs.users()]
+def download_avatars_task(path: str | PathLike = './temp/avatar', override_ids: Optional[List[str]]  = None):
+    ids = override_ids or list(User.select(User.discord))
     for user in ids:
         if user is None or not DiscordClient._validate_user_id(user):
             warning(f"Skipping profile update for {user} (Empty or invalid Discord ID)")

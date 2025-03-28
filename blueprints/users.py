@@ -1,11 +1,14 @@
 from http import HTTPStatus
+from peewee import IntegrityError
 from flask import Blueprint, url_for, redirect, session, request, render_template, abort, flash
 from forms import NewUserForm, EditUserForm
 from flask_login import current_user, login_required
-from models.user import User
+from db_new import User
 from logging import info
 from connectors.discord import DiscordClient
+from passwords import pw_hash
 from tasks import discord_tasks
+from secrets import token_urlsafe
 
 from extensions import dbs, sched
 
@@ -21,10 +24,21 @@ def add_user():
     if not form.validate_and_flash():
         return redirect(url_for('UserController.add_user'))
 
-    user = User(0, form.nickname.data, form.wikidot.data, None, form.discord.data, True)
+    user = User()
+    user.nickname = form.nickname.data
+    user.wikidot = form.wikidot.data
+    user.discord = form.discord.data
 
-    user_id, temp_password = dbs.add_user(user, form.can_login.data)
-    user.uid = user_id
+    if form.can_login.data:
+        temp_password = token_urlsafe(8)
+        user.password = pw_hash(temp_password)
+        session['tpw'] = temp_password
+        session['tmp_uid'] = user.get_id()
+    try:
+        user.save()
+    except IntegrityError:
+        flash("Uživatel již existuje!")
+        return redirect(url_for('UserController.add_user'))
 
     # Fetch nickname and profile in background
     # !TODO: This is now broken because of discord client class rewrite
@@ -32,12 +46,11 @@ def add_user():
     sched.add_job('Immediate profile update', lambda: discord_tasks.download_avatars_task(override_ids=[form.discord.data]))
     
     if form.can_login.data:
-        info(f"Administrator account created for {form.nickname.data} with ID {user_id} by {current_user.nickname} (ID: {current_user.uid})")
+        info(f"Administrator account created for {form.nickname.data} with ID {user.get_id()} by {current_user.nickname} (ID: {current_user.get_id()})")
     else:
-        info(f"User account created for {form.nickname.data} with ID {user_id} by {current_user.nickname} (ID: {current_user.uid})")
-    session['tpw'] = temp_password
-    session['tmp_uid'] = user_id
-    return redirect(url_for('UserAuth.temp_pw') if form.can_login.data else url_for('UserController.user', uid=user_id))
+        info(f"User account created for {form.nickname.data} with ID {user.get_id()} by {current_user.nickname} (ID: {current_user.get_id()})")
+    
+    return redirect(url_for('UserAuth.temp_pw') if form.can_login.data else url_for('UserController.user', uid=user.get_id()))
 
 @UserController.route('/user/<int:uid>/edit', methods=["GET", "POST"])
 @login_required
