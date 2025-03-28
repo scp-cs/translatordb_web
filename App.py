@@ -17,6 +17,7 @@ from utils import ensure_config
 from connectors.discord import DiscordClient
 from connectors.rss import RSSUpdateType
 from tasks import discord_tasks
+from db_new import *
 
 # Blueprints
 from blueprints.auth import UserAuth
@@ -170,6 +171,8 @@ if __name__ == '__main__':
 
     # Create the admin user
     user_init()
+
+    # Initialize the database
 
     # Load extensions and enable integrations based on config
     extensions_init()
