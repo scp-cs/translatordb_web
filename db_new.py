@@ -1,3 +1,4 @@
+import datetime
 from peewee import *
 from flask_login import UserMixin
 
@@ -10,6 +11,9 @@ class BaseModel(Model):
 class ViewModel(BaseModel):
     def save():
         raise RuntimeError("Attempted to insert into an SQL View")
+    
+    class Meta:
+        primary_key = False
 
 # type: ignore
 class User(BaseModel, UserMixin):
@@ -26,9 +30,9 @@ class User(BaseModel, UserMixin):
 
 class Article(BaseModel):
     id = AutoField()
-    added = TimestampField()
+    added = DateTimeField(default=datetime.datetime.now)
     bonus = IntegerField()
-    corrected = TimestampField(null=True)
+    corrected = DateTimeField(null=True)
     author = ForeignKeyField(column_name='idauthor', field='id', model=User, backref='articles')
     corrector = ForeignKeyField(backref='corrections', column_name='idcorrector', field='id', model=User, null=True)
     is_original = BooleanField(default=False)
@@ -42,7 +46,7 @@ class Article(BaseModel):
 class Backup(BaseModel):
     id = AutoField()
     articles = IntegerField()
-    date = TimestampField()
+    date = DateTimeField(default=datetime.datetime.now)
     fingerprint = BlobField()
     author = ForeignKeyField(column_name='idauthor', field='id', model=User, backref='backups')
     sha1 = BlobField()
@@ -91,9 +95,9 @@ class Statistics(ViewModel):
 
 class Correction(ViewModel):
     article = ForeignKeyField(Article, field='id', column_name='article_id', backref='correction')
-    author = ForeignKeyField(User, field='id')
-    corrector = ForeignKeyField(User, field='id', backref='corrections')
-    corrected = TimestampField()
+    author = ForeignKeyField(User, field='id', column_name='author')
+    corrector = ForeignKeyField(User, field='id', backref='corrections', column_name='corrector')
+    timestamp = DateTimeField()
     words = IntegerField()
     name = TextField()
 

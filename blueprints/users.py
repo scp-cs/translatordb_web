@@ -3,7 +3,7 @@ from peewee import IntegrityError
 from flask import Blueprint, url_for, redirect, session, request, render_template, abort, flash
 from forms import NewUserForm, EditUserForm
 from flask_login import current_user, login_required
-from db_new import User
+from db_new import Correction, User
 from logging import info
 from connectors.discord import DiscordClient
 from passwords import pw_hash
@@ -32,8 +32,6 @@ def add_user():
     if form.can_login.data:
         temp_password = token_urlsafe(8)
         user.password = pw_hash(temp_password)
-        session['tpw'] = temp_password
-        session['tmp_uid'] = user.get_id()
     try:
         user.save()
     except IntegrityError:
@@ -46,6 +44,8 @@ def add_user():
     sched.add_job('Immediate profile update', lambda: discord_tasks.download_avatars_task(override_ids=[form.discord.data]))
     
     if form.can_login.data:
+        session['tpw'] = temp_password
+        session['tmp_uid'] = user.get_id()
         info(f"Administrator account created for {form.nickname.data} with ID {user.get_id()} by {current_user.nickname} (ID: {current_user.get_id()})")
     else:
         info(f"User account created for {form.nickname.data} with ID {user.get_id()} by {current_user.nickname} (ID: {current_user.get_id()})")
@@ -55,7 +55,7 @@ def add_user():
 @UserController.route('/user/<int:uid>/edit', methods=["GET", "POST"])
 @login_required
 def edit_user(uid: int):
-    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND)
+    user = User.get_or_none(User.id == uid) or abort(HTTPStatus.NOT_FOUND)
 
     if request.method == "GET":
         fdata = {'nickname': user.nickname, 'wikidot': user.wikidot, 'discord': user.discord, 'login': int(user.password is not None)}
@@ -65,17 +65,21 @@ def edit_user(uid: int):
     if not form.validate_and_flash():
         return redirect(url_for('UserController.edit_user', uid=uid))
 
-    new_user = User(uid, form.nickname.data, form.wikidot.data, user.password, form.discord.data, user.temp_pw)
-    dbs.update_user(new_user)
-    info(f"User {new_user.nickname} (ID: {uid}) edited by {current_user.nickname} (ID: {current_user.uid})")
+    user.nickname = form.nickname.data
+    user.wikidot = form.wikidot.data
+    user.discord = form.discord.data
+    user.save()
+
+    info(f"User {user.nickname} (ID: {uid}) edited by {current_user.nickname} (ID: {current_user.get_id()})")
     return redirect(url_for('UserController.user', uid=uid))
 
 @UserController.route('/user/<int:uid>')
 def user(uid: int):
     sort = request.args.get('sort', 'latest', str)
     page = request.args.get('p', 0, int)
-    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND)
-    corrections = dbs.get_corrections_by_user(uid)
+    user = User.get_or_none(User.id == uid) or abort(HTTPStatus.NOT_FOUND)
+    # TODO: Sorting!
+    corrections = list(Correction.select().where(Correction.corrector == user.get_id()))
     translations = dbs.get_translations_by_user(uid, sort, page)
     originals = dbs.get_originals_by_user(uid)
     return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=translations, corrections=corrections, originals=originals, sort=sort)

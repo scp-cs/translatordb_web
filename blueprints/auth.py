@@ -1,5 +1,5 @@
 # Builtins
-from logging import info, warning
+from logging import info, error
 
 # External
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
@@ -65,9 +65,10 @@ def pw_change():
 
     user = User.get_or_none(User.id == session['PRE_LOGIN_UID'])
     if user is None:
-        warning("Invalid auth state (Temporary PW change in progress but user not found)")
+        error("Invalid auth state (Temporary PW change in progress but user not found)")
         return redirect(url_for('index'))
     user.password = pw_hash(form.pw.data)
+    user.temp_pw = False
     user.save()
 
     login_user(user)
@@ -83,7 +84,7 @@ def temp_pw():
 
     user = User.get_or_none(User.id == session['tmp_uid'])
     if user is None:
-        warning("Invalid auth state (Created administrator with invalid ID)")
+        error("Invalid auth state (Created administrator with invalid ID)")
         return redirect(url_for('index'))
 
     tpw = session['tpw']
