@@ -39,7 +39,7 @@ soupsieve==2.4.1
 tomli==2.0.1
 tzdata==2023.3
 tzlocal==5.0.1
-urllib3==2.2.2
+urllib3==2.5.0
 Werkzeug==3.0.6
 waitress==3.0.1
 wsproto==1.2.0
