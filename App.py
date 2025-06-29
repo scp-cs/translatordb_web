@@ -49,6 +49,7 @@ def init_logger() -> None:
     Sets up logging
     """
     
+    logging.getLogger().handlers.clear()
     logging.basicConfig(filename='translatordb.log', filemode='a', format=LOGGER_FORMAT_STR, encoding='utf-8')
     logging.getLogger().setLevel(logging.INFO)
     handler_st = logging.StreamHandler()
