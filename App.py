@@ -11,9 +11,8 @@ from flask_login import current_user
 from waitress import serve
 
 # Internal
-from models.user import get_user_role, get_role_color
 from passwords import pw_hash
-from utils import ensure_config
+from utils import ensure_config, get_user_role, get_role_color
 from connectors.discord import DiscordClient
 from connectors.rss import RSSUpdateType
 from tasks import discord_tasks

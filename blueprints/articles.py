@@ -9,7 +9,7 @@ from flask_login import current_user, login_required
 
 # Internal
 from forms import NewArticleForm, EditArticleForm, AssignCorrectionForm
-from models.user import get_user_role
+from utils import get_user_role
 from extensions import rss, webhook
 from db import User, Article
 
