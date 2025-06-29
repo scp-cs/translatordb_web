@@ -11,7 +11,6 @@ from typing import Optional
 from collections import deque
 
 # Internal
-from models.user import User
 from db import User, Article, last_update
 
 # External
