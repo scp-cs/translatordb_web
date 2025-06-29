@@ -1,5 +1,4 @@
 # Builtins
-from logging import warn
 from typing import List
 import re
 from logging import debug, info, error, warning, debug
@@ -13,11 +12,11 @@ from collections import deque
 
 # Internal
 from models.user import User
+from db import User, Article, last_update
 
 # External
 import feedparser
-import requests
-from urllib import parse
+from peewee import fn
 
 # Extract the actual title from the feed's title element
 r_title = re.compile(r"\"(.+)\".+", re.UNICODE)
@@ -63,7 +62,6 @@ class RSSMonitor:
             warning('RSSMonitor has no endpoints!')
             return
         self.__links = app.config['RSS_MONITOR_CHANNELS']
-        self.__dbs = app.config['database']
         self.__webhook = app.config['webhook']
 
         info(f'Loaded {len(self.__links)} RSSMonitor endpoints from config')
@@ -80,18 +78,36 @@ class RSSMonitor:
         else:
             return RSSUpdateType.RSS_UNKNOWN
     
+    # Wikidot always converts the username to lowercase and replaces spaces/underscores with dashes for the url slug
+    # Makes finding users kinda a pain in the ass
     def get_rss_update_author(self, update: dict) -> Optional[User]:
         update_description = update['description']
-        username = r_user.search(update_description).group(1)
+        username = r_user.search(update_description).group(1).lower()
         debug(f"Extracted username \"{username}\"")
-        user = self.__dbs.get_user_by_wikidot(username) # Spaces and underscores get replaced with dashes in the URL, there's no way around this unfortunately
+        user = User.get_or_none(fn.LOWER(User.wikidot) == username) # Spaces and underscores get replaced with dashes in the URL, there's no way around this unfortunately
         if not user: #! This is going to break if a user has two of these symbols in their name
             username = username.replace('-', ' ')
-            user = self.__dbs.get_user_by_wikidot(username)
+            user = User.get_or_none(fn.LOWER(User.wikidot) == username)
         if not user:
             username = username.replace(' ', '_')
-            user = self.__dbs.get_user_by_wikidot(username)
+            user = User.get_or_none(fn.LOWER(User.wikidot) == username)
+        if not user:
+            debug(f"Failed to find user \"{username}\"")
         return user
+    
+    # Try both http and https scheme, Wikidot is the only site in existence
+    # that isn't all HTTPS in 2025, so they tend to get mixed up
+    # Using urllib functions for this would be good practice but fuck it tbh
+    @staticmethod
+    def find_link(link: str) -> Optional[Article]:
+        article = Article.get_or_none(Article.link == link)
+        if not article:
+            if link.startswith("https"):
+                link = link.replace("https", "http", 1)
+            else:
+                link = link.replace("http", "https", 1)
+            article = Article.get_or_none(Article.link == link)
+        return article
         
     @staticmethod
     def get_rss_update_title(update: dict) -> str:
@@ -106,12 +122,12 @@ class RSSMonitor:
         title = RSSMonitor.get_rss_update_title(update)
         author = self.get_rss_update_author(update)
         if not author:
-            info('Ignoring {title} in RSS feed (couldn\'t match wikidot username {author} to a user)')
+            info(f'Ignoring {title} in RSS feed (couldn\'t match wikidot username {author} to a user)')
             return False
-        debug(f'Check {title} with ts {timestamp}, last db update was {self.__dbs.lastupdated}')
+        debug(f'Check {title} with ts {timestamp}, last db update was {last_update()}')
         
-        if timestamp+TIMEZONE_UTC_OFFSET > self.__dbs.lastupdated:
-            if self.__dbs.get_article_by_link(update['link']):
+        if timestamp+TIMEZONE_UTC_OFFSET > last_update():
+            if RSSMonitor.find_link(update['link']):
                 info(f'Ignoring {title} in RSS feed (added manually)')
                 return False
             self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], title, author, uuid4(), RSSUpdateType.RSS_NEWPAGE))
@@ -123,15 +139,18 @@ class RSSMonitor:
         author = self.get_rss_update_author(update)
         timestamp = RSSMonitor.get_rss_update_timestamp(update)
         if not author:
+            debug(f"RSS Assign failed - RSS author is {author}, RSS title is {real_title}")
             self.__webhook.send_text(f'Korekci pro {real_title} nelze přiřadit k autorovi. Uživatel neexistuje.')
             warning(f"Correction for {real_title} cannot be assigned to a user")
         else:
-            translation = self.__dbs.get_article_by_link(update['link'])
+            translation = RSSMonitor.find_link(update['link'])
             if not translation:
                 self.__updates.append(RSSUpdate(timestamp+TIMEZONE_UTC_OFFSET, update['link'], real_title, author, uuid4(), RSSUpdateType.RSS_CORRECTION))
                 warning(f"Correction for {real_title} by {author.nickname} cannot be assigned to an article")
             else:
-                self.__dbs.assign_corrector(translation, author)
+                translation.corrector = author
+                translation.corrected = datetime.now()
+                translation.save()
                 info(f'Assigned correction by {author.nickname} to {translation.name}')
 
     def _process_update(self, update) -> bool:

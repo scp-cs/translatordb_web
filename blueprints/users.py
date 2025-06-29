@@ -3,14 +3,14 @@ from peewee import IntegrityError
 from flask import Blueprint, url_for, redirect, session, request, render_template, abort, flash
 from forms import NewUserForm, EditUserForm
 from flask_login import current_user, login_required
-from db_new import Correction, User
+from db import Correction, User, Article
 from logging import info
 from connectors.discord import DiscordClient
 from passwords import pw_hash
 from tasks import discord_tasks
 from secrets import token_urlsafe
 
-from extensions import dbs, sched
+from extensions import sched
 
 UserController = Blueprint('UserController', __name__)
 
@@ -76,20 +76,19 @@ def edit_user(uid: int):
 @UserController.route('/user/<int:uid>')
 def user(uid: int):
     sort = request.args.get('sort', 'latest', str)
-    page = request.args.get('p', 0, int)
     user = User.get_or_none(User.id == uid) or abort(HTTPStatus.NOT_FOUND)
-    # TODO: Sorting!
-    corrections = list(Correction.select().where(Correction.corrector == user.get_id()))
-    translations = dbs.get_translations_by_user(uid, sort, page)
-    originals = dbs.get_originals_by_user(uid)
-    return render_template('user.j2', user=user, stats=dbs.get_user_stats(uid), translations=translations, corrections=corrections, originals=originals, sort=sort)
+    corrections = list(user.corrections)
+    # TODO: Extract constant
+    translations = list(user.articles.where(Article.is_original == False).order_by(Article.added.desc()).limit(15))
+    originals = list(user.articles.where(Article.is_original == True))
+    return render_template('user.j2', user=user, stats=user.stats.first(), translations=translations, corrections=corrections, originals=originals, sort=sort)
 
 @UserController.route('/user/<int:uid>/delete', methods=["POST", "GET"])
 @login_required
 def delete_user(uid: int):
-    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND)
+    user = User.get_or_none(User.id == uid) or abort(HTTPStatus.NOT_FOUND)
     name = user.nickname
-    dbs.delete_user(uid)
+    user.delete_instance()
     info(f"User {name} deleted by {current_user.nickname} (ID: {current_user.uid})")
     flash(f'Uživatel {name} smazán')
     

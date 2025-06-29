@@ -8,7 +8,7 @@ from flask_login import login_user, login_required, logout_user
 
 # Internal
 from passwords import pw_check, pw_hash
-from db_new import User
+from db import User
 
 # TODO: Move templates
 UserAuth = Blueprint('UserAuth', __name__)
@@ -19,7 +19,7 @@ def login():
     if request.method == "GET":
         # Saves the last URL, but prevents the user from staying on the logging page
         # if the first login attempt fails
-        if not request.referrer.endswith('/login'):
+        if request.referrer and not request.referrer.endswith('/login'):
             session['login_next'] = request.referrer
         return render_template('auth/login.j2', form=LoginForm())
 

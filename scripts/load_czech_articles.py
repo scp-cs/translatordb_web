@@ -1,5 +1,6 @@
 """
 Script used to load articles into the database from a listpages-generated CSV
+NOTE: Broken since db moved to peewee
 """
 
 from collections import namedtuple
@@ -7,7 +8,7 @@ from datetime import datetime
 from typing import List
 from msvcrt import getche
 
-from db import Database
+from db_legacy import Database
 from models.article import Article
 
 dbs = Database()
