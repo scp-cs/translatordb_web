@@ -84,7 +84,7 @@
         </td>
         <td data-label="Počet slov:">{{tr.words}}</td>
         <td data-label="Bonus:">{{tr.bonus}}</td>
-        <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.uid)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
+        <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.id)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
         <td data-label="Zapsáno:">{{tr.added.strftime('%d.%m.%Y %H:%M')}}</td>
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
@@ -97,7 +97,7 @@
     </tbody>
 </table>
 <div id="page-selector" class="flex flex-row items-center mx-auto border rounded-md cursor-pointer select-none w-min bg-white/5 backdrop-blur-sm border-slate-900">
-    {% for p in range((stats.count / 15)|round(0, 'ceil')|int) %}
+    {% for p in range((stats.translation_count / 15)|round(0, 'ceil')|int) %}
     <span class="px-2 py-2 transition-all rounded-md hover:bg-white/30" onclick="showPage({{p}})">{{p+1}}</span>
     {% endfor %}
 </div>
