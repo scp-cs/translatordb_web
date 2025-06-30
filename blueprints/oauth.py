@@ -3,7 +3,8 @@ from flask_login import login_user
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from logging import error, warning, info
 
-from extensions import oauth, dbs
+from extensions import oauth
+from db import User
 
 OauthController = Blueprint('OauthController', __name__)
 
@@ -22,7 +23,7 @@ def oauth_callback():
         flash('Autentizace selhala, zkuste to prosím znovu.')
         return redirect(url_for('UserAuth.login'))
     
-    user = dbs.get_user_by_discord(user_id)
+    user = User.get_or_none(User.discord == user_id)
     if not user:
         warning(f'Login attempt with unregistered ID {user_id} from {request.remote_addr}')
         flash('Uživatel není registrován nebo má neplatné ID')
@@ -33,5 +34,5 @@ def oauth_callback():
         flash('Přihlášení je povolené pouze moderátorům')
 
     login_user(user)
-    info(f'User {user.nickname} (ID: {user.uid}) logged in using Oauth (Authorized as {user_id})')
+    info(f'User {user.nickname} (ID: {user.id}) logged in using Oauth (Authorized as {user_id})')
     return redirect(url_for('index'))   # TODO: Pamatovat si posledni URL i tady

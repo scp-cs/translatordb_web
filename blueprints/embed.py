@@ -1,8 +1,9 @@
 from http import HTTPStatus
 from flask import render_template, Blueprint, abort, request
-from extensions import dbs
 from enum import StrEnum
 from os import getcwd, path, listdir
+
+from db import User, Article
 
 EmbedController = Blueprint('EmbedController', __name__)
 EMBED_TEMPLATE_PATH = path.join(getcwd(), 'templates', 'embeds')
@@ -38,10 +39,7 @@ def user_badge(uid: int):
     embed_type = request.args.get("type", type=str, default=EmbedType.TRANSLATOR)
     if embed_type not in list(EmbedType): abort(HTTPStatus.BAD_REQUEST) # Abort on invalid type
     embed_theme = request.args.get("theme", type=str, default="default")
-    user = dbs.get_user(uid) or abort(HTTPStatus.NOT_FOUND) # Abort on invalid user
-    stats = dbs.get_user_stats(uid)
-    if embed_type == EmbedType.TRANSLATOR:
-        last = dbs.get_last_article(uid, False)
-    else:
-        last = dbs.get_last_article(uid, True)
+    user = User.get_or_none(User.id == uid) or abort(HTTPStatus.NOT_FOUND)
+    stats = user.stats.first()
+    last = user.articles.where(Article.is_original == (embed_type != EmbedType.TRANSLATOR)).order_by(Article.added.desc()).first()
     return render_template(get_template(embed_type, embed_theme), user=user, stats=stats, last=last)

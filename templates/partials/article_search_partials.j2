@@ -63,7 +63,7 @@
             </td>
             <td data-label="Počet slov:">{{tr.words}}</td>
             <td data-label="Bonus:">{{tr.bonus}}</td>
-            <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.uid)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
+            <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.get_id())}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
             <td data-label="Zapsáno:">{{tr.added.strftime('%d.%m.%Y %H:%M')}}</td>
             {% if current_user.is_authenticated %}
             <td class="flex flex-col gap-2 md:table-row">
@@ -100,7 +100,7 @@
                 {% endif %}
             </td>
             <td data-label="Počet slov:">{{corr.article.words}}</td>
-            <td data-label="Autor:"><a class="underline" href="{{url_for('UserController.user', uid=corr.author.uid)}}">{{corr.author.nickname}}</a></td>
+            <td data-label="Autor:"><a class="underline" href="{{url_for('UserController.user', uid=corr.author.get_id())}}">{{corr.author.nickname}}</a></td>
             <td data-label="Zapsáno:">{{corr.timestamp.strftime('%d.%m.%Y %H:%M')}}</td>
             {% if current_user.is_authenticated %}
             <td class="flex flex-col gap-2 md:table-row">
@@ -138,7 +138,7 @@
                 {% endif %}
             </td>
             <td data-label="Počet slov:">N/A</td>
-            <td data-label="Korektoval:">{% if article.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=article.corrector.uid)}}">{{article.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
+            <td data-label="Korektoval:">{% if article.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=article.corrector.id)}}">{{article.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
             <td data-label="Zapsáno:">{{article.added.strftime('%d.%m.%Y %H:%M')}}</td>
             {% if current_user.is_authenticated %}
             <td class="flex flex-col gap-2 md:table-row">
