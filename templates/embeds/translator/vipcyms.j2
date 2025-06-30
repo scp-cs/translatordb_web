@@ -9,7 +9,7 @@
         <div id="particle-container" class="absolute top-0 left-0 w-full h-full"></div>
         <h1 class="z-10 m-0 mt-1 text-xl font-bold text-white">{{user.wikidot}}</h1>
         <p class="m-0 text-sm"><b>{{"%.1f" % stats.points}}</b> Překladatelských bodů</p>
-        <p class="m-0 text-sm"><b>{{stats.count}}</b> Přeložených článků</p>
+        <p class="m-0 text-sm"><b>{{stats.translation_count}}</b> Přeložených článků</p>
         <p class="m-0 text-sm">Poslední překlad: <b><a href="{{last.link}}" class="text-white transition-opacity hover:opacity-75" target="_top">{{last.name}}</b></a></p>
     </div>
     <div class="absolute top-0 right-0 block {{get_role_color(stats.points)}} text-white p-2 rounded-bl-lg font-semibold rounded-tr-lg">{{get_user_role(stats.points)}}</div>

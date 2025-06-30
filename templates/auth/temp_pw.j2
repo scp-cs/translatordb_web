@@ -8,10 +8,10 @@
 <i class="mb-6 text-lg">{{tpw}}</i>
 <b class="mb-2 text-xl select-none">Heslo nebude zobrazeno znovu. Prosím, zapište si ho.</b>
 <b class="mb-2 text-xl select-none">Za 20s budete přesměrováni.</b>
-<i class="opacity-70 underline" href="{{url_for('UserController.user', uid=user.uid)}}">Nebo klikněte zde</i>
+<a class="underline opacity-70" href="{{url_for('UserController.user', uid=user.id)}}">Nebo klikněte zde</a>
 </div>
 
-<a href="{{url_for('UserController.user', uid=user.uid)}}" class="hidden" id="ulink"></a>
+<a href="{{url_for('UserController.user', uid=user.id)}}" class="hidden" id="ulink"></a>
 
 <script>
 function redirect() {

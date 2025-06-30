@@ -16,6 +16,7 @@ class FlaskFormEx(FlaskForm):
             return False
         return True
 
+# Can be used like a normal WTForms validator
 class DiscordID():
     def __call__(self, form, field) -> Any:
         if len(field.data) not in [18, 19]:

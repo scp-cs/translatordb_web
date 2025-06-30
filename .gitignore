@@ -159,14 +159,26 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# Legacy data
 translations.json
 translations_new.json
+*.csv
+czech.json
+passwords.txt
 
+# Database files
 *.db
 *.db-wal
 *.db-shm
-*.csv
+
+# Backups
 *.bak
+
+# Configuration
 config.json
-czech.json
+
+# Temporary files
 temp
+
+# Profiler data
+profiles

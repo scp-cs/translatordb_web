@@ -9,7 +9,7 @@ from http import HTTPStatus
 import requests
 
 API_UA = "SCUTTLE Discord service (https://scp-wiki.cz, v1)"
-API_URL = "https://discord.com/api"
+API_URL = "https://discord.com/api/v10"
 CDN_URL = "https://cdn.discordapp.com"
 
 RATELIMIT_RETRIES = 3

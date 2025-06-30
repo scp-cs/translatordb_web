@@ -11,12 +11,13 @@ from flask_login import current_user
 from waitress import serve
 
 # Internal
-from models.user import get_user_role, get_role_color, User
 from passwords import pw_hash
-from utils import ensure_config
+from utils import ensure_config, get_user_role, get_role_color
 from connectors.discord import DiscordClient
 from connectors.rss import RSSUpdateType
 from tasks import discord_tasks
+from db import User
+import db
 
 # Blueprints
 from blueprints.auth import UserAuth
@@ -31,7 +32,7 @@ from blueprints.rsspage import RssPageController
 from blueprints.oauth import OauthController
 from blueprints.embed import EmbedController
 
-from extensions import login_manager, dbs, sched, oauth, rss, webhook
+from extensions import login_manager, sched, oauth, rss, webhook
 
 app = Flask(__name__)
 
@@ -41,14 +42,15 @@ LOGGER_FORMAT_STR = '[%(asctime)s][%(module)s] %(levelname)s: %(message)s'
 def index():
     sort = request.args.get('sort', type=str, default='points')
     page = request.args.get('p', type=int, default=0)
-    user_count = dbs.get_user_count()
-    return render_template('users.j2', users=dbs.get_stats(sort, page), lastupdate=dbs.lastupdated.strftime("%Y-%m-%d %H:%M:%S"), user_count=user_count, sort=sort)
+    user_count = User.select().count()
+    return render_template('users.j2', users=db.get_frontpage(sort, page), lastupdate=db.last_update().strftime("%Y-%m-%d %H:%M:%S"), user_count=user_count, sort=sort)
 
 def init_logger() -> None:
     """
     Sets up logging
     """
     
+    logging.getLogger().handlers.clear()
     logging.basicConfig(filename='translatordb.log', filemode='a', format=LOGGER_FORMAT_STR, encoding='utf-8')
     logging.getLogger().setLevel(logging.INFO)
     handler_st = logging.StreamHandler()
@@ -75,11 +77,17 @@ def user_init() -> None:
     if not init_password:
         error(f"Password not specified for {init_user}")
         exit(-1)
-    if dbs.user_exists(init_user):
+    if User.get_or_none(User.nickname == init_user) is not None:
         warning(f"Initial user {init_user} already exists")
         return
     info(f"Adding initial user {init_user}")
-    dbs.add_user(User(1, init_user, "", pw_hash(init_password), ""))
+    admin = User()
+    admin.nickname = init_user
+    admin.password = pw_hash(init_password)
+    # TODO: Do something with this id
+    admin.discord = ""
+    admin.wikidot = ""
+    admin.save()
 
 def extensions_init() -> None:
     """
@@ -88,7 +96,7 @@ def extensions_init() -> None:
 
     login_manager.session_protection = "basic"
     login_manager.login_view = "UserAuth.login"
-    login_manager.user_loader(lambda uid: dbs.get_user(uid))
+    login_manager.user_loader(lambda uid: User.get_by_id(uid))
     login_manager.init_app(app)
 
     # Checking if we can enable Discord Login
@@ -143,7 +151,6 @@ if __name__ == '__main__':
     makedirs('./temp/avatar', exist_ok=True)
 
     # Store all the singleton classes in config to access them from blueprints
-    app.config['database'] = dbs
     app.config['scheduler'] = sched
     app.config['oauth'] = oauth
     app.config['rss'] = rss
@@ -170,6 +177,9 @@ if __name__ == '__main__':
 
     # Create the admin user
     user_init()
+
+    # Initialize the database
+    db.database.create_tables(db.models)
 
     # Load extensions and enable integrations based on config
     extensions_init()

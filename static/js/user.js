@@ -83,13 +83,13 @@ function clickOut(e) {
 function articlePickerClose() {
     $("#picker-overlay").fadeOut(200)
     $(window).off("click", clickOut)
-    $('#input-search').off('input', handleSearch)
+    $('#input-search').off('input', handlePickerSearch)
 }
 
 function articlePickerOpen() {
     $("#picker-overlay").css("display", "flex").hide().fadeIn(200)
     setTimeout(() => $(window).on("click", clickOut), 100)
-    $('#input-search').on('input', handleSearch).val("")
+    $('#input-search').on('input', handlePickerSearch).val("")
 }
 
 // ===== SEARCH FUNCTIONS =====
@@ -418,7 +418,7 @@ function unassignCorrection(articleId) {
     }).then(() => window.location.reload())
 }
 
-function searchArticle(query) {
+function searchPickerArticle(query) {
     console.log(`search for ${query}`)
     $('#result-table-body').empty()
     fetch('/api/search/article?' + new URLSearchParams({
@@ -427,10 +427,10 @@ function searchArticle(query) {
     })).then(response => response.json()).then(r => r.result.slice(0, 10).forEach(result => addPickerItem(result)))
 }
 
-function handleSearch(e) {
+function handlePickerSearch(e) {
     clearTimeout(timeoutID)
     if(e.target.value.length > 2) {
-        timeoutID = setTimeout(searchArticle, 300, e.target.value)
+        timeoutID = setTimeout(searchPickerArticle, 300, e.target.value)
     }
 }
 

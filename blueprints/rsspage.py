@@ -7,6 +7,8 @@ from forms import AssignCorrectionForm
 
 RssPageController = Blueprint('RssPageController', __name__)
 
+# TODO: Create db table for RSS updates
+
 @RssPageController.route('/changes')
 @login_required
 def rss_changes():

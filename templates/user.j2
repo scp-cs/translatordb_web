@@ -12,7 +12,7 @@
     <div class="flex flex-row items-center w-full ">
         <img class="hidden mr-6 bg-white border-2 border-white max-h-48 rounded-xl md:block " src="{{ url_for('UserContent.get_avatar', uid=(user.discord or 0), s='full')}}">
         <div>
-            <p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.uid}}</p>
+            <p id='desc-iduser' class="my-1 text-xl"><b>ID:</b> {{user.id}}</p>
             <p class="my-1 text-xl"><b>Wikidot ID:</b> <a class="hover:text-blue-500" target="_blank" href="https://www.wikidot.com/user:info/{{user.wikidot | replace(' ', '-')}}/">{{user.wikidot}}</a></p>
             <p class="my-1 text-xl"><b>Discord:</b> {{user.display_name}} ({{ user.discord }})</p>
             <div class="flex flex-row items-center justify-start gap-3">
@@ -25,12 +25,12 @@
             
             {% if current_user.is_authenticated %}
             <div class="flex flex-col gap-1 my-3 md:flex-row md:my-2 align-center">
-                <a href="{{url_for('ArticleController.add_article', uid=user.uid)}}" class="glass-btn"><i class="mr-2 text-2xl bi bi-file-earmark-plus"></i>Přidat překlad</a>
+                <a href="{{url_for('ArticleController.add_article', uid=user.id)}}" class="glass-btn"><i class="mr-2 text-2xl bi bi-file-earmark-plus"></i>Přidat překlad</a>
                 <button class="glass-btn" onclick="articlePickerOpen()"><i class="mr-2 text-2xl bi bi-file-earmark-check"></i>Přidat korekci</button>
-                <a href="{{url_for('ArticleController.add_article', uid=user.uid, original=1)}}" class="glass-btn"><i class="mr-2 text-2xl bi bi-file-earmark-text"></i>Přidat článek</a>
-                <a href="{{url_for('UserController.edit_user', uid=user.uid)}}" class="glass-btn"><i class="mr-2 text-2xl bi bi-person-gear"></i>Upravit uživatele</a>
+                <a href="{{url_for('ArticleController.add_article', uid=user.id, original=1)}}" class="glass-btn"><i class="mr-2 text-2xl bi bi-file-earmark-text"></i>Přidat článek</a>
+                <a href="{{url_for('UserController.edit_user', uid=user.id)}}" class="glass-btn"><i class="mr-2 text-2xl bi bi-person-gear"></i>Upravit uživatele</a>
                 <a id="del-btn" href="javascript:void(0)" class="glass-btn"><i class="mr-2 text-2xl bi bi-person-x"></i>Smazat uživatele</a>
-                <a id="del-confirm" href="{{url_for('UserController.delete_user', uid=user.uid)}}" class="hidden glass-btn">
+                <a id="del-confirm" href="{{url_for('UserController.delete_user', uid=user.id)}}" class="hidden glass-btn">
                     <i class="mr-2 text-2xl bi bi-check-lg"></i> Potvrdit smazání?
                 </a>
             </div>
@@ -84,7 +84,7 @@
         </td>
         <td data-label="Počet slov:">{{tr.words}}</td>
         <td data-label="Bonus:">{{tr.bonus}}</td>
-        <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.uid)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
+        <td data-label="Korektoval:">{% if tr.corrector %}<a class="underline" href="{{url_for('UserController.user', uid=tr.corrector.id)}}">{{tr.corrector.nickname}}</a>{% else %}N/A{% endif %}</td>
         <td data-label="Zapsáno:">{{tr.added.strftime('%d.%m.%Y %H:%M')}}</td>
         {% if current_user.is_authenticated %}
         <td class="flex flex-col gap-2 md:table-row">
@@ -97,7 +97,7 @@
     </tbody>
 </table>
 <div id="page-selector" class="flex flex-row items-center mx-auto border rounded-md cursor-pointer select-none w-min bg-white/5 backdrop-blur-sm border-slate-900">
-    {% for p in range((stats.count / 15)|round(0, 'ceil')|int) %}
+    {% for p in range((stats.translation_count / 15)|round(0, 'ceil')|int) %}
     <span class="px-2 py-2 transition-all rounded-md hover:bg-white/30" onclick="showPage({{p}})">{{p+1}}</span>
     {% endfor %}
 </div>
