@@ -1,5 +1,5 @@
 [![Deploy](https://github.com/scp-cs/translatordb_web/actions/workflows/deploy.yml/badge.svg)](https://github.com/scp-cs/translatordb_web/actions/workflows/deploy.yml)
-# The SCUTTLE Translator Directory System
+# The SCUTTLE Translation Tracking System
 Named after [RAISA's famous cautionary tale](https://scp-wiki.wikidot.com/scuttle), SCUTTLE provides a user friendly way for tracking our members' contributions to the translation project.
 
 Details on the scoring system can be found on our [Discord](https://discord.gg/A6U2fCUJs6).
